@@ -21,6 +21,9 @@
           data-sanatio-required="true"
           data-sanatio-required-type="error"
           data-sanatio-required-message="This is required"
+          data-sanatio-pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
+          data-sanatio-pattern-type="warn"
+          data-sanatio-pattern-message="Invalid Pattern"
         >
       </div>
       <div class="form-group">
@@ -57,7 +60,7 @@
           }
         ]
       };
-      var sanatio = $('#form5').sanatio();
+      // var sanatio = $('#form5').sanatio(validatorObj);
     </script>
   </body>
 </html>
