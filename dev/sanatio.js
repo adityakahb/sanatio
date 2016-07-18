@@ -2,11 +2,11 @@
   
   var defaultApplicableRules = [
     'required',
+    'pattern',
     'email',
     'url',
     'minlength',
     'maxlength',
-    'pattern',
     'luhn',
     'creditcard',
     'date',
@@ -137,7 +137,28 @@
       defaults;
 
       settings = $.extend( true, {}, defaults, options );
-  
+      
+      var msgCnt;
+      var showSanatioErrors = function (element, settingsFn){
+        for (msgCnt = 0; msgCnt < settingsFn.length; msgCnt++){
+          element.parent().find('.sanatio-message').remove();
+          if (settingsFn[msgCnt].isValid === false){
+            element.after('<span class="sanatio-message sanatio-error">' + settingsFn[msgCnt].message + '</span>');
+            break;
+          } else if (settingsFn[msgCnt].isValid === 'warn'){
+            element.after('<span class="sanatio-message sanatio-warn">' + settingsFn[msgCnt].message + '</span>');
+            break;
+          } else if (settingsFn.isValid === true){
+            element.parent().find('.sanatio-message').remove();
+          }
+        }
+      };
+      
+      /**
+      * Check if the value of the element is empty
+      * @param element
+      * @return is empty or not: Boolean
+      */
       var checkRuleRequired = function (elem){
         if ($.type(elem.val()) === 'string'){
           return $.trim(''+elem.val()).length > 0 ? true : false;
@@ -146,37 +167,50 @@
         }
       };
       
-      
+      /**
+      * Check if the value matches the expected pattern
+      * @param element
+      * @return is pattern matched or not: Boolean
+      */
       var checkRulePattern = function (elem, pattern){
         patternRegex = new RegExp( pattern );
         return patternRegex.test( $.trim( '' + elem.val() ));
       };
       
-      
-      var addRuleEvents = function (formElement, ruleElement, settings){
+      /**
+      * Add events to the form elements
+      * @param form, respective element, settings
+      * @return 
+      */
+      var addRuleEvents = function (formElement, ruleElement, ruleSettings){
         ruleElement = selectByNameOrId(formElement, ruleElement);
         
-        ruleElement.on('keydown.sanatio', function(e){
+        ruleElement.on('keyup.sanatio', function(e){
           if ( e.which === 9 && $.trim(''+ruleElement.val()) === '' || $.inArray( e.keyCode, ignoreKeys ) !== -1 ) {
     				return;
     			}
-          for (cnt in settings){
+          for (cnt in ruleSettings){
             
-            switch (settings[cnt].name) {
+            switch (ruleSettings[cnt].name) {
               case 'required':{
-                settings[cnt].isValid = checkRuleRequired(ruleElement);
-                settings[cnt].isValid = (settings[cnt].type === 'warn' && settings[cnt].isValid === false) ? 'warn' : settings[cnt].isValid;
+                ruleSettings[cnt].isValid = checkRuleRequired(ruleElement);
+                ruleSettings[cnt].isValid = (ruleSettings[cnt].type === 'warn' && ruleSettings[cnt].isValid === false) ? 'warn' : ruleSettings[cnt].isValid;
                 break;
               }
               case 'pattern':{
-                settings[cnt].isValid = checkRulePattern(ruleElement, settings[cnt].value);
-                settings[cnt].isValid = (settings[cnt].type === 'warn' && settings[cnt].isValid === false) ? 'warn' : settings[cnt].isValid;
+                ruleSettings[cnt].isValid = checkRulePattern(ruleElement, ruleSettings[cnt].value);
+                ruleSettings[cnt].isValid = (ruleSettings[cnt].type === 'warn' && ruleSettings[cnt].isValid === false) ? 'warn' : ruleSettings[cnt].isValid;
                 break;
               }
-              default: settings[cnt].isValid = true;
+              case 'email':{
+                ruleSettings[cnt].isValid = checkRulePattern(ruleElement, '^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$');
+                ruleSettings[cnt].isValid = (ruleSettings[cnt].type === 'warn' && ruleSettings[cnt].isValid === false) ? 'warn' : ruleSettings[cnt].isValid;
+                break;
+              }
+              default: ruleSettings[cnt].isValid = true;
             };
-            console.log(settings[cnt]);
           }
+          showSanatioErrors(ruleElement, ruleSettings);
         });
       };
       
@@ -205,15 +239,10 @@
       */
       var init = function (formObj, ruleSettings){
         
-        if (!$(formObj).hasClass('in-sanitation')){
-          
-          $(formObj).addClass('in-sanitation');
-          
-          for(outerCnt in ruleSettings){
-            for(innerCnt = 0; innerCnt < ruleSettings[outerCnt].length; innerCnt++){
-              for (rootCnt in ruleSettings[outerCnt][innerCnt]){
-                formValidStatus = addRuleEvents(formObj, rootCnt, ruleSettings[outerCnt][innerCnt][rootCnt]);
-              }
+        for(outerCnt in ruleSettings){
+          for(innerCnt = 0; innerCnt < ruleSettings[outerCnt].length; innerCnt++){
+            for (rootCnt in ruleSettings[outerCnt][innerCnt]){
+              formValidStatus = addRuleEvents(formObj, rootCnt, ruleSettings[outerCnt][innerCnt][rootCnt]);
             }
           }
         }
