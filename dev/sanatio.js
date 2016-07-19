@@ -141,16 +141,29 @@
       var msgCnt;
       var showSanatioErrors = function (element, settingsFn){
         for (msgCnt = 0; msgCnt < settingsFn.length; msgCnt++){
-          element.parent().find('.sanatio-message').remove();
+          
+          element.parent().find('.sanatio-error').remove();
+          element.parent().find('.sanatio-warn').remove();
+          
           if (settingsFn[msgCnt].isValid === false){
-            element.after('<span class="sanatio-message sanatio-error">' + settingsFn[msgCnt].message + '</span>');
+            if (element.isRequiredEnabled === false && $.trim(''+element.val()).length === 0){
+              // TODO: Find reverse logic to eliminate empty block
+            } else {
+              element.after('<div class="sanatio-message sanatio-error">' + settingsFn[msgCnt].message + '</div>');
+            }
             break;
+            
           } else if (settingsFn[msgCnt].isValid === 'warn'){
-            element.after('<span class="sanatio-message sanatio-warn">' + settingsFn[msgCnt].message + '</span>');
+            
+            if (element.isRequiredEnabled === false && $.trim(''+element.val()).length === 0){
+              // TODO: Find reverse logic to eliminate empty block
+            } else {
+              element.after('<div class="sanatio-message sanatio-warn">' + settingsFn[msgCnt].message + '</div>');
+            }
             break;
-          } else if (settingsFn.isValid === true){
+          }/* else if (settingsFn.isValid === true || (settingsFn.isValid === 'warn' && element.isRequiredEnabled === false && $.trim(''+element.val()).length === 0)){
             element.parent().find('.sanatio-message').remove();
-          }
+          }*/
         }
       };
       
@@ -195,16 +208,25 @@
               case 'required':{
                 ruleSettings[cnt].isValid = checkRuleRequired(ruleElement);
                 ruleSettings[cnt].isValid = (ruleSettings[cnt].type === 'warn' && ruleSettings[cnt].isValid === false) ? 'warn' : ruleSettings[cnt].isValid;
+                ruleElement.isRequiredEnabled = true;
                 break;
               }
               case 'pattern':{
                 ruleSettings[cnt].isValid = checkRulePattern(ruleElement, ruleSettings[cnt].value);
                 ruleSettings[cnt].isValid = (ruleSettings[cnt].type === 'warn' && ruleSettings[cnt].isValid === false) ? 'warn' : ruleSettings[cnt].isValid;
+                ruleElement.isRequiredEnabled === true ? ruleElement.isRequiredEnabled = true : ruleElement.isRequiredEnabled = false ;
                 break;
               }
               case 'email':{
                 ruleSettings[cnt].isValid = checkRulePattern(ruleElement, '^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$');
                 ruleSettings[cnt].isValid = (ruleSettings[cnt].type === 'warn' && ruleSettings[cnt].isValid === false) ? 'warn' : ruleSettings[cnt].isValid;
+                ruleElement.isRequiredEnabled === true ? ruleElement.isRequiredEnabled = true : ruleElement.isRequiredEnabled = false ;
+                break;
+              }
+              case 'url':{
+                ruleSettings[cnt].isValid = checkRulePattern(ruleElement, '^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})).?)(?::\d{2,5})?(?:[/?#]\S*)?$');
+                ruleSettings[cnt].isValid = (ruleSettings[cnt].type === 'warn' && ruleSettings[cnt].isValid === false) ? 'warn' : ruleSettings[cnt].isValid;
+                ruleElement.isRequiredEnabled === true ? ruleElement.isRequiredEnabled = true : ruleElement.isRequiredEnabled = false ;
                 break;
               }
               default: ruleSettings[cnt].isValid = true;

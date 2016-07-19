@@ -21,9 +21,6 @@
           data-sanatio-required="true"
           data-sanatio-required-type="error"
           data-sanatio-required-message="This is required"
-          data-sanatio-pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
-          data-sanatio-pattern-type="warn"
-          data-sanatio-pattern-message="Invalid Pattern"
         >
       </div>
       <div class="form-group">
@@ -33,8 +30,24 @@
           data-sanatio-required-type="error"
           data-sanatio-required-message="This is required"
           data-sanatio-pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
-          data-sanatio-pattern-type="error"
+          data-sanatio-pattern-type="warn"
           data-sanatio-pattern-message="Invalid Pattern"
+        >
+      </div>
+      <div class="form-group">
+        <label for="email1_form1">Form 1 email 1</label>
+        <input type="email" name="email1_form1" id="email1_form1" placeholder="email1_form1"
+          data-sanatio-email="true"
+          data-sanatio-email-type="warn"
+          data-sanatio-email-message="Invalid Email"
+        >
+      </div>
+      <div class="form-group">
+        <label for="url1_form1">Form 1 url 1</label>
+        <input type="email" name="url1_form1" id="url1_form1" placeholder="url1_form1"
+          data-sanatio-url="true"
+          data-sanatio-url-type="warn"
+          data-sanatio-url-message="Invalid URL"
         >
       </div>
     </form>
