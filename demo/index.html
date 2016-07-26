@@ -23,6 +23,7 @@
           data-sanatio-required-message="This is required"
         >
       </div>
+      
       <div class="form-group">
         <label for="password1_form1">Form 1 Password 1</label>
         <input type="password" name="password1_form1" id="password1_form1" placeholder="password1_form1"
@@ -34,6 +35,7 @@
           data-sanatio-pattern-message="Invalid Pattern"
         >
       </div>
+      
       <div class="form-group">
         <label for="email1_form1">Form 1 email 1</label>
         <input type="email" name="email1_form1" id="email1_form1" placeholder="email1_form1"
@@ -42,6 +44,7 @@
           data-sanatio-email-message="Invalid Email"
         >
       </div>
+      
       <div class="form-group">
         <label for="url1_form1">Form 1 url 1</label>
         <input type="email" name="url1_form1" id="url1_form1" placeholder="url1_form1"
@@ -50,6 +53,7 @@
           data-sanatio-url-message="Invalid URL"
         >
       </div>
+      
       <div class="form-group">
         <label for="checkbox1_form1">
         <input type="checkbox" name="checkbox1_form1" id="checkbox1_form1"
@@ -58,13 +62,59 @@
           data-sanatio-required-message="Invalid URL"
         >
         Form 1 checkbox 1</label>
+      </div>
+      
+      <div class="form-group">
         <label for="checkbox2_form1">
         <input type="checkbox" name="checkbox2_form1" id="checkbox2_form1"
           data-sanatio-required="true"
-          data-sanatio-required-type="warn"
-          data-sanatio-required-message="Invalid URL"
+          data-sanatio-required-type="error"
+          data-sanatio-required-message="This is required"
         >
         Form 1 checkbox 2</label>
+        <label for="checkbox3_form1">
+        <input type="checkbox" name="checkbox2_form1" id="checkbox3_form1"
+        >
+        Form 1 checkbox 3</label>
+      </div>
+      
+      <div class="form-group">
+        <select name="single_select" id="single_select"
+        data-sanatio-required="true"
+        data-sanatio-required-type="error"
+        data-sanatio-required-message="This is required"
+        >
+          <option value="">Select One</option>
+          <option value="1">Option 1</option>
+          <option value="2">Option 2</option>
+          <option value="3">Option 3</option>
+          <option value="4">Option 4</option>
+          <option value="5">Option 5</option>
+          <option value="6">Option 6</option>
+          <option value="7">Option 7</option>
+          <option value="8">Option 8</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <select name="multiple_select" id="multiple_select" multiple="multiple"
+        data-sanatio-required="true"
+        data-sanatio-required-type="error"
+        data-sanatio-required-message="This is required"
+        >
+          <option value="">Select Multiple</option>
+          <option value="1">Option 1</option>
+          <option value="2">Option 2</option>
+          <option value="3">Option 3</option>
+          <option value="4">Option 4</option>
+          <option value="5">Option 5</option>
+          <option value="6">Option 6</option>
+          <option value="7">Option 7</option>
+          <option value="8">Option 8</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <input type="submit" value="Submit" title="Submit"/>
       </div>
     </form>
     <form data-sanatio id="form2" action="/">

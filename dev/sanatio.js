@@ -1,5 +1,7 @@
 (function( $ ) {
   
+  'use strict';
+  
   var defaultApplicableRules = [
     'required',
     'pattern',
@@ -19,7 +21,8 @@
   var defaultElements,
     defaultElementSettings,
     defaultElementCount,
-    defaultElementObj;
+    defaultElementObj,
+    elementsToValidate;
  
   var formValidStatus = false,
     elementValidStatus = false;
@@ -131,167 +134,44 @@
     }
   };
   
+  // Constructor for validator
+  $.sanatio = function( options, form ) {
+    
+  };
+  
   $.fn.sanatio = function(options) {
-
-    var settings,
-      defaults;
-
-      settings = $.extend( true, {}, defaults, options );
       
-      var msgCnt;
-      var showSanatioErrors = function (element, settingsFn){
-        for (msgCnt = 0; msgCnt < settingsFn.length; msgCnt++){
-          
-          element.parent().find('.sanatio-error').remove();
-          element.parent().find('.sanatio-warn').remove();
-          
-          if (settingsFn[msgCnt].isValid === false){
-            if (element.isRequiredEnabled === false && $.trim(''+element.val()).length === 0){
-              // TODO: Find reverse logic to eliminate empty block
-            } else {
-              element.after('<div class="sanatio-message sanatio-error">' + settingsFn[msgCnt].message + '</div>');
-            }
-            break;
-            
-          } else if (settingsFn[msgCnt].isValid === 'warn'){
-            
-            if (element.isRequiredEnabled === false && $.trim(''+element.val()).length === 0){
-              // TODO: Find reverse logic to eliminate empty block
-            } else {
-              element.after('<div class="sanatio-message sanatio-warn">' + settingsFn[msgCnt].message + '</div>');
-            }
-            break;
-          }/* else if (settingsFn.isValid === true || (settingsFn.isValid === 'warn' && element.isRequiredEnabled === false && $.trim(''+element.val()).length === 0)){
-            element.parent().find('.sanatio-message').remove();
-          }*/
-        }
-      };
+    // Check if a validator for this form was already created
+    var sanitator = $.data( this[ 0 ], 'sanatio' );
+    
+    if ( sanitator ) {
+      return sanitator;
+    }
+    this.attr('novalidate', 'novalidate');
       
-      /**
-      * Check if the value of the element is empty
-      * @param element
-      * @return is empty or not: Boolean
-      */
-      var checkRuleRequired = function (elem){
-        if ($.type(elem.val()) === 'string'){
-          return $.trim(''+elem.val()).length > 0 ? true : false;
-        } else {
-          return elem.val().length > 0 ? true : false;
-        }
-      };
-      
-      /**
-      * Check if the value matches the expected pattern
-      * @param element
-      * @return is pattern matched or not: Boolean
-      */
-      var checkRulePattern = function (elem, pattern){
-        patternRegex = new RegExp( pattern );
-        return patternRegex.test( $.trim( '' + elem.val() ));
-      };
-      
-      /**
-      * Add events to the form elements
-      * @param form, respective element, settings
-      * @return 
-      */
-      var addRuleEvents = function (formElement, ruleElement, ruleSettings){
-        ruleElement = selectByNameOrId(formElement, ruleElement);
-        
-        ruleElement.on('keyup.sanatio', function(e){
-          if ( e.which === 9 && $.trim(''+ruleElement.val()) === '' || $.inArray( e.keyCode, ignoreKeys ) !== -1 ) {
-    				return;
-    			}
-          for (cnt in ruleSettings){
-            
-            switch (ruleSettings[cnt].name) {
-              case 'required':{
-                ruleSettings[cnt].isValid = checkRuleRequired(ruleElement);
-                ruleSettings[cnt].isValid = (ruleSettings[cnt].type === 'warn' && ruleSettings[cnt].isValid === false) ? 'warn' : ruleSettings[cnt].isValid;
-                ruleElement.isRequiredEnabled = true;
-                break;
-              }
-              case 'pattern':{
-                ruleSettings[cnt].isValid = checkRulePattern(ruleElement, ruleSettings[cnt].value);
-                ruleSettings[cnt].isValid = (ruleSettings[cnt].type === 'warn' && ruleSettings[cnt].isValid === false) ? 'warn' : ruleSettings[cnt].isValid;
-                ruleElement.isRequiredEnabled === true ? ruleElement.isRequiredEnabled = true : ruleElement.isRequiredEnabled = false ;
-                break;
-              }
-              case 'email':{
-                ruleSettings[cnt].isValid = checkRulePattern(ruleElement, '^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$');
-                ruleSettings[cnt].isValid = (ruleSettings[cnt].type === 'warn' && ruleSettings[cnt].isValid === false) ? 'warn' : ruleSettings[cnt].isValid;
-                ruleElement.isRequiredEnabled === true ? ruleElement.isRequiredEnabled = true : ruleElement.isRequiredEnabled = false ;
-                break;
-              }
-              case 'url':{
-                ruleSettings[cnt].isValid = checkRulePattern(ruleElement, '^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})).?)(?::\d{2,5})?(?:[/?#]\S*)?$');
-                ruleSettings[cnt].isValid = (ruleSettings[cnt].type === 'warn' && ruleSettings[cnt].isValid === false) ? 'warn' : ruleSettings[cnt].isValid;
-                ruleElement.isRequiredEnabled === true ? ruleElement.isRequiredEnabled = true : ruleElement.isRequiredEnabled = false ;
-                break;
-              }
-              default: ruleSettings[cnt].isValid = true;
-            };
-          }
-          showSanatioErrors(ruleElement, ruleSettings);
-        });
-      };
-      
-      /**
-      * Selects the element from the form based on the name or id
-      * @param form, selector string
-      * @return Applicable element
-      */
-      var tempElement;
-      var selectByNameOrId = function (formElement, string){
-        
-        //TODO: Enahance this more to select dynamically.
-        tempElement = $(formElement).find('[name=' + string + ']');
-        
-        if (tempElement.length > 1){
-          return $(tempElement).eq(0);
-        }
-        
-        return $(tempElement);
-      };
-      
-      /**
-      * Main plugin init
-      * @param form element and rules settings
-      * @return
-      */
-      var init = function (formObj, ruleSettings){
-        
-        for(outerCnt in ruleSettings){
-          for(innerCnt = 0; innerCnt < ruleSettings[outerCnt].length; innerCnt++){
-            for (rootCnt in ruleSettings[outerCnt][innerCnt]){
-              formValidStatus = addRuleEvents(formObj, rootCnt, ruleSettings[outerCnt][innerCnt][rootCnt]);
-            }
-          }
-        }
-      };
+    sanitator = new $.sanatio( options, this[ 0 ] );
+    $.data( this[ 0 ], 'sanatio', sanitator );
   
-      init(this, settings);
-  
-      return this;
+    return this;
 
-    };
+  };
 
-    /**
-    * Auto initialize plugins for forms which have data-sanatio attribute
-    * @param
-    * @return
-    */
-    var defaultFormRulesObj = [];
-    $(function() {
-      defaultElements = $('[data-sanatio]');
-      for (defaultElementCount = 0; defaultElementCount < defaultElements.length; defaultElementCount++){
-        defaultElementObj = defaultInit($(defaultElements[defaultElementCount]));
-        if (defaultElementObj.elementsToValidate.length > 0){
-          defaultFormRulesObj.push(createSanatioRules(defaultElementObj));
-        }
+  /**
+  * Auto initialize plugins for forms which have data-sanatio attribute
+  * @param
+  * @return
+  */
+  var defaultFormRulesObj = [];
+  $(function() {
+    defaultElements = $('[data-sanatio]');
+    for (defaultElementCount = 0; defaultElementCount < defaultElements.length; defaultElementCount++){
+      defaultElementObj = defaultInit($(defaultElements[defaultElementCount]));
+      if (defaultElementObj.elementsToValidate.length > 0){
+        defaultFormRulesObj.push(createSanatioRules(defaultElementObj));
       }
-      // console.log(defaultFormRulesObj);
-      defaultSanatioValidate(defaultFormRulesObj);
-    });
+    }
+    // console.log(defaultFormRulesObj);
+    defaultSanatioValidate(defaultFormRulesObj);
+  });
  
 }( jQuery ));
