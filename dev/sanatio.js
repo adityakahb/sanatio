@@ -6,6 +6,8 @@
     'required',
     'pattern',
     'email',
+    'digits',
+    'equalsWith',
     'url',
     'minlength',
     'maxlength',
@@ -15,8 +17,27 @@
     'shouldBeSameAs',
     'capslock'
   ],
-    defaultRulesCount,
-    ignoreKeys = [16, 17, 18, 20, 35, 36, 37, 38, 39, 40, 45, 144, 225];
+    defaultRulesCount;
+  
+    // Avoid revalidate the field when pressing one of the following keys
+    // Shift       => 16
+    // Ctrl        => 17
+    // Alt         => 18
+    // Caps lock   => 20
+    // End         => 35
+    // Home        => 36
+    // Left arrow  => 37
+    // Up arrow    => 38
+    // Right arrow => 39
+    // Down arrow  => 40
+    // Insert      => 45
+    // Num lock    => 144
+    // AltGr key   => 225
+  var excludedKeys = [16, 17, 18, 20, 35, 36, 37, 38, 39, 40, 45, 144, 225],
+    formEventCallMethod,
+    localValidator,
+    localEventType,
+    localSettings;
   
   var defaultElements,
     defaultElementSettings,
@@ -136,21 +157,83 @@
   
   // Constructor for validator
   $.sanatio = function( options, form ) {
-    
+    this.settings = $.extend( true, {}, $.sanatio.defaults, options );
+    this.currentForm = form;
+    this.init();
   };
+  
+  $.extend( $.sanatio, {
+  	defaults: {
+      rules: {},
+      groups: {},
+      errorClass: 'sanatio-error',
+      warningClass: 'sanatio-warn',
+      ignoreElements: ':hidden',
+      allowWarningsToPassForm: true,
+      messages: {
+        
+      },
+      events: {
+    		focusin: function( element ) {
+    			console.log('focusin');
+    		},
+    		focusout: function( element ) {
+    			console.log('focusout');
+    		},
+    		keyup: function( element, event ) {
+          console.log('keyup');
+    			if ( event.which === 9 && this.elementValue( element ) === '' || $.inArray( event.keyCode, excludedKeys ) !== -1 ) {
+    				return;
+    			} else if ( element.name in this.submitted || element.name in this.invalid ) {
+    				this.element( element );
+    			}
+    		},
+    		click: function( element ) {
+          console.log('clicked');
+    		}
+      }
+  	},
+    prototype: {
+      init: function (){
+        // console.log('this', this);
+        
+        formEventCallMethod = function (event){
+          localValidator = $.data( this.form, 'sanatio' );
+  				//localEventType = "on" + event.type.replace( /^validate/, "" );
+          localEventType = event.type;
+  				localSettings = localValidator.settings;
+          console.log('localEventType', localEventType);
+          console.log('localSettings[ localEventType ]', localSettings.events[ localEventType ]);
+  				if ( localSettings[ localEventType ] && !$( this ).is( localSettings.ignoreElements ) ) {
+            console.log('localSettings', localSettings);
+  					// settings[ eventType ].call( sanatio, this, event );
+  				}
+          
+          //console.log(event.type);
+        };
+        
+        $( this.currentForm )
+  				.on( 'focusin.sanatio focusout.sanatio keyup.sanatio',
+  					':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod )
+  				.on( 'click.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
+      }
+    }
+  });
+  
+  
   
   $.fn.sanatio = function(options) {
       
     // Check if a validator for this form was already created
-    var sanitator = $.data( this[ 0 ], 'sanatio' );
+    var sanitio = $.data( this[ 0 ], 'sanatio' );
     
-    if ( sanitator ) {
-      return sanitator;
+    if ( sanitio ) {
+      return sanitio;
     }
     this.attr('novalidate', 'novalidate');
       
-    sanitator = new $.sanatio( options, this[ 0 ] );
-    $.data( this[ 0 ], 'sanatio', sanitator );
+    sanitio = new $.sanatio( options, this[ 0 ] );
+    $.data( this[ 0 ], 'sanatio', sanitio );
   
     return this;
 
