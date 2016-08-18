@@ -49,7 +49,10 @@
     elementValidStatus = false;
  
   var formElement,
-    sanatioElementsPattern = 'data-sanatio';
+    formSettings,
+    sanatioElementsPattern = 'data-sanatio',
+    thisElement,
+    tempObj;
   
   var cnt,
     outerCnt,
@@ -57,6 +60,8 @@
     rootCnt;
   
   var patternRegex;
+  
+  var isThisFormValid;
   
   /**
   * Takes out the elements which have data-sanatio-* rules on them
@@ -168,32 +173,80 @@
       groups: {},
       errorClass: 'sanatio-error',
       warningClass: 'sanatio-warn',
+      errorCount: 0,
+      warningCount: 0,
       ignoreElements: ':hidden',
       allowWarningsToPassForm: true,
+      isValid: false,
+      debug: false,
+      preparedElements: [],
       messages: {
         
       },
       events: {
-    		focusin: function( element ) {
+    		focusin: function (element) {
     			console.log('focusin');
     		},
-    		focusout: function( element ) {
+    		focusout: function (element) {
     			console.log('focusout');
     		},
-    		keyup: function( element, event ) {
+    		keyup: function (element, event) {
           console.log('keyup');
     			if ( event.which === 9 && this.elementValue( element ) === '' || $.inArray( event.keyCode, excludedKeys ) !== -1 ) {
     				return;
-    			} else if ( element.name in this.submitted || element.name in this.invalid ) {
-    				this.element( element );
+    			} else {
+            
     			}
     		},
-    		click: function( element ) {
+    		click: function (element) {
           console.log('clicked');
     		}
+      },
+      getElement: function (formElement, elementName){
+        return formElement.find('[name='+elementName+']');
+      },
+      checkFor: {
+        required: function (element){
+          console.log('element', element);
+        }
       }
   	},
     prototype: {
+      prepareElements: function (){
+        formElement = $(this.currentForm);
+        formSettings = this.settings;
+        for (cnt in formSettings.rules){
+          for (outerCnt in formSettings.rules[cnt]){
+            thisElement = formSettings.getElement(formElement, outerCnt);
+            // this.settings = ['1', '2'];
+            tempObj = {};
+            tempObj.element = thisElement;
+            if (thisElement.attr('type') === 'radio' || thisElement.attr('type') === 'checkbox' || thisElement.prop('tagName').toLowerCase() === 'select' || thisElement.prop('tagName').toLowerCase() === 'option'){
+              tempObj.clickable = true;
+            } else {
+              tempObj.clickable = false;
+            }
+            
+            for (innerCnt in formSettings.rules[cnt][outerCnt]){  
+              if (formSettings.rules[cnt][outerCnt][innerCnt].name === 'required'){
+                tempObj.applyRequired = true;
+                break;
+              } else {
+                tempObj.applyRequired = false;
+              }
+            }
+            for (innerCnt in formSettings.rules[cnt][outerCnt]){  
+              if (formSettings.rules[cnt][outerCnt][innerCnt].name === 'minlength'){
+                tempObj.applyMinlength = true;
+                break;
+              } else {
+                tempObj.applyMinlength = false;
+              }
+            }
+            this.settings.preparedElements.push(tempObj);
+          }
+        }
+      },
       init: function (){
         // console.log('this', this);
         
@@ -202,7 +255,7 @@
   				//localEventType = "on" + event.type.replace( /^validate/, "" );
           localEventType = event.type;
   				localSettings = localValidator.settings;
-          console.log('localEventType', localEventType);
+          //console.log('localEventType', localEventType);
           console.log('localSettings[ localEventType ]', localSettings.events[ localEventType ]);
   				if ( localSettings[ localEventType ] && !$( this ).is( localSettings.ignoreElements ) ) {
             console.log('localSettings', localSettings);
@@ -216,6 +269,10 @@
   				.on( 'focusin.sanatio focusout.sanatio keyup.sanatio',
   					':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod )
   				.on( 'click.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
+      },
+      applyDefaultRules: function (){
+        console.log(this);
+        return false;
       }
     }
   });
@@ -225,15 +282,27 @@
   $.fn.sanatio = function(options) {
       
     // Check if a validator for this form was already created
-    var sanitio = $.data( this[ 0 ], 'sanatio' );
+    var sanatio = $.data( this[ 0 ], 'sanatio' );
     
-    if ( sanitio ) {
-      return sanitio;
+    if ( sanatio ) {
+      return sanatio;
     }
     this.attr('novalidate', 'novalidate');
       
-    sanitio = new $.sanatio( options, this[ 0 ] );
-    $.data( this[ 0 ], 'sanatio', sanitio );
+    sanatio = new $.sanatio( options, this[ 0 ] );
+    $.data( this[ 0 ], 'sanatio', sanatio );
+    
+    sanatio.prepareElements();
+    
+    this.on( "submit.sanatio", function( event ) {
+      if ( sanatio.settings.debug ) {
+
+        // Prevent form submit to be able to see console output
+        event.preventDefault();
+      }
+      isThisFormValid = sanatio.applyDefaultRules();
+      return false;
+    });
   
     return this;
 
