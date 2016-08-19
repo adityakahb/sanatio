@@ -63,6 +63,25 @@
   
   var isThisFormValid;
   
+  var preparedElements,
+    checkedElements;
+  
+  var sanatioTrim = function (value) {
+     return typeof value === 'string' ? value.replace( /^\s+|\s+$/g, '' ) : value;
+  };
+  var sanatioValue = function (element){
+    if (element.attr('type') === 'checkbox' || element.attr('type') === 'radio'){
+      checkedElements = 0;
+      $.each(element, function (){
+        if ( $(this).is(':checked') ){
+          checkedElements++;
+        }
+      });
+      return checkedElements;
+    } else {
+      return element.val();
+    }
+  };
   /**
   * Takes out the elements which have data-sanatio-* rules on them
   * when a form is initiated using data-sanatio
@@ -178,7 +197,7 @@
       ignoreElements: ':hidden',
       allowWarningsToPassForm: true,
       isValid: false,
-      debug: false,
+      debug: true,
       preparedElements: [],
       messages: {
         
@@ -206,13 +225,25 @@
         return formElement.find('[name='+elementName+']');
       },
       checkFor: {
-        required: function (element){
-          console.log('element', element);
+        required: function (elementObj){
+          if (elementObj.isClickable){
+            if (sanatioValue(elementObj.element) === 0 || sanatioValue(elementObj.element).length === 0){
+              console.log(elementObj.element, 'fail');
+            } else {
+              console.log(elementObj.element, 'pass');
+            }
+          } else {
+            if (sanatioTrim(elementObj.element.val()).length > 0){
+              console.log(elementObj.element, 'pass');
+            } else {
+              console.log(elementObj.element, 'fail');
+            }
+          }
         }
       }
   	},
     prototype: {
-      prepareElements: function (){
+      prepareFormElements: function (){
         formElement = $(this.currentForm);
         formSettings = this.settings;
         for (cnt in formSettings.rules){
@@ -222,27 +253,27 @@
             tempObj = {};
             tempObj.element = thisElement;
             if (thisElement.attr('type') === 'radio' || thisElement.attr('type') === 'checkbox' || thisElement.prop('tagName').toLowerCase() === 'select' || thisElement.prop('tagName').toLowerCase() === 'option'){
-              tempObj.clickable = true;
+              tempObj.isClickable = true;
             } else {
-              tempObj.clickable = false;
+              tempObj.isClickable = false;
             }
             
             for (innerCnt in formSettings.rules[cnt][outerCnt]){  
               if (formSettings.rules[cnt][outerCnt][innerCnt].name === 'required'){
-                tempObj.applyRequired = true;
+                tempObj.shouldApplyRequired = true;
                 break;
               } else {
-                tempObj.applyRequired = false;
+                tempObj.shouldApplyRequired = false;
               }
             }
-            for (innerCnt in formSettings.rules[cnt][outerCnt]){  
+            /*for (innerCnt in formSettings.rules[cnt][outerCnt]){  
               if (formSettings.rules[cnt][outerCnt][innerCnt].name === 'minlength'){
                 tempObj.applyMinlength = true;
                 break;
               } else {
                 tempObj.applyMinlength = false;
               }
-            }
+            }*/
             this.settings.preparedElements.push(tempObj);
           }
         }
@@ -265,13 +296,16 @@
           //console.log(event.type);
         };
         
-        $( this.currentForm )
-  				.on( 'focusin.sanatio focusout.sanatio keyup.sanatio',
-  					':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod )
-  				.on( 'click.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
+        $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio',
+  					':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'click.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
       },
-      applyDefaultRules: function (){
-        console.log(this);
+      checkForDefaultRules: function (){
+        preparedElements = this.settings.preparedElements;
+        for (cnt in preparedElements){
+          if (preparedElements[cnt].shouldApplyRequired){
+            this.settings.checkFor.required(preparedElements[cnt]);
+          }
+        }
         return false;
       }
     }
@@ -292,7 +326,7 @@
     sanatio = new $.sanatio( options, this[ 0 ] );
     $.data( this[ 0 ], 'sanatio', sanatio );
     
-    sanatio.prepareElements();
+    sanatio.prepareFormElements();
     
     this.on( "submit.sanatio", function( event ) {
       if ( sanatio.settings.debug ) {
@@ -300,7 +334,7 @@
         // Prevent form submit to be able to see console output
         event.preventDefault();
       }
-      isThisFormValid = sanatio.applyDefaultRules();
+      isThisFormValid = sanatio.checkForDefaultRules();
       return false;
     });
   
