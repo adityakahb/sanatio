@@ -37,7 +37,8 @@
     formEventCallMethod,
     localValidator,
     localEventType,
-    localSettings;
+    localSettings,
+    localElementObj;
   
   var defaultElements,
     defaultElementSettings,
@@ -61,15 +62,16 @@
   
   var patternRegex;
   
-  var isThisFormValid;
+  var isThisFormValid = {},
+    isThisElementValid = {};
   
   var preparedElements,
     checkedElements;
   
-  var sanatioTrim = function (value) {
+  var sanatioTrimmedValue = function (value) {
      return typeof value === 'string' ? value.replace( /^\s+|\s+$/g, '' ) : value;
   };
-  var sanatioValue = function (element){
+  var sanatioClickedValue = function (element){
     if (element.attr('type') === 'checkbox' || element.attr('type') === 'radio'){
       checkedElements = 0;
       $.each(element, function (){
@@ -135,13 +137,14 @@
   var createSanatioRules = function (elementObj){
     defaultSanatioRulesObj = {};
     defaultSanatioRulesObj.formElement = elementObj.formElement;
-    defaultSanatioRulesObj.rules = [];
+    defaultSanatioRulesObj.rulesConfig = [];
     
     for (rulesElementCount = 0; rulesElementCount < elementObj.elementsToValidate.length; rulesElementCount++){
       thisRuleElement = elementObj.elementsToValidate[rulesElementCount];
       
       tempRuleObj = {};
-      tempRuleObj[$(thisRuleElement).attr('name')] = [];
+      tempRuleObj.rules = [];
+      tempRuleObj.elementName = $(thisRuleElement).attr('name');
       
       for (defaultRulesCount = 0; defaultRulesCount < defaultApplicableRules.length; defaultRulesCount++){
         for (rulesAttributesCount = 0; rulesAttributesCount < thisRuleElement.attributes.length; rulesAttributesCount++){
@@ -153,13 +156,14 @@
             tempRuleObj2['name'] = defaultApplicableRules[ defaultRulesCount ];
             tempRuleObj2['value'] = $(thisRuleElement).attr('data-sanatio-'+defaultApplicableRules[ defaultRulesCount ]);
             tempRuleObj2['message'] = $(thisRuleElement).attr('data-sanatio-'+defaultApplicableRules[ defaultRulesCount ]+'-message');
-            tempRuleObj[$(thisRuleElement).attr('name')].push(tempRuleObj2);
+            tempRuleObj.rules.push(tempRuleObj2);
             break;
           }
         }
       }
-      defaultSanatioRulesObj.rules.push(tempRuleObj);
+      defaultSanatioRulesObj.rulesConfig.push(tempRuleObj);
     }
+    
     return defaultSanatioRulesObj;
   };
   
@@ -173,7 +177,7 @@
     if (defaultRulesObj.length > 0){
       for (rulesElementCount = 0; rulesElementCount < defaultRulesObj.length; rulesElementCount++){
         $('#'+$(defaultRulesObj[rulesElementCount].formElement).attr('id')).sanatio({
-          rules: defaultRulesObj[rulesElementCount].rules
+          rulesConfig: defaultRulesObj[rulesElementCount].rulesConfig
         });
       }
     }
@@ -188,7 +192,7 @@
   
   $.extend( $.sanatio, {
   	defaults: {
-      rules: {},
+      rulesConfig: {},
       groups: {},
       errorClass: 'sanatio-error',
       warningClass: 'sanatio-warn',
@@ -197,46 +201,75 @@
       ignoreElements: ':hidden',
       allowWarningsToPassForm: true,
       isValid: false,
-      debug: true,
+      debug: false,
       preparedElements: [],
+      submitted: [],
       messages: {
         
       },
       events: {
-    		focusin: function (element) {
+    		focusin: function (sanitator, elementObj, event) {
     			console.log('focusin');
     		},
-    		focusout: function (element) {
-    			console.log('focusout');
+    		focusout: function (sanitator, elementObj, event) {
+          if (elementObj.isEditable && sanitator.settings.submitted.indexOf(elementObj) !== -1){
+            sanitator.settings.sanitation(sanitator, elementObj);
+          }
     		},
-    		keyup: function (element, event) {
-          console.log('keyup');
-    			if ( event.which === 9 && this.elementValue( element ) === '' || $.inArray( event.keyCode, excludedKeys ) !== -1 ) {
+    		keyup: function (sanitator, elementObj, event) {
+          // console.log('keyup', elementObj, event);
+    			if ( event.which === 9 && sanatioTrimmedValue( elementObj.element.val() ) === '' || $.inArray( event.keyCode, excludedKeys ) !== -1 ) {
     				return;
     			} else {
-            
+            sanitator.settings.sanitation(sanitator, elementObj);
     			}
     		},
-    		click: function (element) {
+    		click: function (sanitator, elementObj, event) {
           console.log('clicked');
     		}
       },
       getElement: function (formElement, elementName){
-        return formElement.find('[name='+elementName+']');
+        return formElement.find( '[name=' + elementName + ']' );
+      },
+      sanitation: function (sanitator, elementObj){
+        localSettings = sanitator.settings;
+        $.each(localSettings.rulesConfig, function(index, elementItem){
+          
+          if (elementItem.elementObj === elementObj){
+            for (innerCnt in elementItem.rules){
+              isThisElementValid.has = {};
+              isThisElementValid.has.errors = false;
+              isThisElementValid.has.warnings = false;
+              isThisElementValid.has.message = '';
+              if (!isThisElementValid.has.errors && elementItem.rules[innerCnt].name === 'required'){
+                isThisElementValid.has = localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] );
+              }
+            }
+          }
+          
+        });
       },
       checkFor: {
-        required: function (elementObj){
+        required: function (elementObj, rulesObj){
           if (elementObj.isClickable){
-            if (sanatioValue(elementObj.element) === 0 || sanatioValue(elementObj.element).length === 0){
-              console.log(elementObj.element, 'fail');
+            if (sanatioClickedValue(elementObj.element) === 0 || sanatioClickedValue(elementObj.element).length === 0){
+              rulesObj.type === 'error' ? return { errors: true, warnings: false, message: rulesObj.message } : return { errors: false, warnings: true, message: rulesObj.message };
             } else {
-              console.log(elementObj.element, 'pass');
+              return {
+                errors: false,
+                warnings: false,
+                message: ''
+              };
             }
           } else {
-            if (sanatioTrim(elementObj.element.val()).length > 0){
-              console.log(elementObj.element, 'pass');
+            if (sanatioTrimmedValue(elementObj.element.val()).length > 0){
+              return {
+                errors: false,
+                warnings: false,
+                message: ''
+              };
             } else {
-              console.log(elementObj.element, 'fail');
+              rulesObj.type === 'error' ? return { errors: true, warnings: false, message: rulesObj.message } : return { errors: false, warnings: true, message: rulesObj.message };
             }
           }
         }
@@ -246,67 +279,85 @@
       prepareFormElements: function (){
         formElement = $(this.currentForm);
         formSettings = this.settings;
-        for (cnt in formSettings.rules){
-          for (outerCnt in formSettings.rules[cnt]){
-            thisElement = formSettings.getElement(formElement, outerCnt);
-            // this.settings = ['1', '2'];
-            tempObj = {};
-            tempObj.element = thisElement;
-            if (thisElement.attr('type') === 'radio' || thisElement.attr('type') === 'checkbox' || thisElement.prop('tagName').toLowerCase() === 'select' || thisElement.prop('tagName').toLowerCase() === 'option'){
-              tempObj.isClickable = true;
+        for (cnt in formSettings.rulesConfig){
+          thisElement = formSettings.getElement(formElement, formSettings.rulesConfig[cnt].elementName);
+          
+          tempObj = {};
+          tempObj.element = thisElement;
+          
+          if (thisElement.prop('tagName').toLowerCase() === 'select' || thisElement.prop('tagName').toLowerCase() === 'option'){
+            tempObj.isClickable = true;
+            tempObj.isCheckable = false;
+            tempObj.isEditable = false;
+          } else if (thisElement.attr('type') === 'radio' || thisElement.attr('type') === 'checkbox'){
+            tempObj.isClickable = true;
+            tempObj.isCheckable = true;
+            tempObj.isEditable = false;
+          } else {
+            tempObj.isClickable = false;
+            tempObj.isCheckable = false;
+            tempObj.isEditable = true;
+          }
+          for (outerCnt in formSettings.rulesConfig[cnt].rules){
+            
+            if (formSettings.rulesConfig[cnt].rules[outerCnt].name === 'required'){
+              tempObj.shouldApplyRequired = true;
+              break;
             } else {
-              tempObj.isClickable = false;
+              tempObj.shouldApplyRequired = false;
             }
             
-            for (innerCnt in formSettings.rules[cnt][outerCnt]){  
-              if (formSettings.rules[cnt][outerCnt][innerCnt].name === 'required'){
-                tempObj.shouldApplyRequired = true;
-                break;
-              } else {
-                tempObj.shouldApplyRequired = false;
-              }
-            }
-            /*for (innerCnt in formSettings.rules[cnt][outerCnt]){  
-              if (formSettings.rules[cnt][outerCnt][innerCnt].name === 'minlength'){
-                tempObj.applyMinlength = true;
-                break;
-              } else {
-                tempObj.applyMinlength = false;
-              }
-            }*/
-            this.settings.preparedElements.push(tempObj);
+            /* if (formSettings.rulesConfig[cnt].rules[outerCnt].name === 'minlength'){
+              tempObj.applyMinlength = true;
+              break;
+            } else {
+              tempObj.applyMinlength = false;
+            } */
+            
           }
+          this.settings.rulesConfig[cnt].elementObj = tempObj;
+          this.settings.preparedElements.push(tempObj);
         }
       },
       init: function (){
-        // console.log('this', this);
         
         formEventCallMethod = function (event){
           localValidator = $.data( this.form, 'sanatio' );
-  				//localEventType = "on" + event.type.replace( /^validate/, "" );
           localEventType = event.type;
   				localSettings = localValidator.settings;
-          //console.log('localEventType', localEventType);
-          console.log('localSettings[ localEventType ]', localSettings.events[ localEventType ]);
-  				if ( localSettings[ localEventType ] && !$( this ).is( localSettings.ignoreElements ) ) {
-            console.log('localSettings', localSettings);
+          localElementObj;
+          
+  				if ( localSettings.events[ localEventType ] && !$( this ).is(localSettings.ignoreElements) ) {
+            
+            for (cnt in localSettings.preparedElements){
+              if (localSettings.preparedElements[cnt].element.is($(this))){
+                localElementObj = localSettings.preparedElements[cnt];
+                break;
+              }
+            }
+            localSettings.events[ localEventType ]( localValidator, localElementObj, event );
   					// settings[ eventType ].call( sanatio, this, event );
   				}
-          
-          //console.log(event.type);
         };
         
-        $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio',
-  					':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'click.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
+        $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'click.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
       },
-      checkForDefaultRules: function (){
-        preparedElements = this.settings.preparedElements;
+      checkForSubmittedElements: function (){
+        for (cnt in this.settings.rulesConfig){  
+          if (this.settings.submitted.indexOf(this.settings.rulesConfig[cnt].elementObj) === -1 ){
+            this.settings.submitted.push(this.settings.rulesConfig[cnt].elementObj);
+          }
+        }
+        /* preparedElements = this.settings.preparedElements;
         for (cnt in preparedElements){
           if (preparedElements[cnt].shouldApplyRequired){
             this.settings.checkFor.required(preparedElements[cnt]);
           }
-        }
-        return false;
+        }*/
+        return {
+            hasErrors: false,
+            hasWarnings: false
+          };
       }
     }
   });
@@ -334,7 +385,7 @@
         // Prevent form submit to be able to see console output
         event.preventDefault();
       }
-      isThisFormValid = sanatio.checkForDefaultRules();
+      isThisFormValid = sanatio.checkForSubmittedElements();
       return false;
     });
   
