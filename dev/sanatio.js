@@ -63,7 +63,8 @@
   var patternRegex;
   
   var isThisFormValid = {},
-    isThisElementValid = {};
+    isThisElementValid = {},
+    isThisFormElementValid = {};
   
   var preparedElements,
     checkedElements;
@@ -201,8 +202,9 @@
       ignoreElements: ':hidden',
       allowWarningsToPassForm: true,
       isValid: false,
-      debug: false,
+      debug: true,
       preparedElements: [],
+      preparedInvalidElements: [],
       submitted: [],
       messages: {
         
@@ -236,24 +238,30 @@
         $.each(localSettings.rulesConfig, function(index, elementItem){
           
           if (elementItem.elementObj === elementObj){
+            isThisElementValid.has = {};
+            isThisElementValid.has.errors = false;
+            isThisElementValid.has.warnings = false;
+            isThisElementValid.has.message = '';
             for (innerCnt in elementItem.rules){
-              isThisElementValid.has = {};
-              isThisElementValid.has.errors = false;
-              isThisElementValid.has.warnings = false;
-              isThisElementValid.has.message = '';
               if (!isThisElementValid.has.errors && elementItem.rules[innerCnt].name === 'required'){
                 isThisElementValid.has = localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] );
               }
             }
+            // if (sanitator.settings.preparedInvalidElements.indexOf([elementObj, isThisElementValid]) === -1){
+            
+            if (sanitator.settings.preparedInvalidElements[elementItem.elementName] === 'undefined'){
+              sanitator.settings.preparedInvalidElements[elementItem.elementName] = {};
+            }
+            sanitator.settings.preparedInvalidElements[elementItem.elementName] = [elementObj, isThisElementValid];
           }
-          
         });
+        localSettings.showErrors();
       },
       checkFor: {
         required: function (elementObj, rulesObj){
           if (elementObj.isClickable){
             if (sanatioClickedValue(elementObj.element) === 0 || sanatioClickedValue(elementObj.element).length === 0){
-              rulesObj.type === 'error' ? return { errors: true, warnings: false, message: rulesObj.message } : return { errors: false, warnings: true, message: rulesObj.message };
+              return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
             } else {
               return {
                 errors: false,
@@ -269,9 +277,15 @@
                 message: ''
               };
             } else {
-              rulesObj.type === 'error' ? return { errors: true, warnings: false, message: rulesObj.message } : return { errors: false, warnings: true, message: rulesObj.message };
+              return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
             }
           }
+        }
+      },
+      showErrors: function (){
+        // console.log('sanatioArray', this.preparedInvalidElements);
+        for (cnt in this.preparedInvalidElements){
+          console.log('cnt', cnt, this.preparedInvalidElements[cnt]);
         }
       }
   	},
@@ -343,11 +357,29 @@
         $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'click.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
       },
       checkForSubmittedElements: function (){
-        for (cnt in this.settings.rulesConfig){  
+        isThisFormElementValid.has = {};
+        isThisFormElementValid.has.errors = false;
+        isThisFormElementValid.has.warnings = false;
+        isThisFormElementValid.has.message = '';
+        
+        for (cnt in this.settings.rulesConfig){
           if (this.settings.submitted.indexOf(this.settings.rulesConfig[cnt].elementObj) === -1 ){
             this.settings.submitted.push(this.settings.rulesConfig[cnt].elementObj);
           }
+          if (this.settings.rulesConfig[cnt].elementObj.shouldApplyRequired){
+            
+            for (innerCnt in this.settings.rulesConfig[cnt].rules){
+              
+            }
+            
+            isThisFormElementValid.has = this.settings.checkFor.required(this.settings.rulesConfig[cnt].elementObj, this.settings.rulesConfig[cnt].rules);
+            if (this.settings.preparedInvalidElements[this.settings.rulesConfig[cnt].elementName] === 'undefined') {
+              this.settings.preparedInvalidElements[this.settings.rulesConfig[cnt].elementName] = {};
+            }
+            this.settings.preparedInvalidElements[this.settings.rulesConfig[cnt].elementName] = [this.settings.rulesConfig[cnt].elementObj, isThisFormElementValid];
+          }
         }
+        this.settings.showErrors();
         /* preparedElements = this.settings.preparedElements;
         for (cnt in preparedElements){
           if (preparedElements[cnt].shouldApplyRequired){
