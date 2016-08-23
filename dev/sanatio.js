@@ -218,7 +218,7 @@
     			console.log('focusin');
     		},
     		focusout: function (sanitator, elementObj, event) {
-          if (elementObj.isEditable && sanitator.settings.submitted.indexOf(elementObj) !== -1){
+          if ( (elementObj.isEditable || elementObj.isCheckable) && sanitator.settings.submitted.indexOf(elementObj) !== -1){
             sanitator.settings.doSanitation(sanitator, elementObj);
             sanitator.settings.showErrors();
           }
@@ -318,9 +318,8 @@
         }
       },
       showErrors: function (){
-        console.log('sanatioArray', this.preparedInvalidElements.length);
         for (innerCnt in this.preparedInvalidElements){
-          console.log(this.preparedInvalidElements[innerCnt]);
+          console.log(this.preparedInvalidElements[innerCnt].elementObj.element, this.preparedInvalidElements[innerCnt].isThisElementValid[0]);
         }
       }
   	},
