@@ -7,7 +7,6 @@
     'pattern',
     'email',
     'digits',
-    'equalsWith',
     'url',
     'minlength',
     'maxlength',
@@ -34,7 +33,11 @@
     // Num lock    => 144
     // AltGr key   => 225
   var excludedKeys = [16, 17, 18, 20, 35, 36, 37, 38, 39, 40, 45, 144, 225],
-    formEventCallMethod,
+    emailRegex = new RegExp('^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'),
+    urlRegex = new RegExp( '^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})).?)(?::\d{2,5})?(?:[/?#]\S*)?$','i'),
+    digitsRegex = new RegExp('^(?:-?\d+|-?\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$');
+    
+  var formEventCallMethod,
     localValidator,
     localEventType,
     localSettings,
@@ -220,16 +223,20 @@
     		focusout: function (sanitator, elementObj, event) {
           if ( (elementObj.isEditable || elementObj.isCheckable) && sanitator.settings.submitted.indexOf(elementObj) !== -1){
             sanitator.settings.doSanitation(sanitator, elementObj);
-            sanitator.settings.showErrors();
+            sanitator.settings.showSanatioErrors();
+          }
+          if (sanitator.settings.submitted.indexOf(elementObj) === -1){
+            sanitator.settings.submitted.push(elementObj);
           }
     		},
     		keyup: function (sanitator, elementObj, event) {
-          // console.log('keyup', elementObj, event);
     			if ( event.which === 9 && sanatioTrimmedValue( elementObj.element.val() ) === '' || $.inArray( event.keyCode, excludedKeys ) !== -1 ) {
     				return;
     			} else {
-            sanitator.settings.doSanitation(sanitator, elementObj);
-            sanitator.settings.showErrors();
+            if ( (elementObj.isEditable || elementObj.isCheckable) && sanitator.settings.submitted.indexOf(elementObj) !== -1){
+              sanitator.settings.doSanitation(sanitator, elementObj);
+              sanitator.settings.showSanatioErrors();
+            }
     			}
     		},
     		click: function (sanitator, elementObj, event) {
@@ -255,21 +262,16 @@
               warnObj = {};
               isItemPresent = false;
               
-              if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === 'required' && elementItem.rules[innerCnt].type === 'error'){
-                errorObj = (localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] ));
+              for (rootCnt in defaultApplicableRules){
+                if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === defaultApplicableRules[rootCnt] && elementItem.rules[innerCnt].type === 'error'){
+                  errorObj = localSettings.checkFor[defaultApplicableRules[rootCnt]]( elementObj, elementItem.rules[innerCnt] );
+                  isThisElementValid.errors = typeof errorObj.errors !== 'undefined' && errorObj.errors === true ? true : false;
+                }
+                if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === defaultApplicableRules[rootCnt] && elementItem.rules[innerCnt].type === 'warning'){
+                  warnObj = localSettings.checkFor[defaultApplicableRules[rootCnt]]( elementObj, elementItem.rules[innerCnt] );
+                  isThisElementValid.warnings = typeof warnObj.warnings !== 'undefined' && warnObj.warnings === true ? true : false;
+                }
               }
-              if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === 'required' && elementItem.rules[innerCnt].type === 'warning'){
-                warnObj = (localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] ));
-              }
-              if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === 'pattern' && elementItem.rules[innerCnt].type === 'error'){
-                errorObj = (localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] ));
-              }
-              if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === 'pattern' && elementItem.rules[innerCnt].type === 'warning'){
-                warnObj = (localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] ));
-              }
-              
-              isThisElementValid.errors = typeof errorObj.errors !== 'undefined' && errorObj.errors === true ? true : false;
-              isThisElementValid.warnings = typeof warnObj.warnings !== 'undefined' && warnObj.warnings === true ? true : false;
               
               isThisElementValid.message = typeof errorObj.message !== 'undefined' ? errorObj.message : warnObj.message;
               
@@ -315,11 +317,67 @@
               return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
             }
           }
+        },
+        pattern: function (elementObj, rulesObj){
+          if (elementObj.isEditable){
+            
+            patternRegex = new RegExp( rulesObj.value );
+
+            if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
+              return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
+            } else {
+              return { errors: false, warnings: false, message: '' };
+            }
+          } else {
+            return { errors: false, warnings: false, message: '' };
+          }
+        },
+        email: function (elementObj, rulesObj){
+          if (elementObj.isEditable){
+            
+            patternRegex = emailRegex;
+
+            if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
+              return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
+            } else {
+              return { errors: false, warnings: false, message: '' };
+            }
+          } else {
+            return { errors: false, warnings: false, message: '' };
+          }
+        },
+        url: function (elementObj, rulesObj){
+          if (elementObj.isEditable){
+            
+            patternRegex = urlRegex;
+
+            if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
+              return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
+            } else {
+              return { errors: false, warnings: false, message: '' };
+            }
+          } else {
+            return { errors: false, warnings: false, message: '' };
+          }
+        },
+        digits: function (elementObj, rulesObj){
+          if (elementObj.isEditable){
+            
+            patternRegex = digitsRegex;
+
+            if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
+              return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
+            } else {
+              return { errors: false, warnings: false, message: '' };
+            }
+          } else {
+            return { errors: false, warnings: false, message: '' };
+          }
         }
       },
-      showErrors: function (){
+      showSanatioErrors: function (){
         for (innerCnt in this.preparedInvalidElements){
-          console.log(this.preparedInvalidElements[innerCnt].elementObj.element, this.preparedInvalidElements[innerCnt].isThisElementValid[0]);
+          console.log(this.preparedInvalidElements[innerCnt].elementObj.element, this.preparedInvalidElements[innerCnt].isThisElementValid[0], this.preparedInvalidElements[innerCnt].isThisElementValid[1]);
         }
       }
   	},
@@ -401,13 +459,15 @@
         for (cnt in this.settings.submitted){
           this.settings.doSanitation(this, this.settings.submitted[cnt]);
         }
-        this.settings.showErrors();
+        this.settings.showSanatioErrors();
+        
         /* preparedElements = this.settings.preparedElements;
         for (cnt in preparedElements){
           if (preparedElements[cnt].shouldApplyRequired){
             this.settings.checkFor.required(preparedElements[cnt]);
           }
         }*/
+        
         return {
             hasErrors: false,
             hasWarnings: false
