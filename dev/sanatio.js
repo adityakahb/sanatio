@@ -225,7 +225,7 @@
             sanitator.settings.doSanitation(sanitator, elementObj);
             sanitator.settings.showSanatioErrors();
           }
-          if (sanitator.settings.submitted.indexOf(elementObj) === -1){
+          if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
             sanitator.settings.submitted.push(elementObj);
           }
     		},
@@ -376,8 +376,12 @@
         }
       },
       showSanatioErrors: function (){
-        for (innerCnt in this.preparedInvalidElements){
-          console.log(this.preparedInvalidElements[innerCnt].elementObj.element, this.preparedInvalidElements[innerCnt].isThisElementValid[0], this.preparedInvalidElements[innerCnt].isThisElementValid[1]);
+        for (outerCnt in this.preparedInvalidElements){
+          for (innerCnt in this.preparedInvalidElements[outerCnt]){
+            for (rootCnt in this.preparedInvalidElements[outerCnt].isThisElementValid){
+              console.log('messages', this.preparedInvalidElements[outerCnt].isThisElementValid[rootCnt].message);
+            }
+          }
         }
       }
   	},
