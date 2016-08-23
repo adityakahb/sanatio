@@ -53,7 +53,11 @@
     formSettings,
     sanatioElementsPattern = 'data-sanatio',
     thisElement,
-    tempObj;
+    tempObj,
+    tempObj2,
+    errorObj,
+    warnObj,
+    isItemPresent;
   
   var cnt,
     outerCnt,
@@ -215,7 +219,8 @@
     		},
     		focusout: function (sanitator, elementObj, event) {
           if (elementObj.isEditable && sanitator.settings.submitted.indexOf(elementObj) !== -1){
-            sanitator.settings.sanitation(sanitator, elementObj);
+            sanitator.settings.doSanitation(sanitator, elementObj);
+            sanitator.settings.showErrors();
           }
     		},
     		keyup: function (sanitator, elementObj, event) {
@@ -223,7 +228,8 @@
     			if ( event.which === 9 && sanatioTrimmedValue( elementObj.element.val() ) === '' || $.inArray( event.keyCode, excludedKeys ) !== -1 ) {
     				return;
     			} else {
-            sanitator.settings.sanitation(sanitator, elementObj);
+            sanitator.settings.doSanitation(sanitator, elementObj);
+            sanitator.settings.showErrors();
     			}
     		},
     		click: function (sanitator, elementObj, event) {
@@ -233,29 +239,57 @@
       getElement: function (formElement, elementName){
         return formElement.find( '[name=' + elementName + ']' );
       },
-      sanitation: function (sanitator, elementObj){
+      doSanitation: function (sanitator, elementObj){
         localSettings = sanitator.settings;
         $.each(localSettings.rulesConfig, function(index, elementItem){
-          
           if (elementItem.elementObj === elementObj){
-            isThisElementValid.has = {};
-            isThisElementValid.has.errors = false;
-            isThisElementValid.has.warnings = false;
-            isThisElementValid.has.message = '';
+            tempObj2 = {};
+            isItemPresent = 0;
+            console.log('elementItem.rules', elementItem.rules);
             for (innerCnt in elementItem.rules){
-              if (!isThisElementValid.has.errors && elementItem.rules[innerCnt].name === 'required'){
-                isThisElementValid.has = localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] );
+              isThisElementValid = {};
+              isThisElementValid.has = {};
+              isThisElementValid.has.errors = false;
+              isThisElementValid.has.warnings = false;
+              isThisElementValid.has.message = '';
+              errorObj = {};
+              warnObj = {};
+              
+              if (!isThisElementValid.has.errors && elementItem.rules[innerCnt].name === 'required' && elementItem.rules[innerCnt].type === 'error'){
+                errorObj = (localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] ));
               }
+              if (!isThisElementValid.has.warnings && elementItem.rules[innerCnt].name === 'required' && elementItem.rules[innerCnt].type === 'warning'){
+                warnObj = (localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] ));
+              }
+              if (!isThisElementValid.has.errors && elementItem.rules[innerCnt].name === 'pattern' && elementItem.rules[innerCnt].type === 'error'){
+                errorObj = (localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] ));
+              }
+              if (!isThisElementValid.has.warnings && elementItem.rules[innerCnt].name === 'pattern' && elementItem.rules[innerCnt].type === 'warning'){
+                warnObj = (localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] ));
+              }
+              
+              isThisElementValid.has.errors = typeof errorObj.errors !== 'undefined' ? true : false;
+              isThisElementValid.has.warnings = typeof warnObj.warnings !== 'undefined' ? true : false;
+              isThisElementValid.has.message = typeof errorObj.message !== 'undefined' ? errorObj.message : warnObj.message;
+              
+              tempObj2.elementObj = elementItem.elementObj;
+              tempObj2.isThisElementValid = isThisElementValid;
             }
-            // if (sanitator.settings.preparedInvalidElements.indexOf([elementObj, isThisElementValid]) === -1){
             
-            if (sanitator.settings.preparedInvalidElements[elementItem.elementName] === 'undefined'){
-              sanitator.settings.preparedInvalidElements[elementItem.elementName] = {};
+            if (localSettings.preparedInvalidElements.length > 0){
+              if (localSettings.preparedInvalidElements.indexOf(tempObj2) === -1){
+                localSettings.preparedInvalidElements.push(tempObj2);
+              } else {
+                isItemPresent = localSettings.preparedInvalidElements.indexOf(tempObj2);
+                localSettings.preparedInvalidElements[isItemPresent].isThisElementValid = tempObj2.isThisElementValid;
+              }
+            } else {
+              localSettings.preparedInvalidElements.push(tempObj2);
             }
-            sanitator.settings.preparedInvalidElements[elementItem.elementName] = [elementObj, isThisElementValid];
+            
+            return false;
           }
         });
-        localSettings.showErrors();
       },
       checkFor: {
         required: function (elementObj, rulesObj){
@@ -263,19 +297,11 @@
             if (sanatioClickedValue(elementObj.element) === 0 || sanatioClickedValue(elementObj.element).length === 0){
               return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
             } else {
-              return {
-                errors: false,
-                warnings: false,
-                message: ''
-              };
+              return { errors: false, warnings: false, message: '' };
             }
           } else {
             if (sanatioTrimmedValue(elementObj.element.val()).length > 0){
-              return {
-                errors: false,
-                warnings: false,
-                message: ''
-              };
+              return { errors: false, warnings: false, message: '' };
             } else {
               return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
             }
@@ -284,8 +310,8 @@
       },
       showErrors: function (){
         // console.log('sanatioArray', this.preparedInvalidElements);
-        for (cnt in this.preparedInvalidElements){
-          console.log('cnt', cnt, this.preparedInvalidElements[cnt]);
+        for (innerCnt in this.preparedInvalidElements){
+          console.log('innerCnt', innerCnt, this.preparedInvalidElements[innerCnt].elementObj.element, this.preparedInvalidElements[innerCnt].isThisElementValid.has);
         }
       }
   	},
@@ -366,18 +392,10 @@
           if (this.settings.submitted.indexOf(this.settings.rulesConfig[cnt].elementObj) === -1 ){
             this.settings.submitted.push(this.settings.rulesConfig[cnt].elementObj);
           }
-          if (this.settings.rulesConfig[cnt].elementObj.shouldApplyRequired){
-            
-            for (innerCnt in this.settings.rulesConfig[cnt].rules){
-              
-            }
-            
-            isThisFormElementValid.has = this.settings.checkFor.required(this.settings.rulesConfig[cnt].elementObj, this.settings.rulesConfig[cnt].rules);
-            if (this.settings.preparedInvalidElements[this.settings.rulesConfig[cnt].elementName] === 'undefined') {
-              this.settings.preparedInvalidElements[this.settings.rulesConfig[cnt].elementName] = {};
-            }
-            this.settings.preparedInvalidElements[this.settings.rulesConfig[cnt].elementName] = [this.settings.rulesConfig[cnt].elementObj, isThisFormElementValid];
-          }
+        }
+
+        for (cnt in this.settings.submitted){
+          this.settings.doSanitation(this, this.settings.submitted[cnt]);
         }
         this.settings.showErrors();
         /* preparedElements = this.settings.preparedElements;
