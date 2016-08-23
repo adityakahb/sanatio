@@ -35,7 +35,8 @@
   var excludedKeys = [16, 17, 18, 20, 35, 36, 37, 38, 39, 40, 45, 144, 225],
     emailRegex = new RegExp('^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'),
     urlRegex = new RegExp( '^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})).?)(?::\d{2,5})?(?:[/?#]\S*)?$','i'),
-    digitsRegex = new RegExp('^(?:-?\d+|-?\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$');
+    digitsRegex = new RegExp('^(?:-?\d+|-?\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$'),
+    creditcardRegex = new RegExp('^(?:(4[0-9]{12}(?:[0-9]{3})?)|(5[1-5][0-9]{14})|(6(?:011|5[0-9]{2})[0-9]{12})|(3[47][0-9]{13})|(3(?:0[0-5]|[68][0-9])[0-9]{11})|((?:2131|1800|35[0-9]{3})[0-9]{11}))$');
     
   var formEventCallMethod,
     localValidator,
@@ -58,8 +59,8 @@
     thisElement,
     tempObj,
     tempObj2,
-    errorObj,
-    warnObj,
+    tempErrorObj,
+    tempWarnObj,
     isItemPresent;
   
   var cnt,
@@ -76,6 +77,25 @@
   var preparedElements,
     checkedElements;
   
+  var luhnLen,
+    luhnBit,
+    luhnSum;
+    
+  var sanatioLuhnCheck = (function (arr) {
+    return function (ccNum) {
+      luhnLen = ccNum.length;
+      luhnBit = 1;
+      luhnSum = 0;
+
+      while (luhnLen) {
+        luhnVal = parseInt( ccNum.charAt(--luhnLen), 10 );
+        luhnSum += (luhnBit ^= 1) ? arr[luhnVal] : luhnVal;
+      }
+
+      return luhnSum && luhnSum % 10 === 0;
+    };
+  }([0, 2, 4, 6, 8, 1, 3, 5, 7, 9]));
+    
   var sanatioTrimmedValue = function (value) {
      return typeof value === 'string' ? value.replace( /^\s+|\s+$/g, '' ) : value;
   };
@@ -214,7 +234,18 @@
       preparedInvalidElements: [],
       submitted: [],
       messages: {
-        
+        'required': 'This is required default',
+        'pattern': 'Required pattern not followed default',
+        'email': 'This is not a valid email default',
+        'digits': 'Only digits are allowed default',
+        'url': 'This is not a valid url default',
+        'minlength': '',
+        'maxlength': '',
+        'luhn': '',
+        'creditcard': '',
+        'date': '',
+        'shouldBeSameAs': '',
+        'capslock': 'Please check the capslock'
       },
       events: {
     		focusin: function (sanitator, elementObj, event) {
@@ -258,27 +289,27 @@
               isThisElementValid.errors = false;
               isThisElementValid.warnings = false;
               isThisElementValid.message = '';
-              errorObj = {};
-              warnObj = {};
+              tempErrorObj = false;
+              tempWarnObj = false;
               isItemPresent = false;
               
               for (rootCnt in defaultApplicableRules){
                 if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === defaultApplicableRules[rootCnt] && elementItem.rules[innerCnt].type === 'error'){
-                  errorObj = localSettings.checkFor[defaultApplicableRules[rootCnt]]( elementObj, elementItem.rules[innerCnt] );
-                  isThisElementValid.errors = typeof errorObj.errors !== 'undefined' && errorObj.errors === true ? true : false;
+                  tempErrorObj = localSettings.checkFor[defaultApplicableRules[rootCnt]]( elementObj, elementItem.rules[innerCnt] );
+                  isThisElementValid.errors = typeof tempErrorObj !== 'undefined' ? tempErrorObj : false;
                 }
                 if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === defaultApplicableRules[rootCnt] && elementItem.rules[innerCnt].type === 'warning'){
-                  warnObj = localSettings.checkFor[defaultApplicableRules[rootCnt]]( elementObj, elementItem.rules[innerCnt] );
-                  isThisElementValid.warnings = typeof warnObj.warnings !== 'undefined' && warnObj.warnings === true ? true : false;
+                  tempWarnObj = localSettings.checkFor[defaultApplicableRules[rootCnt]]( elementObj, elementItem.rules[innerCnt] );
+                  isThisElementValid.warnings = typeof tempWarnObj !== 'undefined' ? tempWarnObj : false;
                 }
               }
               
-              isThisElementValid.message = typeof errorObj.message !== 'undefined' ? errorObj.message : warnObj.message;
+              isThisElementValid.message = elementItem.rules[innerCnt].message;
               
               tempObj2.elementObj = elementItem.elementObj;
               tempObj2.isThisElementValid.push(isThisElementValid);
             }
-
+            
             if (localSettings.preparedInvalidElements.length > 0){
               
               for (innerCnt in localSettings.preparedInvalidElements){
@@ -306,15 +337,15 @@
         required: function (elementObj, rulesObj){
           if (elementObj.isClickable){
             if (sanatioClickedValue(elementObj.element) === 0 || sanatioClickedValue(elementObj.element).length === 0){
-              return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
+              return true;
             } else {
-              return { errors: false, warnings: false, message: '' };
+              return false;
             }
           } else {
             if (sanatioTrimmedValue(elementObj.element.val()).length > 0){
-              return { errors: false, warnings: false, message: '' };
+              return false;
             } else {
-              return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
+              return true;
             }
           }
         },
@@ -324,12 +355,13 @@
             patternRegex = new RegExp( rulesObj.value );
 
             if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
-              return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
+              return true;
             } else {
-              return { errors: false, warnings: false, message: '' };
+              return false;
             }
+            
           } else {
-            return { errors: false, warnings: false, message: '' };
+            return false;
           }
         },
         email: function (elementObj, rulesObj){
@@ -338,12 +370,13 @@
             patternRegex = emailRegex;
 
             if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
-              return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
+              return true;
             } else {
-              return { errors: false, warnings: false, message: '' };
+              return false;
             }
+            
           } else {
-            return { errors: false, warnings: false, message: '' };
+            return false;
           }
         },
         url: function (elementObj, rulesObj){
@@ -352,12 +385,13 @@
             patternRegex = urlRegex;
 
             if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
-              return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
+              return true;
             } else {
-              return { errors: false, warnings: false, message: '' };
+              return false;
             }
+            
           } else {
-            return { errors: false, warnings: false, message: '' };
+            return false;
           }
         },
         digits: function (elementObj, rulesObj){
@@ -366,22 +400,19 @@
             patternRegex = digitsRegex;
 
             if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
-              return rulesObj.type === 'error' ? { errors: true, warnings: false, message: rulesObj.message } : { errors: false, warnings: true, message: rulesObj.message };
+              return true;
             } else {
-              return { errors: false, warnings: false, message: '' };
+              return false;
             }
+            
           } else {
-            return { errors: false, warnings: false, message: '' };
+            return false;
           }
         }
       },
       showSanatioErrors: function (){
         for (outerCnt in this.preparedInvalidElements){
-          for (innerCnt in this.preparedInvalidElements[outerCnt]){
-            for (rootCnt in this.preparedInvalidElements[outerCnt].isThisElementValid){
-              console.log('messages', this.preparedInvalidElements[outerCnt].isThisElementValid[rootCnt].message);
-            }
-          }
+          console.log(this.preparedInvalidElements[outerCnt]);
         }
       }
   	},
@@ -417,14 +448,19 @@
               tempObj.shouldApplyRequired = false;
             }
             
-            /* if (formSettings.rulesConfig[cnt].rules[outerCnt].name === 'minlength'){
-              tempObj.applyMinlength = true;
+          }
+          
+          for (outerCnt in formSettings.rulesConfig[cnt].rules){
+            
+            if (formSettings.rulesConfig[cnt].rules[outerCnt].name === 'creditcard'){
+              tempObj.shouldApplyCreditcard = true;
               break;
             } else {
-              tempObj.applyMinlength = false;
-            } */
+              tempObj.shouldApplyCreditcard = false;
+            }
             
           }
+          
           this.settings.rulesConfig[cnt].elementObj = tempObj;
           this.settings.preparedElements.push(tempObj);
         }
@@ -464,14 +500,7 @@
           this.settings.doSanitation(this, this.settings.submitted[cnt]);
         }
         this.settings.showSanatioErrors();
-        
-        /* preparedElements = this.settings.preparedElements;
-        for (cnt in preparedElements){
-          if (preparedElements[cnt].shouldApplyRequired){
-            this.settings.checkFor.required(preparedElements[cnt]);
-          }
-        }*/
-        
+  
         return {
             hasErrors: false,
             hasWarnings: false
