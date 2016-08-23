@@ -244,44 +244,53 @@
         $.each(localSettings.rulesConfig, function(index, elementItem){
           if (elementItem.elementObj === elementObj){
             tempObj2 = {};
-            isItemPresent = 0;
-            console.log('elementItem.rules', elementItem.rules);
+            tempObj2.isThisElementValid = [];
+            
             for (innerCnt in elementItem.rules){
               isThisElementValid = {};
-              isThisElementValid.has = {};
-              isThisElementValid.has.errors = false;
-              isThisElementValid.has.warnings = false;
-              isThisElementValid.has.message = '';
+              isThisElementValid.errors = false;
+              isThisElementValid.warnings = false;
+              isThisElementValid.message = '';
               errorObj = {};
               warnObj = {};
+              isItemPresent = false;
               
-              if (!isThisElementValid.has.errors && elementItem.rules[innerCnt].name === 'required' && elementItem.rules[innerCnt].type === 'error'){
+              if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === 'required' && elementItem.rules[innerCnt].type === 'error'){
                 errorObj = (localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] ));
               }
-              if (!isThisElementValid.has.warnings && elementItem.rules[innerCnt].name === 'required' && elementItem.rules[innerCnt].type === 'warning'){
+              if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === 'required' && elementItem.rules[innerCnt].type === 'warning'){
                 warnObj = (localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] ));
               }
-              if (!isThisElementValid.has.errors && elementItem.rules[innerCnt].name === 'pattern' && elementItem.rules[innerCnt].type === 'error'){
+              if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === 'pattern' && elementItem.rules[innerCnt].type === 'error'){
                 errorObj = (localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] ));
               }
-              if (!isThisElementValid.has.warnings && elementItem.rules[innerCnt].name === 'pattern' && elementItem.rules[innerCnt].type === 'warning'){
+              if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === 'pattern' && elementItem.rules[innerCnt].type === 'warning'){
                 warnObj = (localSettings.checkFor.required( elementObj, elementItem.rules[innerCnt] ));
               }
               
-              isThisElementValid.has.errors = typeof errorObj.errors !== 'undefined' ? true : false;
-              isThisElementValid.has.warnings = typeof warnObj.warnings !== 'undefined' ? true : false;
-              isThisElementValid.has.message = typeof errorObj.message !== 'undefined' ? errorObj.message : warnObj.message;
+              isThisElementValid.errors = typeof errorObj.errors !== 'undefined' && errorObj.errors === true ? true : false;
+              isThisElementValid.warnings = typeof warnObj.warnings !== 'undefined' && warnObj.warnings === true ? true : false;
+              
+              isThisElementValid.message = typeof errorObj.message !== 'undefined' ? errorObj.message : warnObj.message;
               
               tempObj2.elementObj = elementItem.elementObj;
-              tempObj2.isThisElementValid = isThisElementValid;
+              tempObj2.isThisElementValid.push(isThisElementValid);
             }
-            
+
             if (localSettings.preparedInvalidElements.length > 0){
-              if (localSettings.preparedInvalidElements.indexOf(tempObj2) === -1){
+              
+              for (innerCnt in localSettings.preparedInvalidElements){
+                if (localSettings.preparedInvalidElements[innerCnt].elementObj.element === tempObj2.elementObj.element){
+                  localSettings.preparedInvalidElements[innerCnt] = tempObj2;
+                  isItemPresent = true;
+                  break;
+                } else {
+                  isItemPresent = false;
+                }
+              }
+
+              if (!isItemPresent){
                 localSettings.preparedInvalidElements.push(tempObj2);
-              } else {
-                isItemPresent = localSettings.preparedInvalidElements.indexOf(tempObj2);
-                localSettings.preparedInvalidElements[isItemPresent].isThisElementValid = tempObj2.isThisElementValid;
               }
             } else {
               localSettings.preparedInvalidElements.push(tempObj2);
@@ -309,9 +318,9 @@
         }
       },
       showErrors: function (){
-        // console.log('sanatioArray', this.preparedInvalidElements);
+        console.log('sanatioArray', this.preparedInvalidElements.length);
         for (innerCnt in this.preparedInvalidElements){
-          console.log('innerCnt', innerCnt, this.preparedInvalidElements[innerCnt].elementObj.element, this.preparedInvalidElements[innerCnt].isThisElementValid.has);
+          console.log(this.preparedInvalidElements[innerCnt]);
         }
       }
   	},
@@ -383,17 +392,13 @@
         $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'click.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
       },
       checkForSubmittedElements: function (){
-        isThisFormElementValid.has = {};
-        isThisFormElementValid.has.errors = false;
-        isThisFormElementValid.has.warnings = false;
-        isThisFormElementValid.has.message = '';
         
         for (cnt in this.settings.rulesConfig){
           if (this.settings.submitted.indexOf(this.settings.rulesConfig[cnt].elementObj) === -1 ){
             this.settings.submitted.push(this.settings.rulesConfig[cnt].elementObj);
           }
         }
-
+        
         for (cnt in this.settings.submitted){
           this.settings.doSanitation(this, this.settings.submitted[cnt]);
         }
