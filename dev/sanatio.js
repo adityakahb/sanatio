@@ -20,6 +20,7 @@
     defaultRulesCount;
   
     // Avoid revalidate the field when pressing one of the following keys
+    // Enter       => 13
     // Shift       => 16
     // Ctrl        => 17
     // Alt         => 18
@@ -33,7 +34,7 @@
     // Insert      => 45
     // Num lock    => 144
     // AltGr key   => 225
-  var excludedKeys = [16, 17, 18, 20, 35, 36, 37, 38, 39, 40, 45, 144, 225],
+  var excludedKeys = [13, 16, 17, 18, 20, 35, 36, 37, 38, 39, 40, 45, 144, 225],
     emailRegex = new RegExp('^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'),
     urlRegex = new RegExp( '^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})).?)(?::\d{2,5})?(?:[/?#]\S*)?$','i'),
     digitsRegex = new RegExp('^(?:-?\d+|-?\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$'),
@@ -86,7 +87,13 @@
   var elementsLength = 0,
     errorElement,
     errorElementProps,
-    jsonedValue;
+    jsonedValue,
+    localError,
+    localWarning,
+    localErrorType,
+    localWarningType,
+    insertedErrorElement,
+    insertedWarningElement;
     
   var sanatioLuhnCheck = (function (arr) {
     return function (ccNum) {
@@ -377,142 +384,154 @@
           if (elementObj.isClickable){
             if (sanatioClickedValue(elementObj.element) === 0 || sanatioClickedValue(elementObj.element).length === 0){
               return true;
-            } else {
-              return false;
             }
           } else {
-            if (sanatioTrimmedValue(elementObj.element.val()).length > 0){
-              return false;
-            } else {
+            if (sanatioTrimmedValue(elementObj.element.val()).length === 0){
               return true;
             }
           }
+          
+          return false;
         },
         pattern: function (elementObj, rulesObj){
           if (elementObj.isEditable){
-            
             patternRegex = new RegExp( rulesObj.value );
-
             if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
               return true;
-            } else {
-              return false;
             }
-            
-          } else {
-            return false;
           }
+          
+          return false;
         },
         email: function (elementObj, rulesObj){
           if (elementObj.isEditable){
-            
             patternRegex = emailRegex;
-
             if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
               return true;
-            } else {
-              return false;
             }
-            
-          } else {
-            return false;
           }
+          
+          return false;
         },
         url: function (elementObj, rulesObj){
           if (elementObj.isEditable){
-            
             patternRegex = urlRegex;
-
             if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
               return true;
-            } else {
-              return false;
             }
-            
-          } else {
-            return false;
           }
+          
+          return false;
         },
         digits: function (elementObj, rulesObj){
           if (elementObj.isEditable){
-            
             patternRegex = digitsRegex;
-
             if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
               return true;
-            } else {
-              return false;
-            }
-            
-          } else {
-            return false;
+            }  
           }
+          
+          return false;
         },
         minlength: function (elementObj, rulesObj){
           jsonedValue = JSON.parse( rulesObj.value );
           if (elementObj.isClickable){
             if (sanatioClickedValue(elementObj.element) > jsonedValue || sanatioClickedValue(elementObj.element).length > jsonedValue){
               return true;
-            } else {
-              return false;
             }
           } else {
             if (sanatioTrimmedValue(elementObj.element.val()).length > jsonedValue){
               return false;
-            } else {
-              return true;
             }
           }
+          
+          return false;
         },
         maxlength: function (elementObj, rulesObj){
           jsonedValue = JSON.parse( rulesObj.value );
           if (elementObj.isClickable){
             if (sanatioClickedValue(elementObj.element) < jsonedValue || sanatioClickedValue(elementObj.element).length < jsonedValue){
               return true;
-            } else {
-              return false;
             }
           } else {
             if (sanatioTrimmedValue(elementObj.element.val()).length < jsonedValue){
               return false;
-            } else {
-              return true;
             }
           }
+          
+          return false;
         },
         rangeminmax: function (elementObj, rulesObj){
           jsonedValue = JSON.parse( rulesObj.value );
           if (elementObj.isClickable){
             if ((sanatioClickedValue(elementObj.element) > jsonedValue[0] && sanatioClickedValue(elementObj.element).length < jsonedValue[1]) || (sanatioClickedValue(elementObj.element) > jsonedValue[0] && sanatioClickedValue(elementObj.element).length < jsonedValue[1])){
               return true;
-            } else {
-              return false;
             }
           } else {
             if (sanatioTrimmedValue(elementObj.element.val()).length > jsonedValue[0] && sanatioTrimmedValue(elementObj.element.val()).length < jsonedValue[1]){
               return false;
-            } else {
-              return true;
             }
           }
+          
+          return false;
         }
       },
       showSanatioErrors: function (){
         for (outerCnt in this.preparedInvalidElements){
           elementsLength = this.preparedInvalidElements[outerCnt].elementObj.element.length;
           errorElementProps = this.preparedInvalidElements[outerCnt].isThisElementValid;
+          localError = '';
+          localWarning = '';
+          localErrorType = '';
+          localWarningType = '';
+          insertedWarningElement = null;
+          insertedErrorElement = null;
           if (elementsLength === 1){
             errorElement = this.preparedInvalidElements[outerCnt].elementObj.element;
+            
             for (innerCnt in errorElementProps){
               if (errorElementProps[innerCnt].errors){
-                // errorElement.after('<div class="error-' + errorElementProps[innerCnt].errorType + '">' + errorElementProps[innerCnt].message + '</div>');
-              } else if (errorElementProps[innerCnt].warnings){
-                // errorElement.after('<div class="warning-' + errorElementProps[innerCnt].warningType + '">' + errorElementProps[innerCnt].message + '</div>');
+                localError = errorElementProps[innerCnt].message;
+                localErrorType = errorElementProps[innerCnt].errorType;
+              }
+              if (localError.length > 0){
+                errorElement.addClass('has-sanatio-error');
+                break;
               } else {
-                
+                errorElement.removeClass('has-sanatio-error');
               }
             }
-            console.log(errorElementProps);
+            for (innerCnt in errorElementProps){
+              if (errorElementProps[innerCnt].warnings){
+                localWarning = errorElementProps[innerCnt].message;
+                localWarningType = errorElementProps[innerCnt].warningType;
+              }
+              if (localWarning.length > 0){
+                errorElement.addClass('has-sanatio-warning');
+                break;
+              } else {
+                errorElement.removeClass('has-sanatio-warning');
+              }
+            }
+            
+            insertedWarningElement = errorElement.nextAll('.warning-' + localWarningType).eq(0);
+            insertedErrorElement = errorElement.nextAll('.error-' + localErrorType).eq(0);
+            
+            if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
+              insertedWarningElement.remove();
+            }
+            if (typeof insertedErrorElement !== 'undefined' && insertedErrorElement !== null){
+              insertedErrorElement.remove();
+            }
+            
+            if (errorElement.hasClass('has-sanatio-warning') && localWarningType.length > 0 && errorElement.nextAll('.warning-' + localWarningType).eq(0).length === 0){
+              errorElement.after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
+            }
+            
+            if (errorElement.hasClass('has-sanatio-error') && localErrorType.length > 0 && errorElement.nextAll('.error-' + localErrorType).eq(0).length === 0){
+              errorElement.after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
+            }
+            
           } else {
             
           }
