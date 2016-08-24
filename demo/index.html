@@ -39,8 +39,11 @@
       <div class="form-group">
         <label for="email1_form1">Form 1 email 1</label>
         <input type="email" name="email1_form1" id="email1_form1" placeholder="email1_form1"
+          data-sanatio-required="true"
+          data-sanatio-required-type="error"
+          data-sanatio-required-message="This is required"
           data-sanatio-email="true"
-          data-sanatio-email-type="warning"
+          data-sanatio-email-type="error"
           data-sanatio-email-message="Invalid Email"
         >
       </div>
@@ -121,15 +124,15 @@
       <input type="text" name="text1_form2" id="text1_form2" placeholder="text1_form2"
         data-sanatio-required="true"
         data-sanatio-required-type="error"
-        data-sanatio-required-message="This is required"
         data-sanatio-pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
         data-sanatio-pattern-type="warning"
         data-sanatio-pattern-message="This is pattern not followed"
       >
       <input type="text" name="text2_form2" id="text2_form2" placeholder="text2_form2"
-        data-sanatio-required="true"
-        data-sanatio-required-type="error"
-        data-sanatio-required-message="This is required two"
+        data-sanatio-rangeminmax="[6, 10]"
+        data-sanatio-rangeminmax-type="error"
+        data-sanatio-minlength="6"
+        data-sanatio-minlength-type="error"
       >
       <input type="text" name="text3_form2" id="text3_form2" placeholder="text3_form2"
         data-sanatio-required="true"

@@ -13,7 +13,8 @@
     'luhn',
     'creditcard',
     'date',
-    'shouldBeSameAs',
+    'equalthisto',
+    'rangeminmax',
     'capslock'
   ],
     defaultRulesCount;
@@ -66,7 +67,8 @@
   var cnt,
     outerCnt,
     innerCnt,
-    rootCnt;
+    rootCnt,
+    msgCnt;
   
   var patternRegex;
   
@@ -80,6 +82,11 @@
   var luhnLen,
     luhnBit,
     luhnSum;
+  
+  var elementsLength = 0,
+    errorElement,
+    errorElementProps,
+    jsonedValue;
     
   var sanatioLuhnCheck = (function (arr) {
     return function (ccNum) {
@@ -112,6 +119,20 @@
       return element.val();
     }
   };
+  var sanatioFormattedMessage = function(message, value){
+    value = JSON.parse(value);
+    
+    if ($.type(value) === 'number'){
+      message = message.replace('{{0}}', value);
+    } else if ($.type(value) === 'array'){
+      for (msgCnt in value){
+        message = message.replace('{{' + msgCnt + '}}', value[msgCnt]);
+      }
+    }
+    
+    return message;
+  };
+  
   /**
   * Takes out the elements which have data-sanatio-* rules on them
   * when a form is initiated using data-sanatio
@@ -239,13 +260,14 @@
         'email': 'This is not a valid email default',
         'digits': 'Only digits are allowed default',
         'url': 'This is not a valid url default',
-        'minlength': '',
-        'maxlength': '',
-        'luhn': '',
-        'creditcard': '',
-        'date': '',
-        'shouldBeSameAs': '',
-        'capslock': 'Please check the capslock'
+        'minlength': 'Minimum {{0}} length is required default',
+        'maxlength': 'Maximum {{0}} length is required default',
+        'luhn': 'Luhn Check not valid default',
+        'creditcard': 'Invalid Credit Card observed default',
+        'date': 'Invalid date default',
+        'equalthisto': 'Values of {{0}} and {{1}} not same default',
+        'rangeminmax': 'Minimum {{0}} and Maximum {{1}} default',
+        'capslock': 'Please check the capslock default'
       },
       events: {
     		focusin: function (sanitator, elementObj, event) {
@@ -288,30 +310,47 @@
               isThisElementValid = {};
               isThisElementValid.errors = false;
               isThisElementValid.warnings = false;
+              isThisElementValid.errorType = '';
+              isThisElementValid.warningType = '';
               isThisElementValid.message = '';
               tempErrorObj = false;
               tempWarnObj = false;
               isItemPresent = false;
-              
+
               for (rootCnt in defaultApplicableRules){
                 if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === defaultApplicableRules[rootCnt] && elementItem.rules[innerCnt].type === 'error'){
                   tempErrorObj = localSettings.checkFor[defaultApplicableRules[rootCnt]]( elementObj, elementItem.rules[innerCnt] );
                   isThisElementValid.errors = typeof tempErrorObj !== 'undefined' ? tempErrorObj : false;
+                  isThisElementValid.errorType = defaultApplicableRules[rootCnt];
+                  
+                  if (typeof elementItem.rules[innerCnt].message === 'undefined'){
+                    if ($.inArray( defaultApplicableRules[rootCnt], ['minlength', 'maxlength', 'rangeminmax'] ) !== -1){
+                      isThisElementValid.message = sanatioFormattedMessage(localSettings.messages[defaultApplicableRules[rootCnt]], elementItem.rules[innerCnt].value);
+                    } else {
+                      isThisElementValid.message = localSettings.messages[defaultApplicableRules[rootCnt]];
+                    }
+                  } else {
+                    isThisElementValid.message = elementItem.rules[innerCnt].message;
+                  }
                 }
                 if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === defaultApplicableRules[rootCnt] && elementItem.rules[innerCnt].type === 'warning'){
                   tempWarnObj = localSettings.checkFor[defaultApplicableRules[rootCnt]]( elementObj, elementItem.rules[innerCnt] );
                   isThisElementValid.warnings = typeof tempWarnObj !== 'undefined' ? tempWarnObj : false;
+                  isThisElementValid.warningType = defaultApplicableRules[rootCnt];
+                  
+                  if (typeof elementItem.rules[innerCnt].message === 'undefined'){
+                    isThisElementValid.message = 'undefined';
+                  } else {
+                    isThisElementValid.message = elementItem.rules[innerCnt].message;
+                  }
                 }
               }
-              
-              isThisElementValid.message = elementItem.rules[innerCnt].message;
-              
               tempObj2.elementObj = elementItem.elementObj;
               tempObj2.isThisElementValid.push(isThisElementValid);
             }
             
             if (localSettings.preparedInvalidElements.length > 0){
-              
+
               for (innerCnt in localSettings.preparedInvalidElements){
                 if (localSettings.preparedInvalidElements[innerCnt].elementObj.element === tempObj2.elementObj.element){
                   localSettings.preparedInvalidElements[innerCnt] = tempObj2;
@@ -408,11 +447,75 @@
           } else {
             return false;
           }
+        },
+        minlength: function (elementObj, rulesObj){
+          jsonedValue = JSON.parse( rulesObj.value );
+          if (elementObj.isClickable){
+            if (sanatioClickedValue(elementObj.element) > jsonedValue || sanatioClickedValue(elementObj.element).length > jsonedValue){
+              return true;
+            } else {
+              return false;
+            }
+          } else {
+            if (sanatioTrimmedValue(elementObj.element.val()).length > jsonedValue){
+              return false;
+            } else {
+              return true;
+            }
+          }
+        },
+        maxlength: function (elementObj, rulesObj){
+          jsonedValue = JSON.parse( rulesObj.value );
+          if (elementObj.isClickable){
+            if (sanatioClickedValue(elementObj.element) < jsonedValue || sanatioClickedValue(elementObj.element).length < jsonedValue){
+              return true;
+            } else {
+              return false;
+            }
+          } else {
+            if (sanatioTrimmedValue(elementObj.element.val()).length < jsonedValue){
+              return false;
+            } else {
+              return true;
+            }
+          }
+        },
+        rangeminmax: function (elementObj, rulesObj){
+          jsonedValue = JSON.parse( rulesObj.value );
+          if (elementObj.isClickable){
+            if ((sanatioClickedValue(elementObj.element) > jsonedValue[0] && sanatioClickedValue(elementObj.element).length < jsonedValue[1]) || (sanatioClickedValue(elementObj.element) > jsonedValue[0] && sanatioClickedValue(elementObj.element).length < jsonedValue[1])){
+              return true;
+            } else {
+              return false;
+            }
+          } else {
+            if (sanatioTrimmedValue(elementObj.element.val()).length > jsonedValue[0] && sanatioTrimmedValue(elementObj.element.val()).length < jsonedValue[1]){
+              return false;
+            } else {
+              return true;
+            }
+          }
         }
       },
       showSanatioErrors: function (){
         for (outerCnt in this.preparedInvalidElements){
-          console.log(this.preparedInvalidElements[outerCnt]);
+          elementsLength = this.preparedInvalidElements[outerCnt].elementObj.element.length;
+          errorElementProps = this.preparedInvalidElements[outerCnt].isThisElementValid;
+          if (elementsLength === 1){
+            errorElement = this.preparedInvalidElements[outerCnt].elementObj.element;
+            for (innerCnt in errorElementProps){
+              if (errorElementProps[innerCnt].errors){
+                // errorElement.after('<div class="error-' + errorElementProps[innerCnt].errorType + '">' + errorElementProps[innerCnt].message + '</div>');
+              } else if (errorElementProps[innerCnt].warnings){
+                // errorElement.after('<div class="warning-' + errorElementProps[innerCnt].warningType + '">' + errorElementProps[innerCnt].message + '</div>');
+              } else {
+                
+              }
+            }
+            console.log(errorElementProps);
+          } else {
+            
+          }
         }
       }
   	},
@@ -554,7 +657,7 @@
         defaultFormRulesObj.push(createSanatioRules(defaultElementObj));
       }
     }
-    // console.log(defaultFormRulesObj);
+    
     defaultSanatioValidate(defaultFormRulesObj);
   });
  
