@@ -386,7 +386,6 @@
                   } catch (e){
                     jsonedValue = elementItem.rules[innerCnt].value;
                   }
-                  
                   tempErrorObj = localSettings.checkFor[rootCnt]( elementObj.element, jsonedValue );
 
                   isThisElementValid.errors = typeof tempErrorObj !== 'undefined' ? tempErrorObj : false;
@@ -546,15 +545,28 @@
             
           }
         }
-      },
-      addMethod: function (){
+      }/*,
+      addMethod: function (fnName, fn){
+        console.log('fnName', fnName);
+        console.log('fn', fn);
         //TODO console.log('called addMethod');
       },
       destroy: function (){
         //TODO console.log('called destroy');
-      }
+      }*/
   	},
-    addSanatioMethod: function (){
+    addSanatioMethod: function (fnName, fn){
+      if (typeof this.defaults.messagesSetup[fnName] === 'undefined'){
+        this.defaults.messagesSetup[fnName] = {};
+      } else {
+        return;
+      }
+      if (typeof this.defaults.checkFor[fnName] === 'undefined'){
+        this.defaults.checkFor[fnName] = fn;
+      } else {
+        return;
+      }
+      
       //TODO console.log('addSanatioMethod called');
       // return thisSanatioObject.sanatio.settings.addMethod();
     },
