@@ -1,6 +1,22 @@
 (function( $ ) {
   
   'use strict';
+  var thisSanatioObject,
+    defaultApplicableRules = [
+      'required',
+      'pattern',
+      'email',
+      'digits',
+      'url',
+      'minlength',
+      'maxlength',
+      'luhn',
+      'creditcard',
+      'date',
+      'equalthisto',
+      'rangeminmax',
+      'capslock'
+    ];
     // Avoid revalidate the field when pressing one of the following keys
     // Enter       => 13 ==> Not used
     // Shift       => 16
@@ -134,9 +150,9 @@
     
     if (typeof receivedMessage === 'undefined'){
       if ($.inArray( receivedRule, ['minlength', 'maxlength', 'rangeminmax'] ) !== -1){
-        thisMessage = sanatioFormattedMessage(receivedSettings.messages[receivedRule], receivedValue);
+        thisMessage = sanatioFormattedMessage(receivedSettings.messagesSetup[receivedRule], receivedValue);
       } else {
-        thisMessage = receivedSettings.messages[receivedRule];
+        thisMessage = receivedSettings.messagesSetup[receivedRule];
       }
     } else {
       thisMessage = receivedMessage;
@@ -208,7 +224,6 @@
       
       for (defaultRulesCount = 0; defaultRulesCount < defaultApplicableRules.length; defaultRulesCount++){
         for (rulesAttributesCount = 0; rulesAttributesCount < thisRuleElement.attributes.length; rulesAttributesCount++){
-          
           ruleAttributeName = thisRuleElement.attributes[rulesAttributesCount];
           if (ruleAttributeName.name.indexOf( defaultApplicableRules[ defaultRulesCount ]) !== -1){
             tempRuleObj2 = {};
@@ -221,6 +236,9 @@
           }
         }
       }
+      
+      // console.log('tempRuleObj 2', tempRuleObj);
+      
       defaultSanatioRulesObj.rulesConfig.push(tempRuleObj);
     }
     
@@ -248,6 +266,7 @@
     this.settings = $.extend( true, {}, $.sanatio.defaults, options );
     this.currentForm = form;
     this.init();
+    
   };
   
   $.extend( $.sanatio, {
@@ -265,21 +284,21 @@
       preparedElements: [],
       preparedInvalidElements: [],
       submitted: [],
-      messagesSetup: [
-        {'key': 'required', 'value': 'This is required default'},
-        {'key': 'pattern', 'value': 'Required pattern not followed default'},
-        {'key': 'email', 'value': 'This is not a valid email default'},
-        {'key': 'digits', 'value': 'Only digits are allowed default'},
-        {'key': 'url', 'value': 'This is not a valid url default'},
-        {'key': 'minlength', 'value': 'Minimum {{0}} length is required default'},
-        {'key': 'maxlength', 'value': 'Maximum {{0}} length is allowed default'},
-        {'key': 'luhn', 'value': 'Luhn Check not valid default'},
-        {'key': 'creditcard', 'value': 'Invalid Credit Card observed default'},
-        {'key': 'date', 'value': 'Invalid date default'},
-        {'key': 'equalthisto', 'value': 'Values of {{0}} and {{1}} not same default'},
-        {'key': 'rangeminmax', 'value': 'Minimum {{0}} and Maximum {{1}} default'},
-        {'key': 'capslock', 'value': 'Please check the capslock default'}
-      ],
+      messagesSetup: {
+        'required': 'This is required default',
+        'pattern': 'Required pattern not followed default',
+        'email': 'This is not a valid email default',
+        'digits': 'Only digits are allowed default',
+        'url': 'This is not a valid url default',
+        'minlength': 'Minimum {{0}} length is required default',
+        'maxlength': 'Maximum {{0}} length is required default',
+        'luhn': 'Luhn Check not valid default',
+        'creditcard': 'Invalid Credit Card observed default',
+        'date': 'Invalid date default',
+        'equalthisto': 'Values of {{0}} and {{1}} not same default',
+        'rangeminmax': 'Minimum {{0}} and Maximum {{1}} default',
+        'capslock': 'Please check the capslock default'
+      },
       events: {
     		focusin: function (sanitator, elementObj, event) {
     			console.log('focusin');
@@ -339,20 +358,20 @@
               localErrorType = '';
 
               for (rootCnt in localSettings.messagesSetup){
-                if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === localSettings.messagesSetup[rootCnt].key && elementItem.rules[innerCnt].type === 'error'){
-                  tempErrorObj = localSettings.checkFor[defaultApplicableRules[rootCnt]]( elementObj, elementItem.rules[innerCnt] );
+                if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
+                  tempErrorObj = localSettings.checkFor[rootCnt]( elementObj, elementItem.rules[innerCnt] );
                   isThisElementValid.errors = typeof tempErrorObj !== 'undefined' ? tempErrorObj : false;
-                  isThisElementValid.errorType = localSettings.messagesSetup[rootCnt].key;
+                  isThisElementValid.errorType = rootCnt;
                   
-                  isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, localSettings.messagesSetup[rootCnt].key, elementItem.rules[innerCnt].value);
+                  isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, rootCnt, elementItem.rules[innerCnt].value);
                   
                 }
-                if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === localSettings.messagesSetup[rootCnt].key && elementItem.rules[innerCnt].type === 'warning'){
-                  tempWarnObj = localSettings.checkFor[localSettings.messagesSetup[rootCnt].key]( elementObj, elementItem.rules[innerCnt] );
+                if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
+                  tempWarnObj = localSettings.checkFor[rootCnt]( elementObj, elementItem.rules[innerCnt] );
                   isThisElementValid.warnings = typeof tempWarnObj !== 'undefined' ? tempWarnObj : false;
-                  isThisElementValid.warningType = localSettings.messagesSetup[rootCnt].key;
+                  isThisElementValid.warningType = rootCnt;
                   
-                  isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, localSettings.messagesSetup[rootCnt].key, elementItem.rules[innerCnt].value);
+                  isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, rootCnt, elementItem.rules[innerCnt].value);
                 }
               }
               tempObj2.elementObj = elementItem.elementObj;
@@ -560,12 +579,19 @@
             
           }
         }
+      },
+      addMethod: function (){
+        console.log('called addMethod');
+      },
+      destroy: function (){
+        console.log('called destroy');
       }
   	},
     prototype: {
       prepareFormElements: function (){
         formElement = $(this.currentForm);
         formSettings = this.settings;
+        
         for (cnt in formSettings.rulesConfig){
           thisElement = formSettings.getElement(formElement, formSettings.rulesConfig[cnt].elementName);
           
@@ -669,7 +695,7 @@
       
     sanatio = new $.sanatio( options, this[ 0 ] );
     $.data( this[ 0 ], 'sanatio', sanatio );
-    
+
     sanatio.prepareFormElements();
     
     this.on( "submit.sanatio", function( event ) {
@@ -681,7 +707,18 @@
       isThisFormValid = sanatio.checkForSubmittedElements();
       return false;
     });
-  
+    
+    thisSanatioObject = $.data(this[0]);
+    this.getSanatioObject = function (){
+      return thisSanatioObject.sanatio;
+    }
+    this.addSanatioMethod = function (){
+      return thisSanatioObject.sanatio.settings.addMethod();
+    };
+    this.destroySanatio = function (){
+      return thisSanatioObject.sanatio.settings.destroy();
+    };
+
     return this;
 
   };

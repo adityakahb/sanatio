@@ -130,7 +130,7 @@
       >-->
       <input type="text" name="text2_form2" id="text2_form2" placeholder="text2_form2"
         data-sanatio-rangeminmax="[6, 10]"
-        data-sanatio-rangeminmax-type="error"
+        data-sanatio-rangeminmax-type="warning"
         data-sanatio-minlength="6"
         data-sanatio-minlength-type="error"
       >
@@ -146,25 +146,36 @@
     <form data-sanatio id="form4" action="/">
     </form>
     <form id="form5" action="/">
+      <label>Tryout</label>
+      <input type="text" name="text2_form5" id="text2_form5" placeholder="text2_form5">
+      <button type="submit">submit form 2</button>
     </form>
     <script src="../bower_components/jquery/dist/jquery.js"></script>
     <script src="../dev/sanatio.js"></script>
     <script>
       var validatorObj = {
-        "rules": [
-          {
-            "elementName": [
-              {
-                "type": "error",
-                "name": "required",
-                "value": true,
-                "message": "This value is required."
-              }
-            ]
-          }
-        ]
+        'rulesConfig': [{
+          'elementName': 'text2_form5',
+          'rules': [
+            {
+              "type": "error",
+              "name": "required",
+              "value": true,
+              "message": "This value is required from jquery initiate."
+            }
+          ]
+        }]
       };
-      // var sanatio = $('#form5').sanatio(validatorObj);
+      var initSanatioForm5 = $('#form5').sanatio(validatorObj);
+      var sanatioObjectForm5 = initSanatioForm5.getSanatioObject();
+      console.log('initSanatioForm5', initSanatioForm5);
+      initSanatioForm5.addSanatioMethod();
+      initSanatioForm5.destroySanatio();
+      console.log('sanatioObjectForm5', sanatioObjectForm5);
+      // initSanatio.sanatio.addSanatioMethod();
+      
+      // var form1Sanatio = $('#form')
+      
     </script>
   </body>
 </html>
