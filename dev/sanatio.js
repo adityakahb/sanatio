@@ -1,24 +1,6 @@
 (function( $ ) {
   
   'use strict';
-  
-  var defaultApplicableRules = [
-    'required',
-    'pattern',
-    'email',
-    'digits',
-    'url',
-    'minlength',
-    'maxlength',
-    'luhn',
-    'creditcard',
-    'date',
-    'equalthisto',
-    'rangeminmax',
-    'capslock'
-  ],
-    defaultRulesCount;
-  
     // Avoid revalidate the field when pressing one of the following keys
     // Enter       => 13 ==> Not used
     // Shift       => 16
@@ -66,7 +48,8 @@
     tempWarnObj,
     isItemPresent;
   
-  var cnt,
+  var defaultRulesCount,
+    cnt,
     outerCnt,
     innerCnt,
     rootCnt,
@@ -282,21 +265,21 @@
       preparedElements: [],
       preparedInvalidElements: [],
       submitted: [],
-      messages: {
-        'required': 'This is required default',
-        'pattern': 'Required pattern not followed default',
-        'email': 'This is not a valid email default',
-        'digits': 'Only digits are allowed default',
-        'url': 'This is not a valid url default',
-        'minlength': 'Minimum {{0}} length is required default',
-        'maxlength': 'Maximum {{0}} length is required default',
-        'luhn': 'Luhn Check not valid default',
-        'creditcard': 'Invalid Credit Card observed default',
-        'date': 'Invalid date default',
-        'equalthisto': 'Values of {{0}} and {{1}} not same default',
-        'rangeminmax': 'Minimum {{0}} and Maximum {{1}} default',
-        'capslock': 'Please check the capslock default'
-      },
+      messagesSetup: [
+        {'key': 'required', 'value': 'This is required default'},
+        {'key': 'pattern', 'value': 'Required pattern not followed default'},
+        {'key': 'email', 'value': 'This is not a valid email default'},
+        {'key': 'digits', 'value': 'Only digits are allowed default'},
+        {'key': 'url', 'value': 'This is not a valid url default'},
+        {'key': 'minlength', 'value': 'Minimum {{0}} length is required default'},
+        {'key': 'maxlength', 'value': 'Maximum {{0}} length is allowed default'},
+        {'key': 'luhn', 'value': 'Luhn Check not valid default'},
+        {'key': 'creditcard', 'value': 'Invalid Credit Card observed default'},
+        {'key': 'date', 'value': 'Invalid date default'},
+        {'key': 'equalthisto', 'value': 'Values of {{0}} and {{1}} not same default'},
+        {'key': 'rangeminmax', 'value': 'Minimum {{0}} and Maximum {{1}} default'},
+        {'key': 'capslock', 'value': 'Please check the capslock default'}
+      ],
       events: {
     		focusin: function (sanitator, elementObj, event) {
     			console.log('focusin');
@@ -355,21 +338,21 @@
               localWarningType = '';
               localErrorType = '';
 
-              for (rootCnt in defaultApplicableRules){
-                if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === defaultApplicableRules[rootCnt] && elementItem.rules[innerCnt].type === 'error'){
+              for (rootCnt in localSettings.messagesSetup){
+                if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === localSettings.messagesSetup[rootCnt].key && elementItem.rules[innerCnt].type === 'error'){
                   tempErrorObj = localSettings.checkFor[defaultApplicableRules[rootCnt]]( elementObj, elementItem.rules[innerCnt] );
                   isThisElementValid.errors = typeof tempErrorObj !== 'undefined' ? tempErrorObj : false;
-                  isThisElementValid.errorType = defaultApplicableRules[rootCnt];
+                  isThisElementValid.errorType = localSettings.messagesSetup[rootCnt].key;
                   
-                  isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, defaultApplicableRules[rootCnt], elementItem.rules[innerCnt].value);
+                  isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, localSettings.messagesSetup[rootCnt].key, elementItem.rules[innerCnt].value);
                   
                 }
-                if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === defaultApplicableRules[rootCnt] && elementItem.rules[innerCnt].type === 'warning'){
-                  tempWarnObj = localSettings.checkFor[defaultApplicableRules[rootCnt]]( elementObj, elementItem.rules[innerCnt] );
+                if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === localSettings.messagesSetup[rootCnt].key && elementItem.rules[innerCnt].type === 'warning'){
+                  tempWarnObj = localSettings.checkFor[localSettings.messagesSetup[rootCnt].key]( elementObj, elementItem.rules[innerCnt] );
                   isThisElementValid.warnings = typeof tempWarnObj !== 'undefined' ? tempWarnObj : false;
-                  isThisElementValid.warningType = defaultApplicableRules[rootCnt];
+                  isThisElementValid.warningType = localSettings.messagesSetup[rootCnt].key;
                   
-                  isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, defaultApplicableRules[rootCnt], elementItem.rules[innerCnt].value);
+                  isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, localSettings.messagesSetup[rootCnt].key, elementItem.rules[innerCnt].value);
                 }
               }
               tempObj2.elementObj = elementItem.elementObj;
