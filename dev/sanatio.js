@@ -436,12 +436,12 @@
         minlength: function (elementObj, rulesObj){
           jsonedValue = JSON.parse( rulesObj.value );
           if (elementObj.isClickable){
-            if (sanatioClickedValue(elementObj.element) > jsonedValue || sanatioClickedValue(elementObj.element).length > jsonedValue){
+            if (sanatioClickedValue(elementObj.element) < jsonedValue || sanatioClickedValue(elementObj.element).length < jsonedValue){
               return true;
             }
           } else {
-            if (sanatioTrimmedValue(elementObj.element.val()).length > jsonedValue){
-              return false;
+            if (sanatioTrimmedValue(elementObj.element.val()).length < jsonedValue){
+              return true;
             }
           }
           
@@ -450,12 +450,12 @@
         maxlength: function (elementObj, rulesObj){
           jsonedValue = JSON.parse( rulesObj.value );
           if (elementObj.isClickable){
-            if (sanatioClickedValue(elementObj.element) < jsonedValue || sanatioClickedValue(elementObj.element).length < jsonedValue){
+            if (sanatioClickedValue(elementObj.element) > jsonedValue || sanatioClickedValue(elementObj.element).length > jsonedValue){
               return true;
             }
           } else {
-            if (sanatioTrimmedValue(elementObj.element.val()).length < jsonedValue){
-              return false;
+            if (sanatioTrimmedValue(elementObj.element.val()).length > jsonedValue){
+              return true;
             }
           }
           
@@ -469,7 +469,7 @@
             }
           } else {
             if (sanatioTrimmedValue(elementObj.element.val()).length > jsonedValue[0] && sanatioTrimmedValue(elementObj.element.val()).length < jsonedValue[1]){
-              return false;
+              return true;
             }
           }
           
@@ -477,6 +477,7 @@
         }
       },
       showSanatioErrors: function (){
+        console.log(this.preparedInvalidElements[0].isThisElementValid);
         for (outerCnt in this.preparedInvalidElements){
           elementsLength = this.preparedInvalidElements[outerCnt].elementObj.element.length;
           errorElementProps = this.preparedInvalidElements[outerCnt].isThisElementValid;
@@ -513,14 +514,18 @@
                 errorElement.removeClass('has-sanatio-warning');
               }
             }
+
+            insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
+            insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
             
-            insertedWarningElement = errorElement.nextAll('.warning-' + localWarningType).eq(0);
-            insertedErrorElement = errorElement.nextAll('.error-' + localErrorType).eq(0);
+            console.log('\n');
+            console.log('localWarningType', localWarningType, insertedWarningElement.attr('class'));
+            console.log('localErrorType', localErrorType, insertedErrorElement.attr('class'));
             
-            if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
+            if (localWarningType.length === 0 && typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
               insertedWarningElement.remove();
             }
-            if (typeof insertedErrorElement !== 'undefined' && insertedErrorElement !== null){
+            if (localErrorType.length === 0 && typeof insertedErrorElement !== 'undefined' && insertedErrorElement !== null){
               insertedErrorElement.remove();
             }
             
