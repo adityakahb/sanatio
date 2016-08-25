@@ -113,7 +113,7 @@
   var sanatioTrimmedValue = function (value) {
      return typeof value === 'string' ? value.replace( /^\s+|\s+$/g, '' ) : value;
   };
-  var sanatioClickedValue = function (element){
+  var sanatioReturnValue = function (element){
     if (element.attr('type') === 'checkbox' || element.attr('type') === 'radio'){
       checkedElements = 0;
       $.each(element, function (){
@@ -122,14 +122,36 @@
         }
       });
       return checkedElements;
-    } else {
+    } else if (element.attr('type') === 'select'){
       if ($.type(element.val()) === 'array'){
-        return element.val().join().replace(/,/g,'').length;
+        return sanatioTrimmedValue(element.val().join().replace(/,/g,'')).length;
       } else {
-        return element.val();
+        return sanatioTrimmedValue(element.val());
       }
-      return 0;
+    } else {
+      return sanatioTrimmedValue(element.val());
     }
+    return '';
+  };
+  var sanatioReturnLength = function (element){
+    if (element.attr('type') === 'checkbox' || element.attr('type') === 'radio'){
+      checkedElements = 0;
+      $.each(element, function (){
+        if ( $(this).is(':checked') ){
+          checkedElements++;
+        }
+      });
+      return checkedElements;
+    } else if (element.attr('type') === 'select'){
+      if ($.type(element.val()) === 'array'){
+        return sanatioTrimmedValue(element.val().join().replace(/,/g,'')).length;
+      } else {
+        return sanatioTrimmedValue(element.val()).length;
+      }
+    } else {
+      return sanatioTrimmedValue(element.val()).length;
+    }
+    return 0;
   };
   var sanatioFormattedMessage = function(message, value){
     value = JSON.parse(value);
@@ -266,7 +288,6 @@
     this.settings = $.extend( true, {}, $.sanatio.defaults, options );
     this.currentForm = form;
     this.init();
-    
   };
   
   $.extend( $.sanatio, {
@@ -359,7 +380,15 @@
 
               for (rootCnt in localSettings.messagesSetup){
                 if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
-                  tempErrorObj = localSettings.checkFor[rootCnt]( elementObj, elementItem.rules[innerCnt] );
+                  // console.log('elementItem.rules[innerCnt]', elementItem.rules[innerCnt]);
+                  try{
+                    jsonedValue = JSON.parse(elementItem.rules[innerCnt].value);
+                  } catch (e){
+                    jsonedValue = elementItem.rules[innerCnt].value;
+                  }
+                  
+                  tempErrorObj = localSettings.checkFor[rootCnt]( elementObj.element, jsonedValue );
+
                   isThisElementValid.errors = typeof tempErrorObj !== 'undefined' ? tempErrorObj : false;
                   isThisElementValid.errorType = rootCnt;
                   
@@ -367,7 +396,14 @@
                   
                 }
                 if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
-                  tempWarnObj = localSettings.checkFor[rootCnt]( elementObj, elementItem.rules[innerCnt] );
+                  try{
+                    jsonedValue = JSON.parse(elementItem.rules[innerCnt].value);
+                  } catch (e){
+                    jsonedValue = elementItem.rules[innerCnt].value;
+                  }
+
+                  tempWarnObj = localSettings.checkFor[rootCnt]( elementObj.element, jsonedValue );
+                  
                   isThisElementValid.warnings = typeof tempWarnObj !== 'undefined' ? tempWarnObj : false;
                   isThisElementValid.warningType = rootCnt;
                   
@@ -402,100 +438,31 @@
         });
       },
       checkFor: {
-        required: function (elementObj, rulesObj){
-          if (elementObj.isClickable){
-            if (sanatioClickedValue(elementObj.element) === 0 || sanatioClickedValue(elementObj.element).length === 0){
-              return true;
-            }
-          } else {
-            if (sanatioTrimmedValue(elementObj.element.val()).length === 0){
-              return true;
-            }
-          }
-          
-          return false;
+        required: function (element, mustBe){
+          return sanatioReturnLength(element) === 0 ? true : false;
         },
-        pattern: function (elementObj, rulesObj){
-          if (elementObj.isEditable){
-            patternRegex = new RegExp( rulesObj.value );
-            if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
-              return true;
-            }
-          }
-          
-          return false;
+        pattern: function (element, mustBe){
+          patternRegex = new RegExp(mustBe);
+
+          return !patternRegex.test(sanatioReturnValue(element));
         },
-        email: function (elementObj, rulesObj){
-          if (elementObj.isEditable){
-            patternRegex = emailRegex;
-            if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
-              return true;
-            }
-          }
-          
-          return false;
+        email: function (element, mustBe){
+          return !emailRegex.test(sanatioReturnValue(element));
         },
-        url: function (elementObj, rulesObj){
-          if (elementObj.isEditable){
-            patternRegex = urlRegex;
-            if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
-              return true;
-            }
-          }
-          
-          return false;
+        url: function (element, mustBe){
+          return !urlRegex.test(sanatioReturnValue(element));
         },
-        digits: function (elementObj, rulesObj){
-          if (elementObj.isEditable){
-            patternRegex = digitsRegex;
-            if (!patternRegex.test(sanatioTrimmedValue(elementObj.element.val()))){
-              return true;
-            }  
-          }
-          
-          return false;
+        digits: function (element, mustBe){
+          return !digitsRegex.test(sanatioReturnValue(element));
         },
-        minlength: function (elementObj, rulesObj){
-          jsonedValue = JSON.parse( rulesObj.value );
-          if (elementObj.isClickable){
-            if (sanatioClickedValue(elementObj.element) < jsonedValue || sanatioClickedValue(elementObj.element).length < jsonedValue){
-              return true;
-            }
-          } else {
-            if (sanatioTrimmedValue(elementObj.element.val()).length < jsonedValue){
-              return true;
-            }
-          }
-          
-          return false;
+        minlength: function (element, mustBe){
+          return sanatioReturnLength(element) < mustBe ? true : false;
         },
-        maxlength: function (elementObj, rulesObj){
-          jsonedValue = JSON.parse( rulesObj.value );
-          if (elementObj.isClickable){
-            if (sanatioClickedValue(elementObj.element) > jsonedValue || sanatioClickedValue(elementObj.element).length > jsonedValue){
-              return true;
-            }
-          } else {
-            if (sanatioTrimmedValue(elementObj.element.val()).length > jsonedValue){
-              return true;
-            }
-          }
-          
-          return false;
+        maxlength: function (element, mustBe){
+          return sanatioReturnLength(element) > mustBe ? true : false;
         },
-        rangeminmax: function (elementObj, rulesObj){
-          jsonedValue = JSON.parse( rulesObj.value );
-          if (elementObj.isClickable){
-            if ((sanatioClickedValue(elementObj.element) < jsonedValue[0] || sanatioClickedValue(elementObj.element).length > jsonedValue[1]) || (sanatioClickedValue(elementObj.element) < jsonedValue[0] || sanatioClickedValue(elementObj.element).length > jsonedValue[1])){
-              return true;
-            }
-          } else {
-            if (sanatioTrimmedValue(elementObj.element.val()).length < jsonedValue[0] || sanatioTrimmedValue(elementObj.element.val()).length > jsonedValue[1]){
-              return true;
-            }
-          }
-          
-          return false;
+        rangeminmax: function (element, mustBe){
+          return sanatioReturnLength(element) < mustBe[0] || sanatioReturnLength(element) > mustBe[1] ? true : false;
         }
       },
       showSanatioErrors: function (){
@@ -581,12 +548,16 @@
         }
       },
       addMethod: function (){
-        console.log('called addMethod');
+        //TODO console.log('called addMethod');
       },
       destroy: function (){
-        console.log('called destroy');
+        //TODO console.log('called destroy');
       }
   	},
+    addSanatioMethod: function (){
+      //TODO console.log('addSanatioMethod called');
+      // return thisSanatioObject.sanatio.settings.addMethod();
+    },
     prototype: {
       prepareFormElements: function (){
         formElement = $(this.currentForm);
@@ -709,16 +680,14 @@
     });
     
     thisSanatioObject = $.data(this[0]);
+    
     this.getSanatioObject = function (){
       return thisSanatioObject.sanatio;
     }
-    this.addSanatioMethod = function (){
-      return thisSanatioObject.sanatio.settings.addMethod();
-    };
     this.destroySanatio = function (){
       return thisSanatioObject.sanatio.settings.destroy();
     };
-
+    
     return this;
 
   };

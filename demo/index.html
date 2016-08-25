@@ -153,6 +153,16 @@
     <script src="../bower_components/jquery/dist/jquery.js"></script>
     <script src="../dev/sanatio.js"></script>
     <script>
+    console.log('$.sanatio', $.sanatio);
+    $.sanatio.addSanatioMethod({
+      'rule': 'sample',
+      'type': 'error',
+      'message': 'This is sample message verify',
+      'method': function (value){
+        return value === 'sample value'
+      }
+    });
+    
       var validatorObj = {
         'rulesConfig': [{
           'elementName': 'text2_form5',
@@ -166,12 +176,20 @@
           ]
         }]
       };
-      var initSanatioForm5 = $('#form5').sanatio(validatorObj);
-      var sanatioObjectForm5 = initSanatioForm5.getSanatioObject();
-      console.log('initSanatioForm5', initSanatioForm5);
-      initSanatioForm5.addSanatioMethod();
+      //var initSanatioForm5 = $('#form5').sanatio(validatorObj);
+      //var sanatioObjectForm5 = initSanatioForm5.getSanatioObject();
+      /*console.log('initSanatioForm5', initSanatioForm5);
+      initSanatioForm5.addSanatioMethod({
+        'elementName': 'text2_form5',
+        'rule': 'sample',
+        'type': 'error',
+        'message': 'This is sample message verify',
+        'method': function (value){
+          return value === 'sample value'
+        }
+      });
       initSanatioForm5.destroySanatio();
-      console.log('sanatioObjectForm5', sanatioObjectForm5);
+      console.log('sanatioObjectForm5', sanatioObjectForm5);*/
       // initSanatio.sanatio.addSanatioMethod();
       
       // var form1Sanatio = $('#form')
