@@ -35,7 +35,7 @@
     // Num lock    => 144
     // AltGr key   => 225
   var excludedKeys = [16, 17, 18, 20, 35, 36, 37, 38, 39, 40, 45, 144, 225],
-    emailRegex = new RegExp('^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'),
+    emailRegex = new RegExp('^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$', 'i'),
     urlRegex = new RegExp( '^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})).?)(?::\d{2,5})?(?:[/?#]\S*)?$','i'),
     digitsRegex = new RegExp('^(?:-?\d+|-?\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$'),
     creditcardRegex = new RegExp('^(?:(4[0-9]{12}(?:[0-9]{3})?)|(5[1-5][0-9]{14})|(6(?:011|5[0-9]{2})[0-9]{12})|(3[47][0-9]{13})|(3(?:0[0-5]|[68][0-9])[0-9]{11})|((?:2131|1800|35[0-9]{3})[0-9]{11}))$');
@@ -124,7 +124,12 @@
       });
       return checkedElements;
     } else {
-      return element.val();
+      if ($.type(element.val()) === 'array'){
+        return element.val().join().replace(/,/g,'').length;
+      } else {
+        return element.val();
+      }
+      return 0;
     }
   };
   var sanatioFormattedMessage = function(message, value){
@@ -297,7 +302,7 @@
     			console.log('focusin');
     		},
     		focusout: function (sanitator, elementObj, event) {
-          if ( (elementObj.isEditable || elementObj.isCheckable) && sanitator.settings.submitted.indexOf(elementObj) !== -1){
+          if (sanitator.settings.submitted.indexOf(elementObj) !== -1){
             sanitator.settings.doSanitation(sanitator, elementObj);
             sanitator.settings.showSanatioErrors();
           }
@@ -309,14 +314,20 @@
     			if ( event.which === 9 && sanatioTrimmedValue( elementObj.element.val() ) === '' || $.inArray( event.keyCode, excludedKeys ) !== -1 ) {
     				return;
     			} else {
-            if ( (elementObj.isEditable || elementObj.isCheckable) && sanitator.settings.submitted.indexOf(elementObj) !== -1){
+            if (sanitator.settings.submitted.indexOf(elementObj) !== -1){
               sanitator.settings.doSanitation(sanitator, elementObj);
               sanitator.settings.showSanatioErrors();
             }
     			}
     		},
-    		click: function (sanitator, elementObj, event) {
-          console.log('clicked');
+    		change: function (sanitator, elementObj, event) {
+          if (sanitator.settings.submitted.indexOf(elementObj) !== -1){
+            sanitator.settings.doSanitation(sanitator, elementObj);
+            sanitator.settings.showSanatioErrors();
+          }
+          if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
+            sanitator.settings.submitted.push(elementObj);
+          }
     		}
       },
       getElement: function (formElement, elementName){
@@ -327,6 +338,7 @@
         
         $.each(localSettings.rulesConfig, function(index, elementItem){
           if (elementItem.elementObj === elementObj){
+            
             tempObj2 = {};
             tempObj2.isThisElementValid = [];
             
@@ -495,7 +507,7 @@
           localWarningType = '';
           insertedWarningElement = null;
           insertedErrorElement = null;
-          if (elementsLength.element.length === 1 && elementsLength.isEditable){
+          if (elementsLength.element.length === 1 && !elementsLength.isCheckable){
             errorElement = this.preparedInvalidElements[outerCnt].elementObj.element;
             
             for (innerCnt in errorElementProps){
@@ -551,6 +563,13 @@
               }
               if (typeof insertedErrorElement !== 'undefined' && insertedErrorElement !== null){
                 insertedErrorElement.remove();
+              }
+            }
+            
+            if (elementsLength.shouldApplyRequired && sanatioTrimmedValue(errorElement.val()).length === 0){
+              insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
+              if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
+                insertedWarningElement.remove();
               }
             }
             
@@ -630,7 +649,7 @@
   				}
         };
         
-        $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'click.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
+        $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'change.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
       },
       checkForSubmittedElements: function (){
         
