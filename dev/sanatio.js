@@ -14,7 +14,8 @@
       'creditcard',
       'date',
       'equalthisto',
-      'rangeminmax',
+      'rangelength',
+      'range',
       'capslock'
     ];
     // Avoid revalidate the field when pressing one of the following keys
@@ -95,6 +96,11 @@
     insertedErrorElement,
     insertedWarningElement;
     
+  /**
+  * Function to check for Luhn Algorithm for Credit Card
+  * @param credit card number inserted by user
+  * @return true if Luhn Algorithm holds true else false
+  */
   var sanatioLuhnCheck = (function (arr) {
     return function (ccNum) {
       luhnLen = ccNum.length;
@@ -109,10 +115,21 @@
       return luhnSum && luhnSum % 10 === 0;
     };
   }([0, 2, 4, 6, 8, 1, 3, 5, 7, 9]));
-    
+  
+  /**
+  * Function to trim value of typable form element
+  * @param value inserted by the user
+  * @return trimmed value
+  */
   var sanatioTrimmedValue = function (value) {
      return typeof value === 'string' ? value.replace( /^\s+|\s+$/g, '' ) : value;
   };
+  
+  /**
+  * Function to return the value of a form element
+  * @param form element
+  * @return length in case of checkbox or radio & value in case of typable, select or file inputs
+  */
   var sanatioReturnValue = function (element){
     if (element.attr('type') === 'checkbox' || element.attr('type') === 'radio'){
       checkedElements = 0;
@@ -133,6 +150,12 @@
     }
     return '';
   };
+  
+  /**
+  * Function to return the length of a form element
+  * @param form element
+  * @return length in case of checkbox or radio & length of the value in case of typable, select or file inputs
+  */
   var sanatioReturnLength = function (element){
     if (element.attr('type') === 'checkbox' || element.attr('type') === 'radio'){
       checkedElements = 0;
@@ -153,6 +176,12 @@
     }
     return 0;
   };
+  
+  /**
+  * Function to format the message in case it has replacable values
+  * @param message, values which need to be replaced
+  * @return formatted message
+  */
   var sanatioFormattedMessage = function(message, value){
     value = JSON.parse(value);
     
@@ -166,12 +195,18 @@
     
     return message;
   };
+  
+  /**
+  * Function to select the message, from default messages or user selected message, for the error or warning
+  * @param message, values which need to be selected
+  * @return selected message
+  */
   var setSanatioMessage = function (receivedSettings, receivedMessage, receivedRule, receivedValue){
     
     thisMessage = '';
     
     if (typeof receivedMessage === 'undefined'){
-      if ($.inArray( receivedRule, ['minlength', 'maxlength', 'rangeminmax'] ) !== -1){
+      if ($.inArray( receivedRule, ['minlength', 'maxlength', 'rangelength', 'range'] ) !== -1){
         thisMessage = sanatioFormattedMessage(receivedSettings.messagesSetup[receivedRule], receivedValue);
       } else {
         thisMessage = receivedSettings.messagesSetup[receivedRule];
@@ -182,9 +217,10 @@
     
     return thisMessage;
   };
+  
+  
   /**
-  * Takes out the elements which have data-sanatio-* rules on them
-  * when a form is initiated using data-sanatio
+  * Takes out the elements which have data-sanatio-* rules on them when a form is initiated using data-sanatio
   * @param elements
   * @return elements which have data-sanatio-* rules
   */
@@ -288,6 +324,11 @@
     this.init();
   };
   
+  /**
+  * Default Sanatio Setup with default values and functions
+  * @param 
+  * @return 
+  */
   $.extend( $.sanatio, {
   	defaults: {
       rulesConfig: {},
@@ -315,7 +356,8 @@
         creditcard: 'Invalid Credit Card observed default',
         date: 'Invalid date default',
         equalthisto: 'Values of {{0}} and {{1}} not same default',
-        rangeminmax: 'Minimum {{0}} and Maximum {{1}} default',
+        rangelength: 'Minimum {{0}} and Maximum {{1}} default',
+        range: 'Value must be between {{0}} and {{1}} default',
         capslock: 'Please check the capslock default'
       },
       events: {
@@ -351,9 +393,21 @@
           }
     		}
       },
+      
+      /**
+      * Function to select the element based on the element name
+      * @param Form and element name from the defined rules
+      * @return element selected from the form element
+      */
       getElement: function (formElement, elementName){
         return formElement.find( '[name=' + elementName + ']' );
       },
+      
+      /**
+      * Function to sanitize the form element based on defined rules
+      * @param Respective Sanatio object and form element
+      * @return 
+      */
       doSanitation: function (sanitator, elementObj){
         localSettings = sanitator.settings;
         
@@ -377,13 +431,17 @@
               localErrorType = '';
 
               for (rootCnt in localSettings.messagesSetup){
+                
+                elementItem.rules[innerCnt].type = typeof elementItem.rules[innerCnt].type === 'undefined' ? 'error' : elementItem.rules[innerCnt].type;
+                
                 if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
-                  // console.log('elementItem.rules[innerCnt]', elementItem.rules[innerCnt]);
+                  
                   try{
                     jsonedValue = JSON.parse(elementItem.rules[innerCnt].value).toString();
                   } catch (e){
                     jsonedValue = elementItem.rules[innerCnt].value;
                   }
+                  
                   tempErrorObj = localSettings.checkFor[rootCnt]( elementObj.element, jsonedValue );
 
                   isThisElementValid.errors = typeof tempErrorObj !== 'undefined' ? tempErrorObj : false;
@@ -393,6 +451,7 @@
                   isThisElementValid.message.length === 0 ? isThisElementValid.message = 'No error message specified for ' + rootCnt : isThisElementValid.message;
                 }
                 if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
+                  
                   try{
                     jsonedValue = JSON.parse(elementItem.rules[innerCnt].value).toString();
                   } catch (e){
@@ -408,6 +467,7 @@
                   isThisElementValid.message.length === 0 ? isThisElementValid.message = 'No warning message specified for ' + rootCnt : isThisElementValid.message;
                 }
               }
+              
               tempObj2.elementObj = elementItem.elementObj;
               tempObj2.isThisElementValid.push(isThisElementValid);
             }
@@ -416,9 +476,11 @@
 
               for (innerCnt in localSettings.preparedInvalidElements){
                 if (localSettings.preparedInvalidElements[innerCnt].elementObj.element === tempObj2.elementObj.element){
+                  
                   localSettings.preparedInvalidElements[innerCnt] = tempObj2;
                   isItemPresent = true;
                   break;
+                  
                 } else {
                   isItemPresent = false;
                 }
@@ -435,6 +497,12 @@
           }
         });
       },
+      
+      /**
+      * Object containing the validation methods
+      * @param form element and expected values
+      * @return 
+      */
       checkFor: {
         required: function (element, mustBe){
           return sanatioReturnLength(element) === 0 ? true : false;
@@ -459,10 +527,19 @@
         maxlength: function (element, mustBe){
           return sanatioReturnLength(element) > mustBe ? true : false;
         },
-        rangeminmax: function (element, mustBe){
+        rangelength: function (element, mustBe){
           return sanatioReturnLength(element) < mustBe[0] || sanatioReturnLength(element) > mustBe[1] ? true : false;
+        },
+        range: function (element, mustBe){
+          return sanatioReturnValue(element) < mustBe[0] || sanatioReturnValue(element) > mustBe[1] ? true : false;
         }
       },
+      
+      /**
+      * Function to show and remove respective errors
+      * @param
+      * @return 
+      */
       showSanatioErrors: function (){
         
         for (outerCnt in this.preparedInvalidElements){
@@ -546,6 +623,12 @@
         }
       }
   	},
+    
+    /**
+    * Function to add custom method and rule
+    * @param rule name and function defination
+    * @return 
+    */
     addSanatioMethod: function (fnName, fn){
       
       if (typeof this.defaults.messagesSetup[fnName] === 'undefined'){
@@ -560,6 +643,7 @@
       }
       
     },
+    
     prototype: {
       prepareFormElements: function (){
         formElement = $(this.currentForm);
@@ -655,7 +739,11 @@
   });
   
   
-  
+  /**
+  * Default plugin initiation for each form
+  * @param rules options
+  * @return 
+  */
   $.fn.sanatio = function(options) {
       
     // Check if a validator for this form was already created
