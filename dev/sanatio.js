@@ -551,35 +551,71 @@
           localWarningType = '';
           insertedWarningElement = null;
           insertedErrorElement = null;
-          if (elementsLength.element.length === 1 && !elementsLength.isCheckable){
-            errorElement = this.preparedInvalidElements[outerCnt].elementObj.element;
+
+          /* if (elementsLength.element.length === 1 && !elementsLength.isCheckable){  
             
-            for (innerCnt in errorElementProps){
-              if (errorElementProps[innerCnt].errors){
-                localError = errorElementProps[innerCnt].message;
-                localErrorType = errorElementProps[innerCnt].errorType;
-              }
-              if (localError.length > 0){
-                errorElement.addClass('has-sanatio-error');
-                break;
-              } else {
-                errorElement.removeClass('has-sanatio-error');
-              }
+          } else {
+            
+          }*/
+          
+          errorElement = this.preparedInvalidElements[outerCnt].elementObj.element;
+          
+          for (innerCnt in errorElementProps){
+            if (errorElementProps[innerCnt].errors){
+              localError = errorElementProps[innerCnt].message;
+              localErrorType = errorElementProps[innerCnt].errorType;
             }
-            
-            for (innerCnt in errorElementProps){
-              if (errorElementProps[innerCnt].warnings){
-                localWarning = errorElementProps[innerCnt].message;
-                localWarningType = errorElementProps[innerCnt].warningType;
-              }
-              if (localWarning.length > 0){
-                errorElement.addClass('has-sanatio-warning');
-                break;
-              } else {
-                errorElement.removeClass('has-sanatio-warning');
-              }
+            if (localError.length > 0){
+              errorElement.addClass('has-sanatio-error');
+              break;
+            } else {
+              errorElement.removeClass('has-sanatio-error');
             }
+          }
+          
+          for (innerCnt in errorElementProps){
+            if (errorElementProps[innerCnt].warnings){
+              localWarning = errorElementProps[innerCnt].message;
+              localWarningType = errorElementProps[innerCnt].warningType;
+            }
+            if (localWarning.length > 0){
+              errorElement.addClass('has-sanatio-warning');
+              break;
+            } else {
+              errorElement.removeClass('has-sanatio-warning');
+            }
+          }
+
+          insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
+          insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
+          
+          // console.log('insertedWarningElement', insertedWarningElement);
+          // console.log('insertedErrorElement', insertedErrorElement);
+          
+          if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
+            insertedWarningElement.remove();
+          }
+          if (typeof insertedErrorElement !== 'undefined' && insertedErrorElement !== null){
+            insertedErrorElement.remove();
+          }
+          
+          if (errorElement.hasClass('has-sanatio-warning') && localWarningType.length > 0 && errorElement.nextAll('.warning-' + localWarningType).eq(0).length === 0){
+            if (elementsLength.isCheckable){
+              errorElement.last().after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
+            } else {
+              errorElement.after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
+            }
+          }
             
+          if (errorElement.hasClass('has-sanatio-error') && localErrorType.length > 0 && errorElement.nextAll('.error-' + localErrorType).eq(0).length === 0){
+            if (elementsLength.isCheckable){
+              errorElement.last().after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
+            } else {
+              errorElement.after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
+            }
+          }
+          
+          if (!elementsLength.shouldApplyRequired && sanatioReturnLength(errorElement) === 0){
             insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
             insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
             
@@ -589,36 +625,13 @@
             if (typeof insertedErrorElement !== 'undefined' && insertedErrorElement !== null){
               insertedErrorElement.remove();
             }
-            
-            if (errorElement.hasClass('has-sanatio-warning') && localWarningType.length > 0 && errorElement.nextAll('.warning-' + localWarningType).eq(0).length === 0){
-              errorElement.after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
+          }
+          
+          if (elementsLength.shouldApplyRequired && sanatioReturnLength(errorElement) === 0){
+            insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
+            if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
+              insertedWarningElement.remove();
             }
-              
-            if (errorElement.hasClass('has-sanatio-error') && localErrorType.length > 0 && errorElement.nextAll('.error-' + localErrorType).eq(0).length === 0){
-              errorElement.after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
-            }
-            
-            if (!elementsLength.shouldApplyRequired && sanatioTrimmedValue(errorElement.val()).length === 0){
-              insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
-              insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
-              
-              if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
-                insertedWarningElement.remove();
-              }
-              if (typeof insertedErrorElement !== 'undefined' && insertedErrorElement !== null){
-                insertedErrorElement.remove();
-              }
-            }
-            
-            if (elementsLength.shouldApplyRequired && sanatioTrimmedValue(errorElement.val()).length === 0){
-              insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
-              if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
-                insertedWarningElement.remove();
-              }
-            }
-            
-          } else {
-            
           }
         }
       }
