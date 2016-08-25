@@ -382,7 +382,7 @@
                 if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
                   // console.log('elementItem.rules[innerCnt]', elementItem.rules[innerCnt]);
                   try{
-                    jsonedValue = JSON.parse(elementItem.rules[innerCnt].value);
+                    jsonedValue = JSON.parse(elementItem.rules[innerCnt].value).toString();
                   } catch (e){
                     jsonedValue = elementItem.rules[innerCnt].value;
                   }
@@ -396,7 +396,7 @@
                 }
                 if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
                   try{
-                    jsonedValue = JSON.parse(elementItem.rules[innerCnt].value);
+                    jsonedValue = JSON.parse(elementItem.rules[innerCnt].value).toString();
                   } catch (e){
                     jsonedValue = elementItem.rules[innerCnt].value;
                   }
@@ -545,17 +545,10 @@
             
           }
         }
-      }/*,
-      addMethod: function (fnName, fn){
-        console.log('fnName', fnName);
-        console.log('fn', fn);
-        //TODO console.log('called addMethod');
-      },
-      destroy: function (){
-        //TODO console.log('called destroy');
-      }*/
+      }
   	},
     addSanatioMethod: function (fnName, fn){
+      
       if (typeof this.defaults.messagesSetup[fnName] === 'undefined'){
         this.defaults.messagesSetup[fnName] = {};
       } else {
@@ -567,8 +560,6 @@
         return;
       }
       
-      //TODO console.log('addSanatioMethod called');
-      // return thisSanatioObject.sanatio.settings.addMethod();
     },
     prototype: {
       prepareFormElements: function (){
