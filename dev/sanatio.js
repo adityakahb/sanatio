@@ -259,8 +259,6 @@
         }
       }
       
-      // console.log('tempRuleObj 2', tempRuleObj);
-      
       defaultSanatioRulesObj.rulesConfig.push(tempRuleObj);
     }
     
@@ -306,19 +304,19 @@
       preparedInvalidElements: [],
       submitted: [],
       messagesSetup: {
-        'required': 'This is required default',
-        'pattern': 'Required pattern not followed default',
-        'email': 'This is not a valid email default',
-        'digits': 'Only digits are allowed default',
-        'url': 'This is not a valid url default',
-        'minlength': 'Minimum {{0}} length is required default',
-        'maxlength': 'Maximum {{0}} length is required default',
-        'luhn': 'Luhn Check not valid default',
-        'creditcard': 'Invalid Credit Card observed default',
-        'date': 'Invalid date default',
-        'equalthisto': 'Values of {{0}} and {{1}} not same default',
-        'rangeminmax': 'Minimum {{0}} and Maximum {{1}} default',
-        'capslock': 'Please check the capslock default'
+        required: 'This is required default',
+        pattern: 'Required pattern not followed default',
+        email: 'This is not a valid email default',
+        digits: 'Only digits are allowed default',
+        url: 'This is not a valid url default',
+        minlength: 'Minimum {{0}} length is required default',
+        maxlength: 'Maximum {{0}} length is required default',
+        luhn: 'Luhn Check not valid default',
+        creditcard: 'Invalid Credit Card observed default',
+        date: 'Invalid date default',
+        equalthisto: 'Values of {{0}} and {{1}} not same default',
+        rangeminmax: 'Minimum {{0}} and Maximum {{1}} default',
+        capslock: 'Please check the capslock default'
       },
       events: {
     		focusin: function (sanitator, elementObj, event) {
@@ -392,7 +390,7 @@
                   isThisElementValid.errorType = rootCnt;
                   
                   isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, rootCnt, elementItem.rules[innerCnt].value);
-                  
+                  isThisElementValid.message.length === 0 ? isThisElementValid.message = 'No error message specified for ' + rootCnt : isThisElementValid.message;
                 }
                 if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
                   try{
@@ -407,6 +405,7 @@
                   isThisElementValid.warningType = rootCnt;
                   
                   isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, rootCnt, elementItem.rules[innerCnt].value);
+                  isThisElementValid.message.length === 0 ? isThisElementValid.message = 'No warning message specified for ' + rootCnt : isThisElementValid.message;
                 }
               }
               tempObj2.elementObj = elementItem.elementObj;
@@ -550,7 +549,7 @@
     addSanatioMethod: function (fnName, fn){
       
       if (typeof this.defaults.messagesSetup[fnName] === 'undefined'){
-        this.defaults.messagesSetup[fnName] = {};
+        this.defaults.messagesSetup[fnName] = '';
       } else {
         return;
       }
