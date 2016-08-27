@@ -39,6 +39,14 @@
                   data-sanatio-required-type="error"
                 >
                 <hr>
+                <label for="text2_form1">Only digits</label>
+                <input type="text" name="text2_form1" id="text2_form1" placeholder="text"
+                  data-sanatio-required="true"
+                  data-sanatio-digits="true"
+                  data-sanatio-rangevalue="[4000, 8000]"
+                  data-sanatio-rangevalue-type="warning"
+                >
+                <hr>
                 <label for="password1_form1">Password</label>
                 <input type="password" name="password1_form1" id="password1_form1" placeholder="password"
                   data-sanatio-required="true"
@@ -57,6 +65,12 @@
                   data-sanatio-url="true"
                   data-sanatio-url-type="warning"
                 >
+                <hr>
+                <label for="textarea1_form1">textarea</label>
+                <textarea name="textarea1_form1" id="textarea1_form1" rows="8" cols="40"
+                  data-sanatio-minlength="50"
+                  data-sanatio-minlength-type="warning"
+                ></textarea>
                 <hr>
                 <label for="checkbox1_form1">
                 <input type="checkbox" name="checkbox1_form1" id="checkbox1_form1"
@@ -82,7 +96,7 @@
                 <label for="radio1_form1">
                 <input type="radio" name="radio1_form1" id="radio1_form1"
                   data-sanatio-required="true"
-                  data-sanatio-required-type="warning"
+                  data-sanatio-required-type="error"
                 >
                 Single Radio</label>
                 <hr>
