@@ -1,0 +1,16 @@
+{
+  "name": "sanatio",
+  "version": "1.0.0",
+  "description": "A modern validation plugin which handles errors and warnings separately",
+  "author": "A·B",
+  "license": "ISC",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-cli": "^1.2.0",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-sass": "^1.1.0",
+    "jit-grunt": "^0.10.0",
+    "load-grunt-config": "^0.19.1",
+    "time-grunt": "^1.3.0"
+  }
+}

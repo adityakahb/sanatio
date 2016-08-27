@@ -1,4 +1,4 @@
-(function( $ ) {
+(function ( $ ) {
   
   'use strict';
   var thisSanatioObject,
@@ -35,7 +35,7 @@
     // AltGr key   => 225
   var excludedKeys = [16, 17, 18, 20, 35, 36, 37, 38, 39, 40, 45, 144, 225],
     emailRegex = new RegExp('^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$', 'i'),
-    urlRegex = new RegExp( '^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})).?)(?::\d{2,5})?(?:[/?#]\S*)?$','i'),
+    urlRegex = new RegExp( '^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})).?)(?::\d{2,5})?(?:[/?#]\S*)?$', 'i'),
     digitsRegex = new RegExp('^(?:-?\d+|-?\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$'),
     creditcardRegex = new RegExp('^(?:(4[0-9]{12}(?:[0-9]{3})?)|(5[1-5][0-9]{14})|(6(?:011|5[0-9]{2})[0-9]{12})|(3[47][0-9]{13})|(3(?:0[0-5]|[68][0-9])[0-9]{11})|((?:2131|1800|35[0-9]{3})[0-9]{11}))$');
     
@@ -124,7 +124,7 @@
   * @return trimmed value
   */
   var sanatioTrimmedValue = function (value) {
-     return typeof value === 'string' ? value.replace( /^\s+|\s+$/g, '' ) : value;
+    return typeof value === 'string' ? value.replace( /^\s+|\s+$/g, '' ) : value;
   };
   
   /**
@@ -140,16 +140,18 @@
           checkedElements++;
         }
       });
+      
       return checkedElements;
     } else if (element.attr('type') === 'select'){
       if ($.type(element.val()) === 'array'){
-        return sanatioTrimmedValue(element.val().join().replace(/,/g,'')).length;
+        return sanatioTrimmedValue(element.val().join().replace(/,/g, '')).length;
       } else {
         return sanatioTrimmedValue(element.val());
       }
     } else {
       return sanatioTrimmedValue(element.val());
     }
+    
     return '';
   };
   
@@ -166,16 +168,18 @@
           checkedElements++;
         }
       });
+      
       return checkedElements;
     } else if (element.attr('type') === 'select'){
       if ($.type(element.val()) === 'array'){
-        return sanatioTrimmedValue(element.val().join().replace(/,/g,'')).length;
+        return sanatioTrimmedValue(element.val().join().replace(/,/g, '')).length;
       } else {
         return sanatioTrimmedValue(element.val()).length;
       }
     } else {
       return sanatioTrimmedValue(element.val()).length;
     }
+    
     return 0;
   };
   
@@ -184,7 +188,7 @@
   * @param message, values which need to be replaced
   * @return formatted message
   */
-  var sanatioFormattedMessage = function(message, value){
+  var sanatioFormattedMessage = function (message, value){
     value = JSON.parse(value);
     
     if ($.type(value) === 'number'){
@@ -230,15 +234,17 @@
     elem;
   var getSanatioElements = function (elements){
     matched = [];
-    elements.each(function(index) {
+    elements.each(function (index) {
       elem = this;
-      $.each(this.attributes, function( index, attr ) {
-        if(attr.name.indexOf(sanatioElementsPattern)===0){
+      $.each(this.attributes, function (index, attr) {
+        if (attr.name.indexOf(sanatioElementsPattern) === 0){
           matched.push(elem);
+          
           return false;
         }
       });
     });
+    
     return $( matched );
   };
 
@@ -320,7 +326,7 @@
   };
   
   // Constructor for validator
-  $.sanatio = function( options, form ) {
+  $.sanatio = function (options, form) {
     this.settings = $.extend( true, {}, $.sanatio.defaults, options );
     this.currentForm = form;
     this.init();
@@ -332,7 +338,7 @@
   * @return 
   */
   $.extend( $.sanatio, {
-  	defaults: {
+    defaults: {
       rulesConfig: {},
       groups: {},
       errorClass: 'sanatio-error',
@@ -363,10 +369,10 @@
         capslock: 'Please check the capslock default'
       },
       events: {
-    		focusin: function (sanitator, elementObj, event) {
-    			console.log('focusin');
-    		},
-    		focusout: function (sanitator, elementObj, event) {
+        focusin: function (sanitator, elementObj, event) {
+          console.log('focusin');
+        },
+        focusout: function (sanitator, elementObj, event) {
           if (sanitator.settings.submitted.indexOf(elementObj) !== -1){
             sanitator.settings.doSanitation(sanitator, elementObj);
             sanitator.settings.showSanatioErrors();
@@ -374,18 +380,18 @@
           if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
             sanitator.settings.submitted.push(elementObj);
           }
-    		},
-    		keyup: function (sanitator, elementObj, event) {
-    			if ( event.which === 9 && sanatioTrimmedValue( elementObj.element.val() ) === '' || $.inArray( event.keyCode, excludedKeys ) !== -1 ) {
-    				return;
-    			} else {
+        },
+        keyup: function (sanitator, elementObj, event) {
+          if ( event.which === 9 && sanatioTrimmedValue( elementObj.element.val() ) === '' || $.inArray( event.keyCode, excludedKeys ) !== -1 ) {
+            return;
+          } else {
             if (sanitator.settings.submitted.indexOf(elementObj) !== -1){
               sanitator.settings.doSanitation(sanitator, elementObj);
               sanitator.settings.showSanatioErrors();
             }
-    			}
-    		},
-    		change: function (sanitator, elementObj, event) {
+          }
+        },
+        change: function (sanitator, elementObj, event) {
           if (sanitator.settings.submitted.indexOf(elementObj) !== -1){
             sanitator.settings.doSanitation(sanitator, elementObj);
             sanitator.settings.showSanatioErrors();
@@ -393,7 +399,7 @@
           if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
             sanitator.settings.submitted.push(elementObj);
           }
-    		}
+        }
       },
       
       /**
@@ -452,7 +458,7 @@
         
         localSettings = sanitator.settings;
         
-        $.each(localSettings.rulesConfig, function(index, elementItem){
+        $.each(localSettings.rulesConfig, function (index, elementItem){
           if (elementItem.elementObj === elementObj){
             
             tempObj2 = {};
@@ -477,7 +483,7 @@
                 
                 if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
                   
-                  try{
+                  try {
                     jsonedValue = JSON.parse(elementItem.rules[innerCnt].value).toString();
                   } catch (e){
                     jsonedValue = elementItem.rules[innerCnt].value;
@@ -493,7 +499,7 @@
                 }
                 if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
                   
-                  try{
+                  try {
                     jsonedValue = JSON.parse(elementItem.rules[innerCnt].value).toString();
                   } catch (e){
                     jsonedValue = elementItem.rules[innerCnt].value;
@@ -667,7 +673,7 @@
         this.validationStatus['errors'] = errorsCount;
         this.validationStatus['warnings'] = warningsCount;
       }
-  	},
+    },
     
     /**
     * Function to add custom method and rule
@@ -744,10 +750,10 @@
         formEventCallMethod = function (event){
           localValidator = $.data( this.form, 'sanatio' );
           localEventType = event.type;
-  				localSettings = localValidator.settings;
+          localSettings = localValidator.settings;
           localElementObj;
           
-  				if ( localSettings.events[ localEventType ] && !$( this ).is(localSettings.ignoreElements) ) {
+          if ( localSettings.events[ localEventType ] && !$( this ).is(localSettings.ignoreElements) ) {
             
             for (cnt in localSettings.preparedElements){
               if (localSettings.preparedElements[cnt].element.is($(this))){
@@ -757,7 +763,7 @@
             }
             localSettings.events[ localEventType ]( localValidator, localElementObj, event );
   					// settings[ eventType ].call( sanatio, this, event );
-  				}
+          }
         };
         
         $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'change.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
@@ -787,7 +793,7 @@
   * @param rules options
   * @return 
   */
-  $.fn.sanatio = function(options) {
+  $.fn.sanatio = function (options) {
       
     // Check if a validator for this form was already created
     var sanatio = $.data( this[ 0 ], 'sanatio' );
@@ -802,7 +808,7 @@
 
     sanatio.prepareFormElements();
     
-    this.on( "submit.sanatio", function( event ) {
+    this.on( 'submit.sanatio', function ( event ) {
       if ( sanatio.settings.debug ) {
 
         // Prevent form submit to be able to see console output
@@ -824,10 +830,12 @@
     
     this.getSanatioObject = function (){
       return thisSanatioObject.sanatio;
-    }
+    };
+    
     this.destroySanatio = function (){
       return thisSanatioObject.sanatio.settings.destroy();
     };
+    
     this.getValidityStatus = function (){
       return thisSanatioObject.sanatio.settings.validationStatus;
     };
@@ -842,7 +850,7 @@
   * @return
   */
   var defaultFormRulesObj = [];
-  $(function() {
+  $(function () {
     defaultElements = $('[data-sanatio]');
     for (defaultElementCount = 0; defaultElementCount < defaultElements.length; defaultElementCount++){
       defaultElementObj = defaultInit($(defaultElements[defaultElementCount]));
