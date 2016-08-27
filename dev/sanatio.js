@@ -46,13 +46,9 @@
     localElementObj;
   
   var defaultElements,
-    defaultElementSettings,
     defaultElementCount,
     defaultElementObj,
     elementsToValidate;
- 
-  var formValidStatus = false,
-    elementValidStatus = false;
  
   var formElement,
     formSettings,
@@ -77,11 +73,9 @@
   var patternRegex;
   
   var isThisFormValid = {},
-    isThisElementValid = {},
-    isThisFormElementValid = {};
+    isThisElementValid = {};
   
-  var preparedElements,
-    checkedElements;
+  var checkedElements;
   
   var luhnLen,
     luhnBit,
@@ -352,33 +346,36 @@
       preparedElements: [],
       preparedInvalidElements: [],
       submitted: [],
+      errorTag: 'label',
       messagesSetup: {
-        required: 'This is required default',
-        pattern: 'Required pattern not followed default',
-        email: 'This is not a valid email default',
-        digits: 'Only digits are allowed default',
-        url: 'This is not a valid url default',
-        minlength: 'Minimum {{0}} length is required default',
-        maxlength: 'Maximum {{0}} length is required default',
-        luhn: 'Luhn Check not valid default',
-        creditcard: 'Invalid Credit Card observed default',
-        date: 'Invalid date default',
-        equalthisto: 'Values of {{0}} and {{1}} not same default',
-        rangelength: 'Minimum {{0}} and Maximum {{1}} default',
-        rangevalue: 'Value must be between {{0}} and {{1}} default',
-        capslock: 'Please check the capslock default'
+        required: 'This field is required.',
+        pattern: 'This does not follow expected pattern.',
+        email: 'Please enter a valid email address.',
+        digits: 'Please enter only digits.',
+        url: 'Please enter a valid URL.',
+        minlength: 'Please enter at least {{0}} characters.',
+        maxlength: 'Please enter no more than {{0}} characters.',
+        luhn: 'TODO: Proper Luhn check message.',
+        creditcard: 'Please enter a valid credit card number.',
+        date: 'Please enter a valid date.',
+        equalthisto: 'Values of {{0}} and {{1}} do not match.',
+        rangelength: 'Please enter a value between {{0}} and {{1}} characters long.',
+        rangevalue: 'Please enter a value between {{0}} and {{1}}.',
+        capslock: 'Capslock is on.'
       },
       events: {
         focusin: function (sanitator, elementObj, event) {
-          console.log('focusin');
+          // TODO: Implement Focus In
         },
         focusout: function (sanitator, elementObj, event) {
-          if (sanitator.settings.submitted.indexOf(elementObj) !== -1){
-            sanitator.settings.doSanitation(sanitator, elementObj);
-            sanitator.settings.showSanatioErrors();
-          }
-          if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
-            sanitator.settings.submitted.push(elementObj);
+          if (elementObj.isEditable){
+            if (sanitator.settings.submitted.indexOf(elementObj) !== -1){
+              sanitator.settings.doSanitation(sanitator, elementObj);
+              sanitator.settings.showSanatioErrors();
+            }
+            if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
+              sanitator.settings.submitted.push(elementObj);
+            }
           }
         },
         keyup: function (sanitator, elementObj, event) {
@@ -437,8 +434,6 @@
           insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
         }
         
-        // console.log('insertedWarningElement', insertedWarningElement);
-        // console.log('insertedErrorElement', insertedErrorElement);
         if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
           insertedWarningElement.remove();
         }
@@ -478,8 +473,6 @@
               localErrorType = '';
 
               for (rootCnt in localSettings.messagesSetup){
-                
-                elementItem.rules[innerCnt].type = typeof elementItem.rules[innerCnt].type === 'undefined' ? 'error' : elementItem.rules[innerCnt].type;
                 
                 if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
                   
@@ -587,17 +580,17 @@
       * @param elementObj with its properties, element, element error or warning class, error or warn string and its string class, message string
       * @return 
       */
-      insertErrorOrWarning: function (eObj, element, elementClass, type, selectorClass, message){
+      insertErrorOrWarning: function (eObj, element, elementClass, type, selectorClass, message, messageClass){
         if (eObj.isCheckable){
           if (element.last().parents('label').length === 1){
-            element.last().parents('label').after('<div class="' + selectorClass.substr(1) + type + ' ' + this.warningClass + '">'+ message +'</div>');
+            element.last().parents('label').after('<' + this.errorTag + ' class="' + selectorClass.substr(1) + type + ' ' + messageClass + '">'+ message +'</' + this.errorTag + '>');
           } else if (element.last().next('label').length === 1){
-            element.last().next('label').after('<div class="' + selectorClass.substr(1) + type + ' ' + this.warningClass + '">'+ message +'</div>');
+            element.last().next('label').after('<' + this.errorTag + ' class="' + selectorClass.substr(1) + type + ' ' + messageClass + '">'+ message +'</' + this.errorTag + '>');
           } else {
-            element.last().after('<div class="' + selectorClass.substr(1) + type + ' ' + this.warningClass + '">'+ message +'</div>');
+            element.last().after('<' + this.errorTag + ' class="' + selectorClass.substr(1) + type + ' ' + messageClass + '">'+ message +'</' + this.errorTag + '>');
           }
         } else {
-          element.after('<div class="' + selectorClass.substr(1) + type + ' ' + this.warningClass + '">'+ message +'</div>');
+          element.after('<' + this.errorTag + ' class="' + selectorClass.substr(1) + type + ' ' + messageClass + '">'+ message +'</' + this.errorTag + '>');
         }
       },
       
@@ -612,6 +605,7 @@
         warningsCount = 0;
         
         for (outerCnt in this.preparedInvalidElements){
+          
           elementsLength = this.preparedInvalidElements[outerCnt].elementObj;
           errorElementProps = this.preparedInvalidElements[outerCnt].isThisElementValid;
           localError = '';
@@ -622,6 +616,8 @@
           insertedErrorElement = null;
           
           errorElement = this.preparedInvalidElements[outerCnt].elementObj.element;
+          
+          this.cleanErrors(elementsLength, 'all');
           
           for (innerCnt in errorElementProps){
             if (errorElementProps[innerCnt].errors){
@@ -649,15 +645,13 @@
             }
           }
           
-          this.cleanErrors(elementsLength, 'all');
-          
-          if (errorElement.hasClass('has-sanatio-warning') && localWarningType.length > 0 && errorElement.nextAll('.warning-' + localWarningType).eq(0).length === 0){
-            this.insertErrorOrWarning(elementsLength, errorElement, 'has-sanatio-warning', localWarningType, '.warning-', localWarning);
+          if (errorElement.hasClass('has-sanatio-warning') && localWarningType.length > 0){
+            this.insertErrorOrWarning(elementsLength, errorElement, 'has-sanatio-warning', localWarningType, '.warning-', localWarning, this.warningClass);
             ++warningsCount;
           }
 
-          if (errorElement.hasClass('has-sanatio-error') && localErrorType.length > 0 && errorElement.nextAll('.error-' + localErrorType).eq(0).length === 0){
-            this.insertErrorOrWarning(elementsLength, errorElement, 'has-sanatio-error', localErrorType, '.error-', localError);
+          if (errorElement.hasClass('has-sanatio-error') && localErrorType.length > 0){
+            this.insertErrorOrWarning(elementsLength, errorElement, 'has-sanatio-error', localErrorType, '.error-', localError, this.errorClass);
             ++errorsCount;
           }
 
@@ -665,11 +659,12 @@
             this.cleanErrors(elementsLength, 'all');
           }
           
-          // if (elementsLength.shouldApplyRequired && sanatioReturnLength(errorElement) === 0){
-            // this.cleanErrors(elementsLength, 'warnings');
-          // }
+          if (elementsLength.shouldApplyRequired && sanatioReturnLength(errorElement) === 0){
+            this.cleanErrors(elementsLength, 'warnings');
+          }
+
         }
-        
+
         this.validationStatus['errors'] = errorsCount;
         this.validationStatus['warnings'] = warningsCount;
       }
@@ -699,7 +694,7 @@
       prepareFormElements: function (){
         formElement = $(this.currentForm);
         formSettings = this.settings;
-        
+
         for (cnt in formSettings.rulesConfig){
           thisElement = formSettings.getElement(formElement, formSettings.rulesConfig[cnt].elementName);
           
@@ -720,6 +715,10 @@
             tempObj.isEditable = true;
           }
           for (outerCnt in formSettings.rulesConfig[cnt].rules){
+            
+            if (typeof formSettings.rulesConfig[cnt].rules[outerCnt].type === 'undefined'){
+              formSettings.rulesConfig[cnt].rules[outerCnt].type = 'error';
+            }
             
             if (formSettings.rulesConfig[cnt].rules[outerCnt].name === 'required'){
               tempObj.shouldApplyRequired = true;

@@ -1,2 +1,9 @@
-h1 {
-  margin: 10px; }
+.sanatio-error, .sanatio-warn {
+  display: block;
+  margin: 10px 0; }
+
+.sanatio-error {
+  color: red; }
+
+.sanatio-warn {
+  color: orange; }
