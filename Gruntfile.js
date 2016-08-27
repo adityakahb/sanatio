@@ -18,8 +18,12 @@ module.exports = function (grunt) {
   /* Task aliases */
   grunt.registerTask( 'default', 'Building...', [
     'clean:css',
+    'sass:dev'
+  ]);
+
+  grunt.registerTask( 'publish', 'Publishing...', [
+    'clean:css',
     'sass:dev',
     'uglify:sanatio'
   ]);
-
 };

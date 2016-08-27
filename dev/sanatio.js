@@ -8,6 +8,8 @@
       'email',
       'digits',
       'url',
+      'minvalue',
+      'maxvalue',
       'minlength',
       'maxlength',
       'luhn',
@@ -136,8 +138,8 @@
       });
       
       return checkedElements;
-    } else if (element.attr('type') === 'select'){
-      if ($.type(element.val()) === 'array'){
+    } else if (element.prop('tagName').toLowerCase() === 'select'){
+      if ($.type(element.val()) === 'array'){  
         return sanatioTrimmedValue(element.val().join().replace(/,/g, '')).length;
       } else {
         return sanatioTrimmedValue(element.val());
@@ -164,7 +166,7 @@
       });
       
       return checkedElements;
-    } else if (element.attr('type') === 'select'){
+    } else if (element.prop('tagName').toLowerCase() === 'select'){
       if ($.type(element.val()) === 'array'){
         return sanatioTrimmedValue(element.val().join().replace(/,/g, '')).length;
       } else {
@@ -342,7 +344,7 @@
       ignoreElements: ':hidden',
       allowWarningsToPassForm: true,
       validationStatus: {},
-      debug: false,
+      debug: true,
       preparedElements: [],
       preparedInvalidElements: [],
       submitted: [],
@@ -353,8 +355,10 @@
         email: 'Please enter a valid email address.',
         digits: 'Please enter only digits.',
         url: 'Please enter a valid URL.',
-        minlength: 'Please enter at least {{0}} characters.',
-        maxlength: 'Please enter no more than {{0}} characters.',
+        minvalue: 'Please enter at least {{0}} characters.',
+        maxvalue: 'Please enter no more than {{0}} characters.',
+        minlength: 'Please select at least {{0}}.',
+        maxlength: 'Please select no more than {{0}}.',
         luhn: 'TODO: Proper Luhn check message.',
         creditcard: 'Please enter a valid credit card number.',
         date: 'Please enter a valid date.',
@@ -452,7 +456,6 @@
       doSanitation: function (sanitator, elementObj){
         
         localSettings = sanitator.settings;
-        
         $.each(localSettings.rulesConfig, function (index, elementItem){
           if (elementItem.elementObj === elementObj){
             
@@ -474,7 +477,7 @@
 
               for (rootCnt in localSettings.messagesSetup){
                 
-                if (!isThisElementValid.errors && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
+                if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
                   
                   try {
                     jsonedValue = JSON.parse(elementItem.rules[innerCnt].value).toString();
@@ -490,7 +493,7 @@
                   isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, rootCnt, elementItem.rules[innerCnt].value);
                   isThisElementValid.message.length === 0 ? isThisElementValid.message = 'No error message specified for ' + rootCnt : isThisElementValid.message;
                 }
-                if (!isThisElementValid.warnings && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
+                if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
                   
                   try {
                     jsonedValue = JSON.parse(elementItem.rules[innerCnt].value).toString();
@@ -560,6 +563,12 @@
         },
         digits: function (element, mustBe){
           return !digitsRegex.test(sanatioReturnValue(element));
+        },
+        minvalue: function (element, mustBe){
+          return sanatioReturnValue(element) < mustBe ? true : false;
+        },
+        maxvalue: function (element, mustBe){
+          return sanatioReturnValue(element) > mustBe ? true : false;
         },
         minlength: function (element, mustBe){
           return sanatioReturnLength(element) < mustBe ? true : false;
@@ -714,11 +723,13 @@
             tempObj.isCheckable = false;
             tempObj.isEditable = true;
           }
+          
           for (outerCnt in formSettings.rulesConfig[cnt].rules){
-            
             if (typeof formSettings.rulesConfig[cnt].rules[outerCnt].type === 'undefined'){
               formSettings.rulesConfig[cnt].rules[outerCnt].type = 'error';
             }
+          }
+          for (outerCnt in formSettings.rulesConfig[cnt].rules){
             
             if (formSettings.rulesConfig[cnt].rules[outerCnt].name === 'required'){
               tempObj.shouldApplyRequired = true;

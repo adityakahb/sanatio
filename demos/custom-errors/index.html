@@ -13,203 +13,142 @@
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
       <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
       <link href="../library/css/common/index.css" rel="stylesheet">
+      <link href="../library/css/demos/basic/index.css" rel="stylesheet">
   </head>
   <body>
-    <form data-sanatio id="form1" action="/">
-      <div class="form-group">
-        <label for="text1_form1">Form 1 Text 1</label>
-        <input type="text" name="text1_form1" id="text1_form1" placeholder="text1_form1"
-          data-sanatio-required="true"
-          data-sanatio-required-type="error"
-          data-sanatio-required-message="This is required"
-        >
+    <div class="page-wrap">
+      <div class="content-wrapper">
+        <div class="container">
+          <div class="row">
+            <div class="col-xs-12">
+              <header>
+                <h1>Sanatio Basic Implementation</h1>
+              </header>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <div class="form-group">
-        <label for="password1_form1">Form 1 Password 1</label>
-        <input type="password" name="password1_form1" id="password1_form1" placeholder="password1_form1"
-          data-sanatio-required="true"
-          data-sanatio-required-type="error"
-          data-sanatio-required-message="This is required"
-          data-sanatio-pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
-          data-sanatio-pattern-type="warning"
-          data-sanatio-pattern-message="Invalid Pattern"
-        >
+      <div class="content-wrapper">
+        <div class="container">
+          <div class="row">
+            <div class="col-xs-12">
+              <form data-sanatio id="form1" action="/">
+                <label for="text1_form1">Text</label>
+                <input type="text" name="text1_form1" id="text1_form1" placeholder="text"
+                  data-sanatio-required="true"
+                  data-sanatio-required-type="error"
+                  data-sanatio-required-message="ERROR: Text is required."
+                >
+                <hr>
+                <label for="password1_form1">Password</label>
+                <input type="password" name="password1_form1" id="password1_form1" placeholder="password"
+                  data-sanatio-required="true"
+                  data-sanatio-required-message="ERROR: Password is required."
+                  data-sanatio-pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
+                  data-sanatio-pattern-type="warning"
+                  data-sanatio-required-message="WARNING: This does not follow the expected pattern."
+                >
+                <hr>
+                <label for="email1_form1">Email</label>
+                <input type="email" name="email1_form1" id="email1_form1" placeholder="Email"
+                  data-sanatio-required="true"
+                  data-sanatio-required-message="ERROR: EMAIL is required."
+                  data-sanatio-email="true"
+                  data-sanatio-email-message="ERROR: Invalid Email."
+                >
+                <hr>
+                <label for="url1_form1">Url</label>
+                <input type="email" name="url1_form1" id="url1_form1" placeholder="Url"
+                  data-sanatio-url="true"
+                  data-sanatio-url-type="warning"
+                  data-sanatio-url-message="WARNING: Invalid URL."
+                >
+                <hr>
+                <label for="checkbox1_form1">
+                <input type="checkbox" name="checkbox1_form1" id="checkbox1_form1"
+                  data-sanatio-required="true"
+                  data-sanatio-required-message="ERROR: Checkbox is required."
+                >
+                Single Checkbox</label>
+                <hr>
+                <label for="checkbox2_form1">
+                <input type="checkbox" name="checkbox2_form1" id="checkbox2_form1"
+                  data-sanatio-required="true"
+                  data-sanatio-required-message="ERROR: Checkboxes are required."
+                  data-sanatio-minlength='2'
+                  data-sanatio-minlength-type='warning'
+                  data-sanatio-minlength-message="WARNING: At least two please."
+                >
+                Checkbox 1 in a Group</label><br>
+                <label for="checkbox3_form1">
+                <input type="checkbox" name="checkbox2_form1" id="checkbox3_form1"
+                >
+                Checkbox 2 in a Group</label><br>
+                <label for="checkbox4_form1">
+                <input type="checkbox" name="checkbox2_form1" id="checkbox4_form1"
+                >
+                Checkbox 3 in a Group</label>
+                <hr>
+                <label for="radio1_form1">
+                <input type="radio" name="radio1_form1" id="radio1_form1"
+                  data-sanatio-required="true"
+                  data-sanatio-required-type="warning"
+                >
+                Single Radio</label>
+                <hr>
+                <label for="radio2_form1">
+                <input type="radio" name="radio2_form1" id="radio2_form1"
+                  data-sanatio-required="true"
+                >
+                Radio 1 in a Group</label><br>
+                <label for="radio3_form1">
+                <input type="radio" name="radio2_form1" id="radio3_form1"
+                >
+                Radio 1 in a Group</label>
+                <hr>
+                <label for="single_select">Select Something</label><br>
+                <select name="single_select" id="single_select"
+                data-sanatio-required="true"
+                >
+                  <option value="">Select One</option>
+                  <option value="1">Option 1</option>
+                  <option value="2">Option 2</option>
+                  <option value="3">Option 3</option>
+                  <option value="4">Option 4</option>
+                  <option value="5">Option 5</option>
+                  <option value="6">Option 6</option>
+                  <option value="7">Option 7</option>
+                  <option value="8">Option 8</option>
+                </select>
+                <hr>
+                <label for="single_select">Select Minimum 3 and Maximum 5</label><br>
+                <select name="multiple_select" id="multiple_select" multiple="multiple"
+                data-sanatio-required="true"
+                data-sanatio-rangelength="[3, 5]"
+                >
+                  <option value="">Select Multiple</option>
+                  <option value="1">Option 1</option>
+                  <option value="2">Option 2</option>
+                  <option value="3">Option 3</option>
+                  <option value="4">Option 4</option>
+                  <option value="5">Option 5</option>
+                  <option value="6">Option 6</option>
+                  <option value="7">Option 7</option>
+                  <option value="8">Option 8</option>
+                </select>
+                <hr>
+                <input type="submit" value="Submit" title="Submit"/>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <div class="form-group">
-        <label for="email1_form1">Form 1 email 1</label>
-        <input type="email" name="email1_form1" id="email1_form1" placeholder="email1_form1"
-          data-sanatio-required="true"
-          data-sanatio-required-type="error"
-          data-sanatio-required-message="This is required"
-          data-sanatio-email="true"
-          data-sanatio-email-type="error"
-          data-sanatio-email-message="Invalid Email"
-        >
-      </div>
-      
-      <div class="form-group">
-        <label for="url1_form1">Form 1 url 1</label>
-        <input type="email" name="url1_form1" id="url1_form1" placeholder="url1_form1"
-          data-sanatio-url="true"
-          data-sanatio-url-type="warning"
-          data-sanatio-url-message="Invalid URL"
-        >
-      </div>
-      
-      <div class="form-group">
-        <label for="checkbox1_form1">
-        <input type="checkbox" name="checkbox1_form1" id="checkbox1_form1"
-          data-sanatio-required="true"
-          data-sanatio-required-type="error"
-          data-sanatio-required-message="This checkbox required"
-        >
-        Form 1 checkbox 1</label>
-      </div>
-      
-      <!--<div class="form-group">
-        <label for="checkbox2_form1">
-        <input type="checkbox" name="checkbox2_form1" id="checkbox2_form1"
-          data-sanatio-required="true"
-          data-sanatio-required-type="error"
-          data-sanatio-required-message="This is required"
-        >
-        Form 1 checkbox 2</label>
-        <label for="checkbox3_form1">
-        <input type="checkbox" name="checkbox2_form1" id="checkbox3_form1"
-        >
-        Form 1 checkbox 3</label>
-      </div>
-      
-      <div class="form-group">
-        <label for="radio1_form1">
-        <input type="radio" name="radio1_form1" id="radio1_form1"
-          data-sanatio-required="true"
-          data-sanatio-required-type="warning"
-          data-sanatio-required-message="This radio required"
-        >
-        Form 1 radio 1</label>
-      </div>
-      
-      <div class="form-group">
-        <label for="radio2_form1">
-        <input type="radio" name="radio2_form1" id="radio2_form1"
-          data-sanatio-required="true"
-          data-sanatio-required-type="error"
-          data-sanatio-required-message="This is required"
-        >
-        Form 1 radio 2</label>
-        <label for="radio3_form1">
-        <input type="radio" name="radio2_form1" id="radio3_form1"
-        >
-        Form 1 radio 3</label>
-      </div>-->
-      
-      <div class="form-group">
-        <select name="single_select" id="single_select"
-        data-sanatio-required="true"
-        data-sanatio-required-type="error"
-        data-sanatio-required-message="This is required"
-        >
-          <option value="">Select One</option>
-          <option value="1">Option 1</option>
-          <option value="2">Option 2</option>
-          <option value="3">Option 3</option>
-          <option value="4">Option 4</option>
-          <option value="5">Option 5</option>
-          <option value="6">Option 6</option>
-          <option value="7">Option 7</option>
-          <option value="8">Option 8</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <select name="multiple_select" id="multiple_select" multiple="multiple"
-        data-sanatio-required="true"
-        data-sanatio-required-type="error"
-        data-sanatio-required-message="This is required"
-        >
-          <option value="">Select Multiple</option>
-          <option value="1">Option 1</option>
-          <option value="2">Option 2</option>
-          <option value="3">Option 3</option>
-          <option value="4">Option 4</option>
-          <option value="5">Option 5</option>
-          <option value="6">Option 6</option>
-          <option value="7">Option 7</option>
-          <option value="8">Option 8</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <input type="submit" value="Submit" title="Submit"/>
-      </div>
-    </form>
-    <form data-sanatio id="form2" action="/">
-      <!--<input type="text" name="text1_form2" id="text1_form2" placeholder="text1_form2"
-        data-sanatio-required="true"
-        data-sanatio-required-type="error"
-        data-sanatio-pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
-        data-sanatio-pattern-type="warning"
-        data-sanatio-pattern-message="This is pattern not followed"
-      >-->
-      <input type="text" name="text2_form2" id="text2_form2" placeholder="text2_form2"
-        data-sanatio-rangelength="[6, 10]"
-        data-sanatio-rangelength-type="warning"
-        data-sanatio-minlength="6"
-        data-sanatio-minlength-type="error"
-      >
-      <!--<input type="text" name="text3_form2" id="text3_form2" placeholder="text3_form2"
-        data-sanatio-required="true"
-        data-sanatio-required-type="warning"
-        data-sanatio-required-message="This is required warning"
-      > -->
-      <button type="submit">submit form 2</button>
-    </form>
-    <form data-sanatio id="form3" action="/">
-    </form>
-    <form data-sanatio id="form4" action="/">
-    </form>
-    <form id="form5" action="/">
-      <label>Tryout</label>
-      <input type="text" name="text2_form5" id="text2_form5" placeholder="text2_form5">
-      <button type="submit">submit form 2</button>
-    </form>
+    </div>
+
+    <footer class="site-footer">
+      I'm the Sticky Footer.
+    </footer>
     <script src="../../bower_components/jquery/dist/jquery.js"></script>
     <script src="../../dev/sanatio.js"></script>
-    <script>
-    
-    $.sanatio.addSanatioMethod('sample', function (element, value){
-      return element.val() !== value;
-    });
-      var validity;
-      var validatorObj = {
-        'rulesConfig': [{
-          'elementName': 'text2_form5',
-          'rules': [
-            {
-              "type": "error",
-              "name": "required",
-              "value": true,
-              "message": "This value is required from jquery initiate."
-            },
-            {
-              "type": "error",
-              "name": "minlength",
-              "value": 6,
-              "message": "minlength from jquery initiate."
-            },
-            {
-              "type": "warning",
-              "name": "sample",
-              "value": "123456",
-              "message": "This is added method error initiate."
-            }
-          ]
-        }]
-      };
-      var initSanatioForm5 = $('#form5').sanatio(validatorObj);
-      validity = initSanatioForm5.getValidityStatus();
-    </script>
   </body>
 </html>

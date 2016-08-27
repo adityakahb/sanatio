@@ -33,27 +33,27 @@
           <div class="row">
             <div class="col-xs-12">
               <form data-sanatio id="form1" action="/">
-                <label for="text1_form1">Form 1 Text 1</label>
-                <input type="text" name="text1_form1" id="text1_form1" placeholder="text1_form1"
+                <label for="text1_form1">Text</label>
+                <input type="text" name="text1_form1" id="text1_form1" placeholder="text"
                   data-sanatio-required="true"
                   data-sanatio-required-type="error"
                 >
                 <hr>
-                <label for="password1_form1">Form 1 Password 1</label>
-                <input type="password" name="password1_form1" id="password1_form1" placeholder="password1_form1"
+                <label for="password1_form1">Password</label>
+                <input type="password" name="password1_form1" id="password1_form1" placeholder="password"
                   data-sanatio-required="true"
                   data-sanatio-pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
                   data-sanatio-pattern-type="warning"
                 >
                 <hr>
-                <label for="email1_form1">Form 1 email 1</label>
-                <input type="email" name="email1_form1" id="email1_form1" placeholder="email1_form1"
+                <label for="email1_form1">Email</label>
+                <input type="email" name="email1_form1" id="email1_form1" placeholder="Email"
                   data-sanatio-required="true"
                   data-sanatio-email="true"
                 >
                 <hr>
-                <label for="url1_form1">Form 1 url 1</label>
-                <input type="email" name="url1_form1" id="url1_form1" placeholder="url1_form1"
+                <label for="url1_form1">Url</label>
+                <input type="email" name="url1_form1" id="url1_form1" placeholder="Url"
                   data-sanatio-url="true"
                   data-sanatio-url-type="warning"
                 >
@@ -62,35 +62,41 @@
                 <input type="checkbox" name="checkbox1_form1" id="checkbox1_form1"
                   data-sanatio-required="true"
                 >
-                Form 1 checkbox 1</label>
+                Single Checkbox</label>
                 <hr>
                 <label for="checkbox2_form1">
                 <input type="checkbox" name="checkbox2_form1" id="checkbox2_form1"
                   data-sanatio-required="true"
+                  data-sanatio-minlength='2'
                 >
-                Form 1 checkbox 2</label><br>
+                Checkbox 1 in a Group</label><br>
                 <label for="checkbox3_form1">
                 <input type="checkbox" name="checkbox2_form1" id="checkbox3_form1"
                 >
-                Form 1 checkbox 3</label>
+                Checkbox 2 in a Group</label><br>
+                <label for="checkbox4_form1">
+                <input type="checkbox" name="checkbox2_form1" id="checkbox4_form1"
+                >
+                Checkbox 3 in a Group</label>
                 <hr>
                 <label for="radio1_form1">
                 <input type="radio" name="radio1_form1" id="radio1_form1"
                   data-sanatio-required="true"
                   data-sanatio-required-type="warning"
                 >
-                Form 1 radio 1</label>
+                Single Radio</label>
                 <hr>
                 <label for="radio2_form1">
                 <input type="radio" name="radio2_form1" id="radio2_form1"
                   data-sanatio-required="true"
                 >
-                Form 1 radio 2</label><br>
+                Radio 1 in a Group</label><br>
                 <label for="radio3_form1">
                 <input type="radio" name="radio2_form1" id="radio3_form1"
                 >
-                Form 1 radio 3</label>
+                Radio 1 in a Group</label>
                 <hr>
+                <label for="single_select">Select Something</label><br>
                 <select name="single_select" id="single_select"
                 data-sanatio-required="true"
                 >
@@ -105,8 +111,10 @@
                   <option value="8">Option 8</option>
                 </select>
                 <hr>
+                <label for="single_select">Select Minimum 3 and Maximum 5</label><br>
                 <select name="multiple_select" id="multiple_select" multiple="multiple"
                 data-sanatio-required="true"
+                data-sanatio-rangelength="[3, 5]"
                 >
                   <option value="">Select Multiple</option>
                   <option value="1">Option 1</option>
@@ -131,6 +139,6 @@
       I'm the Sticky Footer.
     </footer>
     <script src="../../bower_components/jquery/dist/jquery.js"></script>
-    <script src="../../dist/sanatio.min.js"></script>
+    <script src="../../dev/sanatio.js"></script>
   </body>
 </html>
