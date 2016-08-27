@@ -3,9 +3,7 @@ module.exports = function (grunt) {
   grunt.config( 'uglify', {
     sanatio: {
       options: {
-        sourceMap: true,
-        sourceMapIncludeSources: true,
-        sourceMapIn: 'example/coffeescript-sourcemap.js', // input sourcemap from a previous compilation
+        sourceMap: true
       },
       files: {
         'dist/sanatio.min.js': ['dev/sanatio.js'],
