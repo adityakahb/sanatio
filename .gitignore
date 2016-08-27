@@ -39,4 +39,5 @@ Thumbs.db
 # Sanatio related ignored files #
 ######################
 node_modules/
+bower_components/
 .eslintrc

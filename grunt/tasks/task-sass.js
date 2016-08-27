@@ -7,9 +7,9 @@ module.exports = function (grunt) {
     dev: {
       files: [{
         expand: true,
-        cwd: 'library/sass',
-        src: ['**/**/**.scss'],
-        dest: 'library/css',
+        cwd: 'demos/library/sass',
+        src: ['**/**/**/**.scss'],
+        dest: 'demos/library/css',
         ext: '.css'
       }]
     }

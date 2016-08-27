@@ -4,9 +4,9 @@ module.exports = function (grunt) {
       force: true
     },
     css: [
-      'library/**/css',
-      'library/sass/**/*.css',
-      'library/sass/**/*.map'
+      'demos/library/**/css',
+      'demos/library/sass/**/*.css',
+      'demos/library/sass/**/*.map'
     ]
   });
 

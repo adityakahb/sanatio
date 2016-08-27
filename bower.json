@@ -14,5 +14,9 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "devDependencies": {
+    "jquery": "^3.1.0",
+    "normalize-scss": "normalize.scss#^5.0.3"
+  }
 }
