@@ -406,6 +406,44 @@
       },
       
       /**
+      * Function to clean the errors on the element
+      * @param elementObj with element and its properties
+      * @return
+      */
+      cleanErrors: function (elementObj, type){
+        errorElement = elementObj.element;
+        insertedWarningElement = null;
+        insertedErrorElement = null;
+        
+        if (elementObj.isCheckable){
+          if (errorElement.parents('label').length === 1){
+            insertedWarningElement = errorElement.last().parents('label').nextAll('.'+this.warningClass).eq(0);
+            insertedErrorElement = errorElement.last().parents('label').nextAll('.'+this.errorClass).eq(0);
+          } else if (errorElement.next('label').length === 1){
+            insertedWarningElement = errorElement.last().next('label').nextAll('.'+this.warningClass).eq(0);
+            insertedErrorElement = errorElement.last().next('label').nextAll('.'+this.errorClass).eq(0);
+          } else {
+            insertedWarningElement = errorElement.last().nextAll('.'+this.warningClass).eq(0);
+            insertedErrorElement = errorElement.last().nextAll('.'+this.errorClass).eq(0);
+          }
+        } else {
+          insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
+          insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
+        }
+        
+        // console.log('insertedWarningElement', insertedWarningElement);
+        // console.log('insertedErrorElement', insertedErrorElement);
+        if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
+          insertedWarningElement.remove();
+        }
+        if (type === 'all'){
+          if (typeof insertedErrorElement !== 'undefined' && insertedErrorElement !== null){
+            insertedErrorElement.remove();
+          }
+        }
+      },
+      
+      /**
       * Function to sanitize the form element based on defined rules
       * @param Respective Sanatio object and form element
       * @return 
@@ -539,6 +577,25 @@
       },
       
       /**
+      * Insert the error or warning respective to the element
+      * @param elementObj with its properties, element, element error or warning class, error or warn string and its string class, message string
+      * @return 
+      */
+      insertErrorOrWarning: function (eObj, element, elementClass, type, selectorClass, message){
+        if (eObj.isCheckable){
+          if (element.parents('label').length === 1){
+            element.last().parents('label').after('<div class="' + selectorClass.substr(1) + type + ' ' + this.warningClass + '">'+ message +'</div>');
+          } else if (element.next('label').length === 1){
+            element.last().next('label').after('<div class="' + selectorClass.substr(1) + type + ' ' + this.warningClass + '">'+ message +'</div>');
+          } else {
+            element.last().after('<div class="' + selectorClass.substr(1) + type + ' ' + this.warningClass + '">'+ message +'</div>');
+          }
+        } else {
+          element.after('<div class="' + selectorClass.substr(1) + type + ' ' + this.warningClass + '">'+ message +'</div>');
+        }
+      },
+      
+      /**
       * Function to show and remove respective errors
       * @param
       * @return 
@@ -557,12 +614,6 @@
           localWarningType = '';
           insertedWarningElement = null;
           insertedErrorElement = null;
-          
-          /* if (elementsLength.element.length === 1 && !elementsLength.isCheckable){  
-            
-          } else {
-            
-          }*/
           
           errorElement = this.preparedInvalidElements[outerCnt].elementObj.element;
           
@@ -591,104 +642,26 @@
               errorElement.removeClass('has-sanatio-warning');
             }
           }
-          if (elementsLength.isCheckable){
-            if (errorElement.parents('label').length === 1){
-              insertedWarningElement = errorElement.last().parents('label').nextAll('.'+this.warningClass).eq(0);
-              insertedErrorElement = errorElement.last().parents('label').nextAll('.'+this.errorClass).eq(0);
-            } else if (errorElement.next('label').length === 1){
-              insertedWarningElement = errorElement.last().next('label').nextAll('.'+this.warningClass).eq(0);
-              insertedErrorElement = errorElement.last().next('label').nextAll('.'+this.errorClass).eq(0);
-            } else {
-              insertedWarningElement = errorElement.last().nextAll('.'+this.warningClass).eq(0);
-              insertedErrorElement = errorElement.last().nextAll('.'+this.errorClass).eq(0);
-            }
-          } else {
-            insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
-            insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
-          }
           
-          // console.log('insertedWarningElement', insertedWarningElement);
-          // console.log('insertedErrorElement', insertedErrorElement);
+          this.cleanErrors(elementsLength, 'all');
           
-          if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
-            insertedWarningElement.remove();
-          }
-          if (typeof insertedErrorElement !== 'undefined' && insertedErrorElement !== null){
-            insertedErrorElement.remove();
-          }
-
           if (errorElement.hasClass('has-sanatio-warning') && localWarningType.length > 0 && errorElement.nextAll('.warning-' + localWarningType).eq(0).length === 0){
-            if (elementsLength.isCheckable){
-              if (errorElement.parents('label').length === 1){
-                errorElement.last().parents('label').after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
-              } else if (errorElement.next('label').length === 1){
-                errorElement.last().next('label').after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
-              } else {
-                errorElement.last().after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
-              }
-            } else {
-              errorElement.after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
-            }
+            this.insertErrorOrWarning(elementsLength, errorElement, 'has-sanatio-warning', localWarningType, '.warning-', localWarning);
             ++warningsCount;
           }
 
           if (errorElement.hasClass('has-sanatio-error') && localErrorType.length > 0 && errorElement.nextAll('.error-' + localErrorType).eq(0).length === 0){
-            if (elementsLength.isCheckable){
-              if (errorElement.parents('label').length === 1){
-                errorElement.last().parents('label').after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
-              } else if (errorElement.next('label').length === 1){
-                errorElement.last().next('label').after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
-              } else {
-                errorElement.last().after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
-              }
-            } else {
-              errorElement.after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
-            }
+            this.insertErrorOrWarning(elementsLength, errorElement, 'has-sanatio-error', localErrorType, '.error-', localError);
             ++errorsCount;
           }
 
           if (!elementsLength.shouldApplyRequired && sanatioReturnLength(errorElement) === 0){
-
-            if (elementsLength.isCheckable){
-              if (errorElement.parents('label').length === 1){
-                insertedWarningElement = errorElement.last().parents('label').nextAll('.'+this.warningClass).eq(0);
-                insertedErrorElement = errorElement.last().parents('label').nextAll('.'+this.errorClass).eq(0);
-              } else if (errorElement.next('label').length === 1){
-                insertedWarningElement = errorElement.last().next('label').nextAll('.'+this.warningClass).eq(0);
-                insertedErrorElement = errorElement.last().next('label').nextAll('.'+this.errorClass).eq(0);
-              } else {
-                insertedWarningElement = errorElement.last().nextAll('.'+this.warningClass).eq(0);
-                insertedErrorElement = errorElement.last().nextAll('.'+this.errorClass).eq(0);
-              }
-            } else {
-              insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
-              insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
-            }
-            
-            if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
-              insertedWarningElement.remove();
-            }
-            if (typeof insertedErrorElement !== 'undefined' && insertedErrorElement !== null){
-              insertedErrorElement.remove();
-            }
+            this.cleanErrors(elementsLength, 'all');
           }
           
-          if (elementsLength.shouldApplyRequired && sanatioReturnLength(errorElement) === 0){
-            if (elementsLength.isCheckable){
-              if (errorElement.parents('label').length === 1){
-                insertedWarningElement = errorElement.last().parents('label').nextAll('.'+this.warningClass).eq(0);
-              } else if (errorElement.next('label').length === 1){
-                insertedWarningElement = errorElement.last().next('label').nextAll('.'+this.warningClass).eq(0);
-              } else {
-                insertedWarningElement = errorElement.last().nextAll('.'+this.warningClass).eq(0);
-              }
-            } else {
-              insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
-            }
-            if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
-              insertedWarningElement.remove();
-            }
-          }
+          // if (elementsLength.shouldApplyRequired && sanatioReturnLength(errorElement) === 0){
+            // this.cleanErrors(elementsLength, 'warnings');
+          // }
         }
         
         this.validationStatus['errors'] = errorsCount;
