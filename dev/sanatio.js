@@ -15,7 +15,7 @@
       'date',
       'equalthisto',
       'rangelength',
-      'range',
+      'rangevalue',
       'capslock'
     ];
     // Avoid revalidate the field when pressing one of the following keys
@@ -70,7 +70,9 @@
     outerCnt,
     innerCnt,
     rootCnt,
-    msgCnt;
+    msgCnt,
+    errorsCount,
+    warningsCount;
   
   var patternRegex;
   
@@ -206,7 +208,7 @@
     thisMessage = '';
     
     if (typeof receivedMessage === 'undefined'){
-      if ($.inArray( receivedRule, ['minlength', 'maxlength', 'rangelength', 'range'] ) !== -1){
+      if ($.inArray( receivedRule, ['minlength', 'maxlength', 'rangelength', 'rangevalue'] ) !== -1){
         thisMessage = sanatioFormattedMessage(receivedSettings.messagesSetup[receivedRule], receivedValue);
       } else {
         thisMessage = receivedSettings.messagesSetup[receivedRule];
@@ -339,8 +341,8 @@
       warningCount: 0,
       ignoreElements: ':hidden',
       allowWarningsToPassForm: true,
-      isValid: false,
-      debug: true,
+      validationStatus: {},
+      debug: false,
       preparedElements: [],
       preparedInvalidElements: [],
       submitted: [],
@@ -357,7 +359,7 @@
         date: 'Invalid date default',
         equalthisto: 'Values of {{0}} and {{1}} not same default',
         rangelength: 'Minimum {{0}} and Maximum {{1}} default',
-        range: 'Value must be between {{0}} and {{1}} default',
+        rangevalue: 'Value must be between {{0}} and {{1}} default',
         capslock: 'Please check the capslock default'
       },
       events: {
@@ -409,6 +411,7 @@
       * @return 
       */
       doSanitation: function (sanitator, elementObj){
+        
         localSettings = sanitator.settings;
         
         $.each(localSettings.rulesConfig, function(index, elementItem){
@@ -530,7 +533,7 @@
         rangelength: function (element, mustBe){
           return sanatioReturnLength(element) < mustBe[0] || sanatioReturnLength(element) > mustBe[1] ? true : false;
         },
-        range: function (element, mustBe){
+        rangevalue: function (element, mustBe){
           return sanatioReturnValue(element) < mustBe[0] || sanatioReturnValue(element) > mustBe[1] ? true : false;
         }
       },
@@ -542,6 +545,9 @@
       */
       showSanatioErrors: function (){
         
+        errorsCount = 0;
+        warningsCount = 0;
+        
         for (outerCnt in this.preparedInvalidElements){
           elementsLength = this.preparedInvalidElements[outerCnt].elementObj;
           errorElementProps = this.preparedInvalidElements[outerCnt].isThisElementValid;
@@ -551,7 +557,7 @@
           localWarningType = '';
           insertedWarningElement = null;
           insertedErrorElement = null;
-
+          
           /* if (elementsLength.element.length === 1 && !elementsLength.isCheckable){  
             
           } else {
@@ -585,9 +591,21 @@
               errorElement.removeClass('has-sanatio-warning');
             }
           }
-
-          insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
-          insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
+          if (elementsLength.isCheckable){
+            if (errorElement.parents('label').length === 1){
+              insertedWarningElement = errorElement.last().parents('label').nextAll('.'+this.warningClass).eq(0);
+              insertedErrorElement = errorElement.last().parents('label').nextAll('.'+this.errorClass).eq(0);
+            } else if (errorElement.next('label').length === 1){
+              insertedWarningElement = errorElement.last().next('label').nextAll('.'+this.warningClass).eq(0);
+              insertedErrorElement = errorElement.last().next('label').nextAll('.'+this.errorClass).eq(0);
+            } else {
+              insertedWarningElement = errorElement.last().nextAll('.'+this.warningClass).eq(0);
+              insertedErrorElement = errorElement.last().nextAll('.'+this.errorClass).eq(0);
+            }
+          } else {
+            insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
+            insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
+          }
           
           // console.log('insertedWarningElement', insertedWarningElement);
           // console.log('insertedErrorElement', insertedErrorElement);
@@ -598,26 +616,54 @@
           if (typeof insertedErrorElement !== 'undefined' && insertedErrorElement !== null){
             insertedErrorElement.remove();
           }
-          
+
           if (errorElement.hasClass('has-sanatio-warning') && localWarningType.length > 0 && errorElement.nextAll('.warning-' + localWarningType).eq(0).length === 0){
             if (elementsLength.isCheckable){
-              errorElement.last().after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
+              if (errorElement.parents('label').length === 1){
+                errorElement.last().parents('label').after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
+              } else if (errorElement.next('label').length === 1){
+                errorElement.last().next('label').after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
+              } else {
+                errorElement.last().after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
+              }
             } else {
               errorElement.after('<div class="' + this.warningClass + ' warning-' + localWarningType + '">'+ localWarning +'</div>');
             }
+            ++warningsCount;
           }
-            
+
           if (errorElement.hasClass('has-sanatio-error') && localErrorType.length > 0 && errorElement.nextAll('.error-' + localErrorType).eq(0).length === 0){
             if (elementsLength.isCheckable){
-              errorElement.last().after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
+              if (errorElement.parents('label').length === 1){
+                errorElement.last().parents('label').after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
+              } else if (errorElement.next('label').length === 1){
+                errorElement.last().next('label').after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
+              } else {
+                errorElement.last().after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
+              }
             } else {
               errorElement.after('<div class="' + this.errorClass + ' error-' + localErrorType + '">'+ localError +'</div>');
             }
+            ++errorsCount;
           }
-          
+
           if (!elementsLength.shouldApplyRequired && sanatioReturnLength(errorElement) === 0){
-            insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
-            insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
+
+            if (elementsLength.isCheckable){
+              if (errorElement.parents('label').length === 1){
+                insertedWarningElement = errorElement.last().parents('label').nextAll('.'+this.warningClass).eq(0);
+                insertedErrorElement = errorElement.last().parents('label').nextAll('.'+this.errorClass).eq(0);
+              } else if (errorElement.next('label').length === 1){
+                insertedWarningElement = errorElement.last().next('label').nextAll('.'+this.warningClass).eq(0);
+                insertedErrorElement = errorElement.last().next('label').nextAll('.'+this.errorClass).eq(0);
+              } else {
+                insertedWarningElement = errorElement.last().nextAll('.'+this.warningClass).eq(0);
+                insertedErrorElement = errorElement.last().nextAll('.'+this.errorClass).eq(0);
+              }
+            } else {
+              insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
+              insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
+            }
             
             if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
               insertedWarningElement.remove();
@@ -628,12 +674,25 @@
           }
           
           if (elementsLength.shouldApplyRequired && sanatioReturnLength(errorElement) === 0){
-            insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
+            if (elementsLength.isCheckable){
+              if (errorElement.parents('label').length === 1){
+                insertedWarningElement = errorElement.last().parents('label').nextAll('.'+this.warningClass).eq(0);
+              } else if (errorElement.next('label').length === 1){
+                insertedWarningElement = errorElement.last().next('label').nextAll('.'+this.warningClass).eq(0);
+              } else {
+                insertedWarningElement = errorElement.last().nextAll('.'+this.warningClass).eq(0);
+              }
+            } else {
+              insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
+            }
             if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
               insertedWarningElement.remove();
             }
           }
         }
+        
+        this.validationStatus['errors'] = errorsCount;
+        this.validationStatus['warnings'] = warningsCount;
       }
   	},
     
@@ -741,12 +800,10 @@
         for (cnt in this.settings.submitted){
           this.settings.doSanitation(this, this.settings.submitted[cnt]);
         }
+        
         this.settings.showSanatioErrors();
-  
-        return {
-            hasErrors: false,
-            hasWarnings: false
-          };
+        
+        return;
       }
     }
   });
@@ -778,8 +835,16 @@
         // Prevent form submit to be able to see console output
         event.preventDefault();
       }
-      isThisFormValid = sanatio.checkForSubmittedElements();
-      return false;
+      sanatio.checkForSubmittedElements();
+      isThisFormValid = sanatio.settings.validationStatus;
+      
+      if (sanatio.settings.allowWarningsToPassForm){
+        return isThisFormValid.errors === 0 ? true : false;
+      } else {
+        return (isThisFormValid.errors !== 0 || isThisFormValid.warnings !== 0) ? false : true;
+      }
+      
+      return true;
     });
     
     thisSanatioObject = $.data(this[0]);
@@ -789,6 +854,9 @@
     }
     this.destroySanatio = function (){
       return thisSanatioObject.sanatio.settings.destroy();
+    };
+    this.getValidityStatus = function (){
+      return thisSanatioObject.sanatio.settings.validationStatus;
     };
     
     return this;

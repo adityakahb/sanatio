@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!--[if IE 9]>         <html lang="en_CA" class="no-js lt-ie10" > <![endif]-->
+<!--[if IE 9]>         <html lang="en_US" class="no-js lt-ie10" > <![endif]-->
 <!--[if gt IE 9]><!-->
-<html lang="en_CA" class="no-js">
+<html lang="en_US" class="no-js">
 <!--<![endif]-->
 
   <head>
@@ -181,7 +181,7 @@
     $.sanatio.addSanatioMethod('sample', function (element, value){
       return element.val() !== value;
     });
-    
+      var validity;
       var validatorObj = {
         'rulesConfig': [{
           'elementName': 'text2_form5',
@@ -208,7 +208,7 @@
         }]
       };
       var initSanatioForm5 = $('#form5').sanatio(validatorObj);
-    
+      validity = initSanatioForm5.getValidityStatus();
     </script>
   </body>
 </html>
