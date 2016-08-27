@@ -589,9 +589,9 @@
       */
       insertErrorOrWarning: function (eObj, element, elementClass, type, selectorClass, message){
         if (eObj.isCheckable){
-          if (element.parents('label').length === 1){
+          if (element.last().parents('label').length === 1){
             element.last().parents('label').after('<div class="' + selectorClass.substr(1) + type + ' ' + this.warningClass + '">'+ message +'</div>');
-          } else if (element.next('label').length === 1){
+          } else if (element.last().next('label').length === 1){
             element.last().next('label').after('<div class="' + selectorClass.substr(1) + type + ' ' + this.warningClass + '">'+ message +'</div>');
           } else {
             element.last().after('<div class="' + selectorClass.substr(1) + type + ' ' + this.warningClass + '">'+ message +'</div>');
