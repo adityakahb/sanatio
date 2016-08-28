@@ -3,6 +3,7 @@
   'use strict';
   var thisSanatioObject,
     defaultApplicableRules = [
+      'capslock',
       'required',
       'pattern',
       'email',
@@ -18,8 +19,7 @@
       'dateformat',
       'equalthisto',
       'rangelength',
-      'rangevalue',
-      'capslock'
+      'rangevalue'
     ];
     // Avoid revalidate the field when pressing one of the following keys
     // Enter       => 13 ==> Not used
@@ -435,6 +435,7 @@
       submitted: [],
       errorTag: 'label',
       messagesSetup: {
+        capslock: 'Capslock is on.',
         required: 'This field is required.',
         pattern: 'This does not follow expected pattern.',
         email: 'Please enter a valid email address.',
@@ -450,12 +451,18 @@
         dateformat: 'Please check the Date Format.',
         equalthisto: 'Values do not match.',
         rangelength: 'Please enter a value between {{0}} and {{1}} characters long.',
-        rangevalue: 'Please enter a value between {{0}} and {{1}}.',
-        capslock: 'Capslock is on.'
+        rangevalue: 'Please enter a value between {{0}} and {{1}}.'
       },
       events: {
         focusin: function (sanitator, elementObj, event) {
-          // TODO: Implement Focus In
+          // TODO: Caps lock Implementation
+          if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable) && elementObj.applyCaps){
+            sanitator.settings.submitted.push(elementObj);
+          }
+          if (sanitator.settings.submitted.indexOf(elementObj) !== -1 && elementObj.applyCaps){
+            sanitator.settings.doSanitation(sanitator, elementObj);
+            sanitator.settings.showSanatioErrors();
+          }
         },
         focusout: function (sanitator, elementObj, event) {
           if (elementObj.isEditable){
@@ -472,16 +479,20 @@
           if ( event.which === 9 && sanatioTrimmedValue( elementObj.element.val() ) === '' || $.inArray( event.keyCode, excludedKeys ) !== -1 ) {
             return;
           } else {
-            if (sanitator.settings.submitted.indexOf(elementObj) !== -1){
+            if (sanitator.settings.submitted.indexOf(elementObj) !== -1 && !elementObj.applyCaps){
               sanitator.settings.doSanitation(sanitator, elementObj);
               sanitator.settings.showSanatioErrors();
             }
           }
         },
         keydown: function (sanitator, elementObj, event) {
-          if (elementObj.applyCaps && elementObj.isEditable){
-            console.log('CapsLock.isOn()', CapsLock.isOn());
-            // TODO: Caps lock Implement
+          // TODO: Caps lock Implementation
+          if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable) && elementObj.applyCaps){
+            sanitator.settings.submitted.push(elementObj);
+          }
+          if (sanitator.settings.submitted.indexOf(elementObj) !== -1 && elementObj.applyCaps){
+            sanitator.settings.doSanitation(sanitator, elementObj);
+            sanitator.settings.showSanatioErrors();
           }
         },
         change: function (sanitator, elementObj, event) {
@@ -604,12 +615,12 @@
               localErrorType = '';
 
               for (rootCnt in localSettings.messagesSetup){
-                if (rootCnt!== 'capslock' && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
+                if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
                   
                   isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempErrorObj, 'errors', 'errorType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
                   
                 }
-                if (rootCnt!== 'capslock' && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
+                if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
                   
                   isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempWarnObj, 'warnings', 'warningType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
 
@@ -771,6 +782,9 @@
           }
           
           return true;
+        },
+        capslock: function (element, mustBe){
+          return CapsLock.isOn();
         }
       },
       
