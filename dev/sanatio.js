@@ -362,7 +362,7 @@
         luhn: 'TODO: Proper Luhn check message.',
         creditcard: 'Please enter a valid credit card number.',
         date: 'Please enter a valid date.',
-        equalthisto: 'Values of {{0}} and {{1}} do not match.',
+        equalthisto: 'Values do not match.',
         rangelength: 'Please enter a value between {{0}} and {{1}} characters long.',
         rangevalue: 'Please enter a value between {{0}} and {{1}}.',
         capslock: 'Capslock is on.'
@@ -448,6 +448,29 @@
         }
       },
       
+      crossCheckRule: function (ruleValue, ruleFunction, ruleElement, temp_obj, str, typeStr, countStr, messageStr, returnObj, actualMessage){
+        try {
+          jsonedValue = JSON.parse(ruleValue);
+        } catch (e){
+          jsonedValue = ruleValue;
+        }
+        
+        if (countStr === 'equalthisto'){
+          temp_obj = ruleFunction(ruleElement, this.getElement(this.currentForm, jsonedValue));
+        } else {
+          temp_obj = ruleFunction(ruleElement, jsonedValue);
+        }
+        
+        returnObj[str] = typeof temp_obj !== 'undefined' ? temp_obj : false;
+        
+        returnObj[typeStr] = countStr;
+        
+        returnObj[messageStr] = setSanatioMessage(localSettings, actualMessage, countStr, ruleValue);
+        returnObj[messageStr].length === 0 ? returnObj.message = 'No error message specified for ' + countStr : returnObj[messageStr];
+        
+        return returnObj;
+      },
+
       /**
       * Function to sanitize the form element based on defined rules
       * @param Respective Sanatio object and form element
@@ -478,36 +501,14 @@
               for (rootCnt in localSettings.messagesSetup){
                 
                 if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
-                  
-                  try {
-                    jsonedValue = JSON.parse(elementItem.rules[innerCnt].value);
-                  } catch (e){
-                    jsonedValue = elementItem.rules[innerCnt].value;
-                  }
-                  
-                  tempErrorObj = localSettings.checkFor[rootCnt]( elementObj.element, jsonedValue );
 
-                  isThisElementValid.errors = typeof tempErrorObj !== 'undefined' ? tempErrorObj : false;
-                  isThisElementValid.errorType = rootCnt;
+                  isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempErrorObj, 'errors', 'errorType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message);
                   
-                  isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, rootCnt, elementItem.rules[innerCnt].value);
-                  isThisElementValid.message.length === 0 ? isThisElementValid.message = 'No error message specified for ' + rootCnt : isThisElementValid.message;
                 }
                 if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
                   
-                  try {
-                    jsonedValue = JSON.parse(elementItem.rules[innerCnt].value);
-                  } catch (e){
-                    jsonedValue = elementItem.rules[innerCnt].value;
-                  }
-                  
-                  tempWarnObj = localSettings.checkFor[rootCnt]( elementObj.element, jsonedValue );
-                  
-                  isThisElementValid.warnings = typeof tempWarnObj !== 'undefined' ? tempWarnObj : false;
-                  isThisElementValid.warningType = rootCnt;
-                  
-                  isThisElementValid.message = setSanatioMessage(localSettings, elementItem.rules[innerCnt].message, rootCnt, elementItem.rules[innerCnt].value);
-                  isThisElementValid.message.length === 0 ? isThisElementValid.message = 'No warning message specified for ' + rootCnt : isThisElementValid.message;
+                  isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempWarnObj, 'warnings', 'warningType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message);
+
                 }
               }
               
@@ -594,6 +595,15 @@
         rangevalue: function (element, mustBe){
           try {
             return parseInt(sanatioReturnValue(element)) >= parseInt(mustBe[0]) && parseInt(sanatioReturnValue(element)) <= parseInt(mustBe[1]) ? false : true;
+          } catch (e){
+            return true;
+          }
+          
+          return true;
+        },
+        equalthisto: function (element, mustBe){
+          try {
+            return sanatioReturnValue(element) === sanatioReturnValue(mustBe) ? false : true;
           } catch (e){
             return true;
           }
@@ -721,7 +731,8 @@
       prepareFormElements: function (){
         formElement = $(this.currentForm);
         formSettings = this.settings;
-
+        formSettings.currentForm = formElement;
+        
         for (cnt in formSettings.rulesConfig){
           thisElement = formSettings.getElement(formElement, formSettings.rulesConfig[cnt].elementName);
           
