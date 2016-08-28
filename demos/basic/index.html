@@ -36,7 +36,32 @@
                 <label for="text1_form1">Text</label>
                 <input type="text" name="text1_form1" id="text1_form1" placeholder="text"
                   data-sanatio-required="true"
-                  data-sanatio-required-type="error"
+                >
+                <hr>
+                <label for="password1_form1">Password</label>
+                <input type="password" name="password1_form1" id="password1_form1" placeholder="password"
+                  data-sanatio-required="true"
+                  data-sanatio-capslock="true"
+                >
+                <!-- data-sanatio-pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
+                data-sanatio-pattern-type="warning" -->
+                <hr>
+                <label for="password2_form1">Password</label>
+                <input type="password" name="password2_form1" id="password2_form1" placeholder="retype password"
+                  data-sanatio-required="true"
+                  data-sanatio-equalthisto="password1_form1"
+                >
+                <hr>
+                <label for="email1_form1">Email</label>
+                <input type="email" name="email1_form1" id="email1_form1" placeholder="Email"
+                  data-sanatio-required="true"
+                  data-sanatio-email="true"
+                >
+                <hr>
+                <label for="url1_form1">Url</label>
+                <input type="email" name="url1_form1" id="url1_form1" placeholder="Url"
+                  data-sanatio-url="true"
+                  data-sanatio-url-type="warning"
                 >
                 <hr>
                 <label for="text2_form1">Only digits</label>
@@ -60,31 +85,12 @@
                   data-sanatio-luhn="true"
                 >
                 <hr>
-                <label for="password1_form1">Password</label>
-                <input type="password" name="password1_form1" id="password1_form1" placeholder="password"
+                <label for="date1_form1">Date</label>
+                <input type="text" name="date1_form1" id="date1_form1" placeholder="Date in YYYY MM DD"
                   data-sanatio-required="true"
-                  data-sanatio-pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
-                  data-sanatio-pattern-type="warning"
-                >
-                <hr>
-                <label for="password2_form1">Password</label>
-                <input type="password" name="password2_form1" id="password2_form1" placeholder="retype password"
-                  data-sanatio-required="true"
-                  data-sanatio-pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
-                  data-sanatio-pattern-type="warning"
-                  data-sanatio-equalthisto="password1_form1"
-                >
-                <hr>
-                <label for="email1_form1">Email</label>
-                <input type="email" name="email1_form1" id="email1_form1" placeholder="Email"
-                  data-sanatio-required="true"
-                  data-sanatio-email="true"
-                >
-                <hr>
-                <label for="url1_form1">Url</label>
-                <input type="email" name="url1_form1" id="url1_form1" placeholder="Url"
-                  data-sanatio-url="true"
-                  data-sanatio-url-type="warning"
+                  data-sanatio-date="YYYY MM DD"
+                  data-sanatio-dateformat="YYYY MM DD"
+                  data-sanatio-dateformat-type="warning"
                 >
                 <hr>
                 <label for="textarea1_form1">textarea</label>
@@ -174,6 +180,7 @@
       I'm the Sticky Footer.
     </footer>
     <script src="../../bower_components/jquery/dist/jquery.js"></script>
+    <script src="../../bower_components/moment/min/moment-with-locales.js"></script>
     <script src="../../dev/sanatio.js"></script>
   </body>
 </html>

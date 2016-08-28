@@ -15,6 +15,7 @@
       'luhn',
       'creditcard',
       'date',
+      'dateformat',
       'equalthisto',
       'rangelength',
       'rangevalue',
@@ -76,7 +77,13 @@
   
   var creditCardValue,
     creditCardTestValue,
-    creditCardMatch;
+    creditCardMatch,
+    capsLock,
+    listeners,
+    isMac,
+    priorCapsLock,
+    charCode,
+    index;
   
   var isThisFormValid = {},
     isThisElementValid = {};
@@ -98,7 +105,8 @@
     localWarningType,
     insertedErrorElement,
     insertedWarningElement;
-    
+  
+  var momentJSWarning = 'Sanatio uses MomentJS to validate the date values. Please check if the MomentJS plugin file is included and referred correctly.\nVisit http://momentjs.com/ for more information.';
   /**
   * Function to check for Luhn Algorithm for Credit Card
   * @param credit card number inserted by user
@@ -225,6 +233,69 @@
     return thisMessage;
   };
   
+  /*
+
+  CapsLock.js
+
+  An object allowing the status of the caps lock key to be determined
+
+  Created by Stephen Morley - http://code.stephenmorley.org/ - and released under
+  the terms of the CC0 1.0 Universal legal code:
+
+  http://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+  */
+
+  var CapsLock = (function (){
+
+    capsLock = false;
+    listeners = [];
+    isMac = /Mac/.test(navigator.platform);
+
+    function isOn (){
+      return capsLock;
+    }
+
+    function addListener (listener){
+      listeners.push(listener);
+    }
+
+    function handleKeyPress (e){
+
+      if (!e) e = window.event;
+
+      priorCapsLock = capsLock;
+
+      charCode = (e.charCode ? e.charCode : e.keyCode);
+
+      if (charCode >= 97 && charCode <= 122){
+        capsLock = e.shiftKey;
+      } else if (charCode >= 65 && charCode <= 90 && !(e.shiftKey && isMac)){
+        capsLock = !e.shiftKey;
+      }
+
+      if (capsLock !== priorCapsLock){
+        for (index = 0; index < listeners.length; index ++){
+          listeners[index](capsLock);
+        }
+      }
+
+    }
+
+    if (window.addEventListener){
+      window.addEventListener('keypress', handleKeyPress, false);
+    } else {
+      document.documentElement.attachEvent('onkeypress', handleKeyPress);
+    }
+
+    return {
+      isOn: isOn,
+      addListener: addListener
+    };
+
+  })();
+
+
   
   /**
   * Takes out the elements which have data-sanatio-* rules on them when a form is initiated using data-sanatio
@@ -302,7 +373,9 @@
             if (tempRuleObj2['name'] === 'creditcard'){
               tempRuleObj2['luhncheck'] = $(thisRuleElement).attr('data-sanatio-creditcard');
               tempRuleObj2['formatter'] = $(thisRuleElement).attr('data-sanatio-creditcard-formatter');
-              // Aditya tempRuleObj2['type']
+            }
+            if (tempRuleObj2['name'] === 'capslock'){
+              tempRuleObj2['type'] = 'warning';
             }
             tempRuleObj.rules.push(tempRuleObj2);
             break;
@@ -331,6 +404,7 @@
       }
     }
   };
+  
   
   // Constructor for validator
   $.sanatio = function (options, form) {
@@ -373,6 +447,7 @@
         luhn: 'Luhn check didn\'t pass for this field.',
         creditcard: 'Please enter a valid credit card number.',
         date: 'Please enter a valid date.',
+        dateformat: 'Please check the Date Format.',
         equalthisto: 'Values do not match.',
         rangelength: 'Please enter a value between {{0}} and {{1}} characters long.',
         rangevalue: 'Please enter a value between {{0}} and {{1}}.',
@@ -403,6 +478,12 @@
             }
           }
         },
+        keydown: function (sanitator, elementObj, event) {
+          if (elementObj.applyCaps && elementObj.isEditable){
+            console.log('CapsLock.isOn()', CapsLock.isOn());
+            // TODO: Caps lock Implement
+          }
+        },
         change: function (sanitator, elementObj, event) {
           if (sanitator.settings.submitted.indexOf(elementObj) !== -1){
             sanitator.settings.doSanitation(sanitator, elementObj);
@@ -412,7 +493,7 @@
             sanitator.settings.submitted.push(elementObj);
           }
         },
-        keypress: function (sanitator, elementObj, event){
+        keypress: function (sanitator, elementObj, event) {
           if (elementObj.creditcardProps !== null && elementObj.creditcardProps.applyCC && elementObj.creditcardProps.format){
             creditCardValue = elementObj.element.val().split(elementObj.creditcardProps.formatter).join(''); // remove hyphens
             if (creditCardValue.length > 0) {
@@ -468,17 +549,21 @@
         }
       },
       
-      crossCheckRule: function (ruleValue, ruleFunction, ruleElement, temp_obj, str, typeStr, countStr, messageStr, returnObj, actualMessage){
+      crossCheckRule: function (ruleValue, ruleFunction, ruleElement, temp_obj, str, typeStr, countStr, messageStr, returnObj, actualMessage, shouldApplyCaps, capsStatus){
         try {
           jsonedValue = JSON.parse(ruleValue);
         } catch (e){
           jsonedValue = ruleValue;
         }
         
-        if (countStr === 'equalthisto'){
-          temp_obj = ruleFunction(ruleElement, this.getElement(this.currentForm, jsonedValue));
+        if (shouldApplyCaps && countStr === 'capslock'){
+          temp_obj = ruleFunction(capsStatus);
         } else {
-          temp_obj = ruleFunction(ruleElement, jsonedValue);
+          if (countStr === 'equalthisto'){
+            temp_obj = ruleFunction(ruleElement, this.getElement(this.currentForm, jsonedValue));
+          } else {
+            temp_obj = ruleFunction(ruleElement, jsonedValue);
+          }
         }
         
         returnObj[str] = typeof temp_obj !== 'undefined' ? temp_obj : false;
@@ -519,15 +604,14 @@
               localErrorType = '';
 
               for (rootCnt in localSettings.messagesSetup){
-                
-                if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
-
-                  isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempErrorObj, 'errors', 'errorType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message);
+                if (rootCnt!== 'capslock' && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
+                  
+                  isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempErrorObj, 'errors', 'errorType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
                   
                 }
-                if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
+                if (rootCnt!== 'capslock' && elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
                   
-                  isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempWarnObj, 'warnings', 'warningType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message);
+                  isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempWarnObj, 'warnings', 'warningType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
 
                 }
               }
@@ -663,6 +747,30 @@
           } else {
             return true;
           }
+          
+          return true;
+        },
+        date: function (element, mustBe){
+          try {
+            return !moment(sanatioReturnValue(element), mustBe).isValid();
+          } catch (e){
+            console.warn(momentJSWarning);
+            
+            return true;
+          }
+          
+          return true;
+        },
+        dateformat: function (element, mustBe){
+          try {
+            return !moment(sanatioReturnValue(element), mustBe, true).isValid();
+          } catch (e){
+            console.warn(momentJSWarning);
+            
+            return true;
+          }
+          
+          return true;
         }
       },
       
@@ -845,6 +953,15 @@
             
           }
           
+          for (outerCnt in formSettings.rulesConfig[cnt].rules){
+            if (formSettings.rulesConfig[cnt].rules[outerCnt].name === 'capslock'){
+              tempObj.applyCaps = true;
+              break;
+            } else {
+              tempObj.applyCaps = false;
+            }
+          }
+          
           this.settings.rulesConfig[cnt].elementObj = tempObj;
           this.settings.preparedElements.push(tempObj);
         }
@@ -872,7 +989,7 @@
           }
         };
         
-        $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio keypress.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'change.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
+        $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio keypress.sanatio keydown.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'change.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
       },
       
       checkForSubmittedElements: function (){
