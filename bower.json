@@ -29,6 +29,7 @@
     "tests",
     "grunt/",
     "gruntfile.js",
-    "package.json"
+    "package.json",
+    ".eslintrc"
   ]
 }
