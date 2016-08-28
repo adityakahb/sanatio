@@ -434,6 +434,7 @@
       preparedInvalidElements: [],
       submitted: [],
       errorTag: 'label',
+      highlightParent: '',
       messagesSetup: {
         capslock: 'Capslock is on.',
         required: 'This field is required.',
@@ -796,14 +797,14 @@
       insertErrorOrWarning: function (eObj, element, elementClass, type, selectorClass, message, messageClass){
         if (eObj.isCheckable){
           if (element.last().parents('label').length === 1){
-            element.last().parents('label').after('<' + this.errorTag + ' class="' + selectorClass.substr(1) + type + ' ' + messageClass + '">'+ message +'</' + this.errorTag + '>');
+            element.last().parents('label').after('<' + this.errorTag + ' class="' + selectorClass.substr(1) + type + ' ' + messageClass + ' help-block">'+ message +'</' + this.errorTag + '>');
           } else if (element.last().next('label').length === 1){
-            element.last().next('label').after('<' + this.errorTag + ' class="' + selectorClass.substr(1) + type + ' ' + messageClass + '">'+ message +'</' + this.errorTag + '>');
+            element.last().next('label').after('<' + this.errorTag + ' class="' + selectorClass.substr(1) + type + ' ' + messageClass + ' help-block">'+ message +'</' + this.errorTag + '>');
           } else {
-            element.last().after('<' + this.errorTag + ' class="' + selectorClass.substr(1) + type + ' ' + messageClass + '">'+ message +'</' + this.errorTag + '>');
+            element.last().after('<' + this.errorTag + ' class="' + selectorClass.substr(1) + type + ' ' + messageClass + ' help-block">'+ message +'</' + this.errorTag + '>');
           }
         } else {
-          element.after('<' + this.errorTag + ' class="' + selectorClass.substr(1) + type + ' ' + messageClass + '">'+ message +'</' + this.errorTag + '>');
+          element.after('<' + this.errorTag + ' class="' + selectorClass.substr(1) + type + ' ' + messageClass + ' help-block">'+ message +'</' + this.errorTag + '>');
         }
       },
       
@@ -839,9 +840,17 @@
             }
             if (localError.length > 0){
               errorElement.addClass('has-sanatio-error');
+              
+              if (typeof errorElement.parents(this.highlightParent) !== 'undefined'){
+                errorElement.parents(this.highlightParent).addClass(this.errorClass);
+              }
               break;
             } else {
               errorElement.removeClass('has-sanatio-error');
+              
+              if (typeof errorElement.parents(this.highlightParent) !== 'undefined'){
+                errorElement.parents(this.highlightParent).removeClass(this.errorClass);
+              }
             }
           }
           
@@ -852,9 +861,17 @@
             }
             if (localWarning.length > 0){
               errorElement.addClass('has-sanatio-warning');
+              
+              if (typeof errorElement.parents(this.highlightParent) !== 'undefined'){
+                errorElement.parents(this.highlightParent).addClass(this.warningClass);
+              }
               break;
             } else {
               errorElement.removeClass('has-sanatio-warning');
+              
+              if (typeof errorElement.parents(this.highlightParent) !== 'undefined'){
+                errorElement.parents(this.highlightParent).removeClass(this.warningClass);
+              }
             }
           }
           
