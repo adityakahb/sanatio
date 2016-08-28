@@ -39,7 +39,9 @@
     emailRegex = new RegExp('^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$', 'i'),
     urlRegex = new RegExp( '^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})).?)(?::\d{2,5})?(?:[/?#]\S*)?$', 'i'),
     digitsRegex = new RegExp('^\\d+$'),
-    creditcardRegex = new RegExp('^(?:(4[0-9]{12}(?:[0-9]{3})?)|(5[1-5][0-9]{14})|(6(?:011|5[0-9]{2})[0-9]{12})|(3[47][0-9]{13})|(3(?:0[0-5]|[68][0-9])[0-9]{11})|((?:2131|1800|35[0-9]{3})[0-9]{11}))$');
+    creditcardFormatRegex = new RegExp('.{1,4}', 'g'),
+    creditcardRegex = new RegExp('^(?:(4[0-9]{12}(?:[0-9]{3})?)|(5[1-5][0-9]{14})|(6(?:011|5[0-9]{2})[0-9]{12})|(3[47][0-9]{13})|(3(?:0[0-5]|[68][0-9])[0-9]{11})|((?:2131|1800|35[0-9]{3})[0-9]{11}))$'),
+    patternRegex;
     
   var formEventCallMethod,
     localValidator,
@@ -72,7 +74,9 @@
     errorsCount,
     warningsCount;
   
-  var patternRegex;
+  var creditCardValue,
+    creditCardTestValue,
+    creditCardMatch;
   
   var isThisFormValid = {},
     isThisElementValid = {};
@@ -81,7 +85,8 @@
   
   var luhnLen,
     luhnBit,
-    luhnSum;
+    luhnSum,
+    luhnVal;
   
   var elementsLength = 0,
     errorElement,
@@ -289,10 +294,16 @@
           ruleAttributeName = thisRuleElement.attributes[rulesAttributesCount];
           if (ruleAttributeName.name.indexOf( defaultApplicableRules[ defaultRulesCount ]) !== -1){
             tempRuleObj2 = {};
-            tempRuleObj2['type'] = $(thisRuleElement).attr('data-sanatio-'+defaultApplicableRules[ defaultRulesCount ]+'-type');
+            tempRuleObj2['type'] = typeof $(thisRuleElement).attr('data-sanatio-'+defaultApplicableRules[ defaultRulesCount ]+'-type') !== 'undefined' ? $(thisRuleElement).attr('data-sanatio-'+defaultApplicableRules[ defaultRulesCount ]+'-type') : 'error';
             tempRuleObj2['name'] = defaultApplicableRules[ defaultRulesCount ];
             tempRuleObj2['value'] = $(thisRuleElement).attr('data-sanatio-'+defaultApplicableRules[ defaultRulesCount ]);
             tempRuleObj2['message'] = $(thisRuleElement).attr('data-sanatio-'+defaultApplicableRules[ defaultRulesCount ]+'-message');
+            
+            if (tempRuleObj2['name'] === 'creditcard'){
+              tempRuleObj2['luhncheck'] = $(thisRuleElement).attr('data-sanatio-creditcard');
+              tempRuleObj2['formatter'] = $(thisRuleElement).attr('data-sanatio-creditcard-formatter');
+              // Aditya tempRuleObj2['type']
+            }
             tempRuleObj.rules.push(tempRuleObj2);
             break;
           }
@@ -359,7 +370,7 @@
         maxvalue: 'Please enter no more than {{0}} characters.',
         minlength: 'Entered / Selected value(s) must be at least {{0}} in length.',
         maxlength: 'Entered / Selected value(s) must be at max {{0}} in length.',
-        luhn: 'TODO: Proper Luhn check message.',
+        luhn: 'Luhn check didn\'t pass for this field.',
         creditcard: 'Please enter a valid credit card number.',
         date: 'Please enter a valid date.',
         equalthisto: 'Values do not match.',
@@ -399,6 +410,15 @@
           }
           if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
             sanitator.settings.submitted.push(elementObj);
+          }
+        },
+        keypress: function (sanitator, elementObj, event){
+          if (elementObj.creditcardProps !== null && elementObj.creditcardProps.applyCC && elementObj.creditcardProps.format){
+            creditCardValue = elementObj.element.val().split(elementObj.creditcardProps.formatter).join(''); // remove hyphens
+            if (creditCardValue.length > 0) {
+              creditCardValue = creditCardValue.match(creditcardFormatRegex).join(elementObj.creditcardProps.formatter);
+            }
+            elementObj.element.val(creditCardValue);
           }
         }
       },
@@ -609,6 +629,40 @@
           }
           
           return true;
+        },
+        creditcard: function (element, mustBe){
+          creditCardTestValue = sanatioReturnValue(element).replace(/[ -]/g, '');
+          if (mustBe === 'withoutLuhn'){
+            return !creditcardRegex.test(creditCardTestValue);
+          } else {
+            creditCardMatch =creditcardRegex.exec(creditCardTestValue);
+            if (creditCardMatch) {
+              for (defaultRulesCount = 1; defaultRulesCount < creditCardMatch.length; defaultRulesCount++) {
+                if (creditCardMatch[defaultRulesCount]) {  
+                  return !sanatioLuhnCheck(creditCardTestValue);
+                  break;
+                }
+              }
+            } else {
+              return true;
+            }
+          }
+          
+          return true;
+        },
+        luhn: function (element, mustBe){
+          creditCardTestValue = sanatioReturnValue(element).replace(/[ -]/g, '');
+          creditCardMatch =creditcardRegex.exec(creditCardTestValue);
+          if (creditCardMatch) {
+            for (defaultRulesCount = 1; defaultRulesCount < creditCardMatch.length; defaultRulesCount++) {
+              if (creditCardMatch[defaultRulesCount]) {  
+                return !sanatioLuhnCheck(creditCardTestValue);
+                break;
+              }
+            }
+          } else {
+            return true;
+          }
         }
       },
       
@@ -728,6 +782,7 @@
     },
     
     prototype: {
+      
       prepareFormElements: function (){
         formElement = $(this.currentForm);
         formSettings = this.settings;
@@ -770,12 +825,22 @@
           }
           
           for (outerCnt in formSettings.rulesConfig[cnt].rules){
-            
             if (formSettings.rulesConfig[cnt].rules[outerCnt].name === 'creditcard'){
-              tempObj.shouldApplyCreditcard = true;
+              tempObj.creditcardProps = {};
+              tempObj.creditcardProps.applyCC = true;
+
+              tempObj.creditcardProps.luhnCheck = typeof formSettings.rulesConfig[cnt].rules[outerCnt].value !== 'undefined' ? formSettings.rulesConfig[cnt].rules[outerCnt].value : 'withoutLuhn';
+              tempObj.creditcardProps.format = typeof formSettings.rulesConfig[cnt].rules[outerCnt].formatter !== 'undefined' ? true : false;
+              tempObj.creditcardProps.formatter = typeof formSettings.rulesConfig[cnt].rules[outerCnt].formatter !== 'undefined' ? formSettings.rulesConfig[cnt].rules[outerCnt].formatter : '';
+              
+              if (tempObj.creditcardProps.formatter !== ' ' && tempObj.creditcardProps.formatter !== '-' && tempObj.creditcardProps.formatter !== ''){
+                console.warn('Invalid separator is used; resetting it to blankspace.');
+                tempObj.creditcardProps.formatter = ' ';
+              }
+              
               break;
             } else {
-              tempObj.shouldApplyCreditcard = false;
+              tempObj.creditcardProps = null;
             }
             
           }
@@ -784,6 +849,7 @@
           this.settings.preparedElements.push(tempObj);
         }
       },
+      
       init: function (){
         
         formEventCallMethod = function (event){
@@ -800,13 +866,15 @@
                 break;
               }
             }
+            
             localSettings.events[ localEventType ]( localValidator, localElementObj, event );
   					// settings[ eventType ].call( sanatio, this, event );
           }
         };
         
-        $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'change.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
+        $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio keypress.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'change.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
       },
+      
       checkForSubmittedElements: function (){
         
         for (cnt in this.settings.rulesConfig){
