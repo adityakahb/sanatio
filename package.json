@@ -2,8 +2,8 @@
   "name": "sanatio",
   "version": "1.0.0",
   "description": "A modern validation plugin which handles errors and warnings separately",
-  "author": "A·B",
-  "license": "ISC",
+  "author": "Aditya Bhakay <http://www.adityabhakay.com>",
+  "license": "MIT",
   "devDependencies": {
     "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",

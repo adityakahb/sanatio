@@ -1,13 +1,26 @@
 {
   "name": "sanatio",
-  "homepage": "https://github.com/adityakahb/sanatio",
-  "authors": [
-    "A·B"
+  "description": "A validator plugin to handle Warnings and Errors separately",
+  "main": [
+    "dist/sanatio.min.js"
   ],
-  "description": "A modern validator plugin",
-  "main": "",
+  "devDependencies": {
+    "jquery": "^3.1.0",
+    "moment": "^2.14.1"
+  },
+  "keywords": [
+    "sanatio",
+    "validator",
+    "jquery",
+    "warnings",
+    "errors",
+    "html",
+    "javascript"
+  ],
+  "authors": [
+    "Aditya Bhakay <http://www.adityabhakay.com>"
+  ],
   "license": "MIT",
-  "private": true,
   "ignore": [
     "**/.*",
     "node_modules",
@@ -15,9 +28,5 @@
     "test",
     "tests"
   ],
-  "devDependencies": {
-    "jquery": "^3.1.0",
-    "normalize-scss": "normalize.scss#^5.0.3",
-    "moment": "^2.14.1"
-  }
+  "private": true
 }
