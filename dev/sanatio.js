@@ -109,6 +109,8 @@
     insertedErrorElement,
     insertedWarningElement;
   
+  var passToSubmitHandler;
+  
   var momentJSWarning = 'Sanatio uses MomentJS to validate the date values. Please check if the MomentJS plugin file is included and referred correctly.\nVisit http://momentjs.com/ for more information.';
   /**
   * Function to check for Luhn Algorithm for Credit Card
@@ -432,7 +434,7 @@
       ignoreElements: ':hidden',
       allowWarningsToPassForm: true,
       validationStatus: {},
-      debug: true,
+      debug: false,
       preparedElements: [],
       preparedInvalidElements: [],
       submitted: [],
@@ -935,6 +937,15 @@
       
     },
     
+    /**
+    * Function to generate the form submit
+    * @param shouldPassTheForm Boolean
+    * @return 
+    */
+    submitHandler: function (){
+      return true;
+    },
+    
     prototype: {
       
       prepareFormElements: function (){
@@ -1101,12 +1112,15 @@
       isThisFormValid = sanatio.settings.validationStatus;
       
       if (sanatio.settings.allowWarningsToPassForm){
-        return isThisFormValid.errors === 0 ? true : false;
+        passToSubmitHandler = isThisFormValid.errors === 0 ? true : false;
       } else {
-        return (isThisFormValid.errors !== 0 || isThisFormValid.warnings !== 0) ? false : true;
+        passToSubmitHandler = (isThisFormValid.errors !== 0 || isThisFormValid.warnings !== 0) ? false : true;
       }
-      
-      return true;
+      if (passToSubmitHandler){
+        return $.sanatio.submitHandler();
+      } else {
+        return false;
+      }
     });
     
     thisSanatioObject = $.data(this[0]);

@@ -5839,6 +5839,6 @@ footer {
   background: #2a2a2a;
   color: #fff; }
 
-.col-xs-12.col-sm-4.col-lg-3 {
+.col-xs-12.col-sm-4.col-lg-3, .main-wrapper {
   padding-top: 20px;
   padding-bottom: 20px; }

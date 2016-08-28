@@ -28,7 +28,7 @@
           </div>
         </div>
       </div>
-      <div class="content-wrapper">
+      <div class="content-wrapper main-wrapper">
         <div class="container">
           <div class="row">
             <div class="col-xs-12">
@@ -58,6 +58,10 @@
     <script src="../../bower_components/moment/min/moment-with-locales.js"></script>
     <script src="../../dev/sanatio.js"></script>
     <script>
+    $.sanatio.submitHandler = function (){
+      alert('submitted');
+      return false;
+    };
     $.sanatio.addSanatioMethod('customrule', function (element, value){
       return parseInt(element.val()) !== parseInt(value);
     });
