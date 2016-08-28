@@ -429,7 +429,7 @@
       ignoreElements: ':hidden',
       allowWarningsToPassForm: true,
       validationStatus: {},
-      debug: true,
+      debug: false,
       preparedElements: [],
       preparedInvalidElements: [],
       submitted: [],
