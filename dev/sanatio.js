@@ -64,7 +64,10 @@
     tempObj2,
     tempErrorObj,
     tempWarnObj,
-    isItemPresent;
+    isItemPresent,
+    ifConditionPresent,
+    ifConditionObj,
+    ifConditionArr = [];
   
   var defaultRulesCount,
     cnt,
@@ -429,7 +432,7 @@
       ignoreElements: ':hidden',
       allowWarningsToPassForm: true,
       validationStatus: {},
-      debug: false,
+      debug: true,
       preparedElements: [],
       preparedInvalidElements: [],
       submitted: [],
@@ -536,16 +539,18 @@
         insertedErrorElement = null;
         
         if (elementObj.isCheckable){
-          if (errorElement.parents('label').length === 1){
+
+          if (errorElement.last().parents('label').length === 1){
             insertedWarningElement = errorElement.last().parents('label').nextAll('.'+this.warningClass).eq(0);
             insertedErrorElement = errorElement.last().parents('label').nextAll('.'+this.errorClass).eq(0);
-          } else if (errorElement.next('label').length === 1){
+          } else if (errorElement.last().next('label').length === 1){
             insertedWarningElement = errorElement.last().next('label').nextAll('.'+this.warningClass).eq(0);
             insertedErrorElement = errorElement.last().next('label').nextAll('.'+this.errorClass).eq(0);
           } else {
             insertedWarningElement = errorElement.last().nextAll('.'+this.warningClass).eq(0);
             insertedErrorElement = errorElement.last().nextAll('.'+this.errorClass).eq(0);
           }
+          
         } else {
           insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
           insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
@@ -614,17 +619,27 @@
               isItemPresent = false;
               localWarningType = '';
               localErrorType = '';
-
+              ifConditionPresent = false;
               for (rootCnt in localSettings.messagesSetup){
-                if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
-                  
-                  isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempErrorObj, 'errors', 'errorType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
-                  
+                if (typeof elementItem.if !== 'undefined'){
+                  ifConditionPresent = true;
+                  if (elementItem.elementObj.ifConditionElement.element.is(elementItem.elementObj.ifConditionElement.condition)){
+                    ifConditionPresent = false;
+                  }
+                } else {
+                  ifConditionPresent = false;
                 }
-                if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
-                  
-                  isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempWarnObj, 'warnings', 'warningType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
+                if (!ifConditionPresent){
+                  if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
+                    
+                    isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempErrorObj, 'errors', 'errorType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
+                    
+                  }
+                  if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
+                    
+                    isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempWarnObj, 'warnings', 'warningType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
 
+                  }
                 }
               }
               
@@ -841,14 +856,14 @@
             if (localError.length > 0){
               errorElement.addClass('has-sanatio-error');
               
-              if (typeof errorElement.parents(this.highlightParent) !== 'undefined'){
+              if (sanatioTrimmedValue(this.highlightParent).length > 0 && typeof errorElement.parents(this.highlightParent) !== 'undefined'){
                 errorElement.parents(this.highlightParent).addClass(this.errorClass);
               }
               break;
             } else {
               errorElement.removeClass('has-sanatio-error');
               
-              if (typeof errorElement.parents(this.highlightParent) !== 'undefined'){
+              if (sanatioTrimmedValue(this.highlightParent).length > 0 && typeof errorElement.parents(this.highlightParent) !== 'undefined'){
                 errorElement.parents(this.highlightParent).removeClass(this.errorClass);
               }
             }
@@ -862,14 +877,14 @@
             if (localWarning.length > 0){
               errorElement.addClass('has-sanatio-warning');
               
-              if (typeof errorElement.parents(this.highlightParent) !== 'undefined'){
+              if (sanatioTrimmedValue(this.highlightParent).length > 0 && typeof errorElement.parents(this.highlightParent) !== 'undefined'){
                 errorElement.parents(this.highlightParent).addClass(this.warningClass);
               }
               break;
             } else {
               errorElement.removeClass('has-sanatio-warning');
-              
-              if (typeof errorElement.parents(this.highlightParent) !== 'undefined'){
+
+              if (sanatioTrimmedValue(this.highlightParent).length > 0 && typeof errorElement.parents(this.highlightParent) !== 'undefined'){
                 errorElement.parents(this.highlightParent).removeClass(this.warningClass);
               }
             }
@@ -926,7 +941,7 @@
         formElement = $(this.currentForm);
         formSettings = this.settings;
         formSettings.currentForm = formElement;
-        
+
         for (cnt in formSettings.rulesConfig){
           thisElement = formSettings.getElement(formElement, formSettings.rulesConfig[cnt].elementName);
           
@@ -945,6 +960,18 @@
             tempObj.isClickable = false;
             tempObj.isCheckable = false;
             tempObj.isEditable = true;
+          }
+          
+          if (typeof formSettings.rulesConfig[cnt].if !== 'undefined'){
+            tempObj.if = formSettings.rulesConfig[cnt].if;
+            
+            ifConditionArr = tempObj.if.split(':');
+            ifConditionObj = {};
+            ifConditionObj.element = formSettings.getElement(formElement, ifConditionArr[0]);
+            ifConditionObj.condition = ':'+ifConditionArr[1];
+            
+            tempObj.ifConditionElement = ifConditionObj;
+
           }
           
           for (outerCnt in formSettings.rulesConfig[cnt].rules){
@@ -1014,8 +1041,9 @@
                 break;
               }
             }
-            
-            localSettings.events[ localEventType ]( localValidator, localElementObj, event );
+            if (localElementObj){
+              localSettings.events[ localEventType ]( localValidator, localElementObj, event );
+            }
   					// settings[ eventType ].call( sanatio, this, event );
           }
         };
