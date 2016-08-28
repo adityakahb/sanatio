@@ -27,6 +27,5 @@
     "bower_components",
     "test",
     "tests"
-  ],
-  "private": true
+  ]
 }
