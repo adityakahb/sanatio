@@ -46,6 +46,36 @@
                   <label class="control-label" for="inputError2">Text 3</label>
                   <input type="text" class="form-control" name="inputError2" id="inputError2">
                 </div>
+                <div class="form-group">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" id="checkbox1" name="checkbox1" value="option1">
+                      Checkbox with errors
+                    </label>
+                  </div>
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" id="checkbox1_1" name="checkbox1" value="option1">
+                      Checkbox with errors
+                    </label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" id="checkbox2" name="checkbox2" value="option1">
+                      Checkbox with warning
+                    </label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" id="checkbox3" name="checkbox3" value="option1">
+                      Checkbox
+                    </label>
+                  </div>
+                </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
               </form>
             </div>
@@ -78,14 +108,17 @@
       'errorTag': 'span',
       'additionalErrorClasses': 'help-block',
       'additionalWarningClasses': 'help-block',
-      'messagePlaceholder': '.message-parent',
       'rulesConfig': [{
         'elementName': 'inputWarning1',
         'rules': [
           {
             "type": "warning",
             "name": "minlength",
-            "value": "10"
+            "value": "10",
+            "message": "<div class='alert alert-warning'>\
+              <span class='glyphicon glyphicon-exclamation-sign'></span>\
+              Minlength is not followed\
+              </div>"
           }
         ]
       },{
@@ -93,7 +126,11 @@
         'rules': [
           {
             "type": "error",
-            "name": "required"
+            "name": "required",
+            "message": "<div class='alert alert-danger'>\
+              <span class='glyphicon glyphicon-exclamation-sign'></span>\
+              This field is required\
+              </div>"
           }
         ]
       },{
@@ -101,7 +138,30 @@
         'rules': [
           {
             "type": "error",
-            "name": "required"
+            "name": "required",
+            "message": "<div class='alert alert-danger'>\
+              <span class='glyphicon glyphicon-exclamation-sign'></span>\
+              This field is required\
+              </div>"
+          }
+        ]
+      },{
+        'elementName': 'checkbox1',
+        'rules': [
+          {
+            "name": "required",
+            "message": "<div class='alert alert-danger'>\
+              <span class='glyphicon glyphicon-exclamation-sign'></span>\
+              Please check this\
+              </div>"
+          }
+        ]
+      },{
+        'elementName': 'checkbox2',
+        'rules': [
+          {
+            "name": "required",
+            "type": "warning"
           }
         ]
       }]
