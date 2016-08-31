@@ -141,7 +141,11 @@
   * @return trimmed value
   */
   var sanatioTrimmedValue = function (value) {
-    return typeof value === 'string' ? value.replace( /^\s+|\s+$/g, '' ) : value;
+    try {
+      return typeof value === 'string' ? value.replace( /^\s+|\s+$/g, '' ) : value;
+    } catch (e){
+      return value;
+    }
   };
   
   /**
@@ -303,6 +307,11 @@
 
   })();
 
+  /**
+  * Gets the place where an error or warning should be placed
+  * @param elementsObj and custom placeholder (if any)
+  * @return element and its relative place like after or append
+  */
   var getErrorPlacement = function (eObj, custom){
     
     thisMessagePlaceholder = eObj.element.parent().find(custom);
@@ -323,6 +332,25 @@
       } else {
         return [eObj.element, 'after'];
       }
+    }
+  };
+  
+  /**
+  * Pretty much like previous function, but this time it gets the placed error
+  * @param elementsObj
+  * @return element
+  */
+  var getPlacedError = function (eObj){
+    if (eObj.isCheckable){
+      if (eObj.element.last().parents('label').length === 1){
+        return [eObj.element.last().parents('label'), eObj.element.attr('name')];
+      } else if (eObj.element.last().next('label').length === 1){
+        return [eObj.element.last().next('label'), eObj.element.attr('name')];
+      } else {
+        return [eObj.element.last(), , eObj.element.attr('name')];
+      }
+    } else {
+      return [eObj.element, eObj.element.attr('name')];
     }
   };
   
@@ -460,7 +488,7 @@
       ignoreElements: ':hidden',
       allowWarningsToPassForm: true,
       validationStatus: {errors: 0, warnings: 0},
-      debug: false,
+      debug: true,
       preparedElements: [],
       preparedInvalidElements: [],
       submitted: [],
@@ -620,7 +648,8 @@
                 } else {
                   ifConditionPresent = false;
                 }
-                if (!ifConditionPresent){
+                
+                if (!ifConditionPresent && typeof elementItem.rules[innerCnt].value !== 'undefined' && sanatioTrimmedValue(elementItem.rules[innerCnt].value).toString() !== 'false'){
                   if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
                     
                     isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempErrorObj, 'errors', 'errorType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
@@ -736,7 +765,7 @@
         },
         creditcard: function (element, mustBe){
           creditCardTestValue = sanatioReturnValue(element).replace(/[ -]/g, '');
-          if (mustBe === 'withoutLuhn'){
+          if (mustBe === 'without-luhn'){
             return !creditcardRegex.test(creditCardTestValue);
           } else {
             creditCardMatch =creditcardRegex.exec(creditCardTestValue);
@@ -772,7 +801,7 @@
         },
         date: function (element, mustBe){
           try {
-            return !moment(sanatioReturnValue(element), mustBe).isValid();
+            return !moment(sanatioReturnValue(element)).isValid();
           } catch (e){
             console.warn(momentJSWarning);
             
@@ -802,29 +831,13 @@
       * @param elementObj with element and its properties
       * @return
       */
-      // TODO: Clean this function again
       cleanErrors: function (elementObj, type){
-        errorElement = elementObj.element;
+        
+        defaultElementObj = getPlacedError(elementObj);
         insertedWarningElement = null;
         insertedErrorElement = null;
-        
-        if (elementObj.isCheckable){
-
-          if (errorElement.last().parents('label').length === 1){
-            insertedWarningElement = errorElement.last().parents('label').nextAll('.'+this.warningClass).eq(0);
-            insertedErrorElement = errorElement.last().parents('label').nextAll('.'+this.errorClass).eq(0);
-          } else if (errorElement.last().next('label').length === 1){
-            insertedWarningElement = errorElement.last().next('label').nextAll('.'+this.warningClass).eq(0);
-            insertedErrorElement = errorElement.last().next('label').nextAll('.'+this.errorClass).eq(0);
-          } else {
-            insertedWarningElement = errorElement.last().nextAll('.'+this.warningClass).eq(0);
-            insertedErrorElement = errorElement.last().nextAll('.'+this.errorClass).eq(0);
-          }
-          
-        } else {
-          insertedWarningElement = errorElement.nextAll('.'+this.warningClass).eq(0);
-          insertedErrorElement = errorElement.nextAll('.'+this.errorClass).eq(0);
-        }
+        insertedWarningElement = $(defaultElementObj[0]).nextAll('[for="' + defaultElementObj[1] + '"].'+this.warningClass).eq(0);
+        insertedErrorElement = $(defaultElementObj[0]).nextAll('[for="' + defaultElementObj[1] + '"].'+this.errorClass).eq(0);
         
         if (typeof insertedWarningElement !== 'undefined' && insertedWarningElement !== null){
           insertedWarningElement.remove();
@@ -841,8 +854,8 @@
       * @param elementObj with its properties, element, element error or warning class, error or warn string and its string class, message string
       * @return preparedMessage
       */
-      preparedMessage: function (errorTag, selectorClass, type, messageClass, additionalClasses, message){
-        return $('<' + errorTag + ' class="' + selectorClass + type + ' ' + messageClass + ' ' + additionalClasses + '">'+ message +'</' + errorTag + '>');
+      preparedMessage: function (errorTag, selectorClass, type, messageClass, additionalClasses, message, element){
+        return $('<' + errorTag + ' for="' + element.attr('name') + '" class="' + selectorClass + type + ' ' + messageClass + ' ' + additionalClasses + '">'+ message +'</' + errorTag + '>');
       },
       
       /**
@@ -850,9 +863,10 @@
       * @param elementObj with its properties, element, element error or warning class, error or warn string and its string class, message string
       * @return 
       */
-      insertErrorOrWarning: function (placeholderArr, elementClass, type, selectorClass, message, messageClass, additionalClasses){
-        addedMessage = this.preparedMessage(this.errorTag, selectorClass.substr(1), type, messageClass, additionalClasses, message);
+      insertErrorOrWarning: function (placeholderArr, element, elementClass, type, selectorClass, message, messageClass, additionalClasses){
+        addedMessage = this.preparedMessage(this.errorTag, selectorClass.substr(1), type, messageClass, additionalClasses, message, element);
         placeholderArr[0][placeholderArr[1]](addedMessage);
+        
         // addedMessage.show('slow');
       },
       
@@ -931,12 +945,12 @@
           thisMessagePlaceholder = getErrorPlacement(elementsLength, this.messagePlaceholder);
           
           if (errorElement.hasClass('has-sanatio-warning') && localWarningType.length > 0){
-            this.insertErrorOrWarning(thisMessagePlaceholder, 'has-sanatio-warning', localWarningType, '.warning-', localWarning, this.warningClass, this.additionalWarningClasses);
+            this.insertErrorOrWarning(thisMessagePlaceholder, elementsLength.element, 'has-sanatio-warning', localWarningType, '.warning-', localWarning, this.warningClass, this.additionalWarningClasses);
             ++warningsCount;
           }
 
           if (errorElement.hasClass('has-sanatio-error') && localErrorType.length > 0){
-            this.insertErrorOrWarning(thisMessagePlaceholder, 'has-sanatio-error', localErrorType, '.error-', localError, this.errorClass, this.additionalErrorClasses);
+            this.insertErrorOrWarning(thisMessagePlaceholder, elementsLength.element, 'has-sanatio-error', localErrorType, '.error-', localError, this.errorClass, this.additionalErrorClasses);
             ++errorsCount;
           }
 
@@ -960,7 +974,7 @@
     * @param rule name and function defination
     * @return 
     */
-    addSanatioMethod: function (fnName, fn){
+    addSanatioRule: function (fnName, fn){
       
       if (typeof this.defaults.messagesSetup[fnName] === 'undefined'){
         this.defaults.messagesSetup[fnName] = '';
@@ -1043,7 +1057,7 @@
               tempObj.ccProps = {};
               tempObj.ccProps.applyCC = true;
 
-              tempObj.ccProps.luhnCheck = typeof formSettings.rulesConfig[cnt].rules[outerCnt].value !== 'undefined' ? formSettings.rulesConfig[cnt].rules[outerCnt].value : 'withoutLuhn';
+              tempObj.ccProps.luhnCheck = typeof formSettings.rulesConfig[cnt].rules[outerCnt].value !== 'undefined' ? formSettings.rulesConfig[cnt].rules[outerCnt].value : 'without-luhn';
               tempObj.ccProps.format = typeof formSettings.rulesConfig[cnt].rules[outerCnt].formatter !== 'undefined' ? true : false;
               tempObj.ccProps.formatter = typeof formSettings.rulesConfig[cnt].rules[outerCnt].formatter !== 'undefined' ? formSettings.rulesConfig[cnt].rules[outerCnt].formatter : '';
               
@@ -1117,7 +1131,6 @@
     }
   });
   
-  
   /**
   * Default plugin initiation for each form
   * @param rules options
@@ -1131,6 +1144,7 @@
     if ( sanatio ) {
       return sanatio;
     }
+    
     this.attr('novalidate', 'novalidate');
       
     sanatio = new $.sanatio( options, this[ 0 ] );
@@ -1148,6 +1162,7 @@
       sanatio.settings.validationStatus['warnings'] = 0;
       
       sanatio.checkForSubmittedElements();
+      
       isThisFormValid = sanatio.settings.validationStatus;
       
       if (sanatio.settings.allowWarningsToPassForm){

@@ -62,7 +62,7 @@
       alert('submitted');
       return false;
     };
-    $.sanatio.addSanatioMethod('customrule', function (element, value){
+    $.sanatio.addSanatioRule('customrule', function (element, value){
       return parseInt(element.val()) !== parseInt(value);
     });
     var validatorObj = {
