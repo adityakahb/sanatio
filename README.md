@@ -11,13 +11,13 @@ NPM: `npm install sanatio`
 
 Basic Requirements
 ==================
-__[JQuery](http://www.jquery.com) is required for the plugin.__
+* __[JQuery](http://www.jquery.com) is required for the plugin.__
 
-__[MomentJS](http://momentjs.com) is required for Date related validations.__
+* __[MomentJS](http://momentjs.com) is required for Date related validations.__
 
-__All Form elements must have valid name attributes. `Sanatio` does not work with IDs, but with Names.__
+* __All Form elements must have valid name attributes. `Sanatio` does not work with IDs, but with Names.__
 
-__The Form must have a submit button.__
+* __The Form must have a submit button.__
 
 Supported Browsers
 ==================
@@ -234,30 +234,30 @@ __HTML markup should not have any `data-sanatio` attributes.__
 
 ### methods
 
-* `addSanatioRule`: Can be used to add custom rule to `Sanatio`; must return Boolean
-  ```js
-  $.sanatio.addSanatioRule('customrule', function (element, value){
-    return parseInt(element.val()) !== parseInt(value);
-  });
-  ```
-* `submitHandler`: Can be used to add custom logic while submitting the __validated__ form __NOTE__ this will apply to all forms on the page globally
-  ```js
-  $.sanatio.submitHandler = function (){
-    alert('form validated');
-    /* For example, ajax logic can be implemented here */
-    return false;
-  };
-  ```
-* `getSanatioObject`: For debugging purpose. Nothing to describe as such.
-  ```js
-  var sanatioInit = $('#form1').sanatio(validatorObj);
-  console.log(sanatioInit.getSanatioObject());
-  ```
-* `getValidityStatus`: Returns an object with counts of errors and warnings on the form.
-  ```js
-  var sanatioInit = $('#form1').sanatio(validatorObj);
-  console.log(sanatioInit.getValidityStatus()); /* Returns Object {errors: 0, warnings: 0} */
-  ```
+`addSanatioRule`: Can be used to add custom rule to `Sanatio`; must return Boolean
+```js
+$.sanatio.addSanatioRule('customrule', function (element, value){
+  return parseInt(element.val()) !== parseInt(value);
+});
+```
+`submitHandler`: Can be used to add custom logic while submitting the __validated__ form __NOTE__ this will apply to all forms on the page globally
+```js
+$.sanatio.submitHandler = function (){
+  alert('form validated');
+  /* For example, ajax logic can be implemented here */
+  return false;
+};
+```
+`getSanatioObject`: For debugging purpose. Nothing to describe as such.
+```js
+var sanatioInit = $('#form1').sanatio(validatorObj);
+console.log(sanatioInit.getSanatioObject());
+```
+`getValidityStatus`: Returns an object with counts of errors and warnings on the form.
+```js
+var sanatioInit = $('#form1').sanatio(validatorObj);
+console.log(sanatioInit.getValidityStatus()); /* Returns Object {errors: 0, warnings: 0} */
+```
 
 More
 ====

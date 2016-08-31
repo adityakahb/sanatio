@@ -1,6 +1,6 @@
 {
   "name": "sanatio",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "A validator plugin to handle Warnings and Errors separately",
   "author": "Aditya Bhakay <http://www.adityabhakay.com>",
   "license": "MIT",
