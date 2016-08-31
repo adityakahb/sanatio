@@ -226,7 +226,7 @@ __HTML markup should not have any `data-sanatio` attributes.__
 
 * `additionalErrorClasses`: If more CSS classes need to be added to the errors
 
-* `additionalWarningClasses`: If more CSS classes need to be added to the warnings __NOTE__: independed to `additionalErrorClasses`
+* `additionalWarningClasses`: If more CSS classes need to be added to the warnings __NOTE__: independent to `additionalErrorClasses`
 
 * `messagePlaceholder`: In case you want to place the error or warning in certain placeholder related to individual form element
 
