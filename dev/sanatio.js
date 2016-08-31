@@ -488,7 +488,7 @@
       ignoreElements: ':hidden',
       allowWarningsToPassForm: true,
       validationStatus: {errors: 0, warnings: 0},
-      debug: true,
+      debug: false,
       preparedElements: [],
       preparedInvalidElements: [],
       submitted: [],
@@ -1131,6 +1131,22 @@
     }
   });
   
+  $.fn.destroySanatio = function (options) {
+    var sanatio = $.data( this[ 0 ], 'sanatio' );
+    if (typeof sanatio !== 'undefined'){
+      
+      $(this).find('.' + sanatio.settings.errorClass).remove();
+      $(this).find('.' + sanatio.settings.warningClass).remove();
+      $(this).find('.has-sanatio-error').removeClass('has-sanatio-error');
+      $(this).find('.has-sanatio-warning').removeClass('has-sanatio-warning');
+      
+      $(this).off('submit.sanatio').off( 'focusin.sanatio focusout.sanatio keyup.sanatio keypress.sanatio keydown.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]' ).off( 'change.sanatio', 'select, option, [type=radio], [type=checkbox]' );
+      
+      $.removeData(this[0]);
+    }
+    
+    return this;
+  };
   /**
   * Default plugin initiation for each form
   * @param rules options
@@ -1183,13 +1199,14 @@
       return thisSanatioObject.sanatio;
     };
     
-    this.destroySanatio = function (){
-      
-    };
-    
     this.getValidityStatus = function (){
       return thisSanatioObject.sanatio.settings.validationStatus;
     };
+    
+    $.fn.sanatio.destroy = function () {
+      
+    };
+    
     
     return this;
 

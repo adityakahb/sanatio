@@ -103,7 +103,6 @@ Features
 * jQuery Chaining supported when initiated via jQuery.
 * In-built credit card formatter available.
 * Conditional validation for Checkboxes.
-* `destroy` method will be implemented in next release.
 * More features will be added soon.
 
 Available Rules
@@ -232,7 +231,7 @@ __HTML markup should not have any `data-sanatio` attributes.__
 * `messagePlaceholder`: In case you want to place the error or warning in certain placeholder related to individual form element
 
 
-### methods
+### Methods
 
 `addSanatioRule`: Can be used to add custom rule to `Sanatio`; must return Boolean
 ```js
@@ -257,6 +256,11 @@ console.log(sanatioInit.getSanatioObject());
 ```js
 var sanatioInit = $('#form1').sanatio(validatorObj);
 console.log(sanatioInit.getValidityStatus()); /* Returns Object {errors: 0, warnings: 0} */
+```
+`destroySanatio`: Destroys the `Sanatio` implementation on a form.
+```js
+var sanatioInit = $('#form1').sanatio(validatorObj); /* Initiates Sanatio and returns form object */
+var sanatioDestroy = $('#form1').destroySanatio(); /* Destroys Sanatio and returns form object */
 ```
 
 More
