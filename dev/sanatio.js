@@ -44,7 +44,12 @@
     creditcardRegex = new RegExp('^(?:(4[0-9]{12}(?:[0-9]{3})?)|(5[1-5][0-9]{14})|(6(?:011|5[0-9]{2})[0-9]{12})|(3[47][0-9]{13})|(3(?:0[0-5]|[68][0-9])[0-9]{11})|((?:2131|1800|35[0-9]{3})[0-9]{11}))$'),
     patternRegex;
     
-  var formEventCallMethod,
+  var typeEvents = 'focusin.sanatio focusout.sanatio keyup.sanatio keypress.sanatio keydown.sanatio',
+    typeFields = ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]',
+    changeEvents = 'change.sanatio',
+    changeFields = 'select, option, [type=radio], [type=checkbox]';
+    
+  var eventFn,
     localValidator,
     localEventType,
     localSettings,
@@ -92,7 +97,7 @@
     index;
   
   var isThisFormValid = {},
-    isThisElementValid = {};
+    isElemValid = {};
   
   var checkedElements;
   
@@ -234,9 +239,9 @@
     
     if (typeof receivedMessage === 'undefined'){
       if ($.inArray( receivedRule, ['minlength', 'maxlength', 'rangelength', 'rangevalue'] ) !== -1){
-        thisMessage = sanatioFormattedMessage(receivedSettings.messagesSetup[receivedRule], receivedValue);
+        thisMessage = sanatioFormattedMessage(receivedSettings.msgSetup[receivedRule], receivedValue);
       } else {
-        thisMessage = receivedSettings.messagesSetup[receivedRule];
+        thisMessage = receivedSettings.msgSetup[receivedRule];
       }
     } else {
       thisMessage = receivedMessage;
@@ -465,7 +470,7 @@
   
   // Constructor for validator
   $.sanatio = function (options, form) {
-    this.settings = $.extend( true, {}, $.sanatio.defaults, options );
+    this.specs = $.extend( true, {}, $.sanatio.defaults, options );
     this.currentForm = form;
     this.init();
   };
@@ -477,25 +482,26 @@
   */
   $.extend( $.sanatio, {
     defaults: {
-      rulesConfig: {},
-      groups: {},
+      debug: true,
+      allowWarningsToPassForm: true,
       errorClass: 'sanatio-error',
       warningClass: 'sanatio-warn',
       additionalErrorClasses: '',
       additionalWarningClasses: '',
+      highlightParent: '',
+      messagePlaceholder: '',
+      errorTag: 'label',
+      /* --------------------------------------- */
+      rulesConfig: {},
+      groups: {},
       errorCount: 0,
       warningCount: 0,
       ignoreElements: ':hidden',
-      allowWarningsToPassForm: true,
       validationStatus: {errors: 0, warnings: 0},
-      debug: false,
       preparedElements: [],
-      preparedInvalidElements: [],
+      invalidElements: [],
       submitted: [],
-      errorTag: 'label',
-      highlightParent: '',
-      messagePlaceholder: '',
-      messagesSetup: {
+      msgSetup: {
         capslock: 'Capslock is on.',
         required: 'This field is required.',
         pattern: 'This does not follow expected pattern.',
@@ -517,22 +523,22 @@
       events: {
         focusin: function (sanitator, elementObj, event) {
           // TODO: Caps lock Implementation
-          if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable) && elementObj.applyCaps){
-            sanitator.settings.submitted.push(elementObj);
+          if (sanitator.specs.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable) && elementObj.applyCaps){
+            sanitator.specs.submitted.push(elementObj);
           }
-          if (sanitator.settings.submitted.indexOf(elementObj) !== -1 && elementObj.applyCaps){
-            showThisElement = sanitator.settings.doSanitation(sanitator, elementObj);
-            sanitator.settings.showSanatioErrors(showThisElement);
+          if (sanitator.specs.submitted.indexOf(elementObj) !== -1 && elementObj.applyCaps){
+            showThisElement = sanitator.specs.doSanity(sanitator, elementObj);
+            sanitator.specs.showMsgs(showThisElement);
           }
         },
         focusout: function (sanitator, elementObj, event) {
           if (elementObj.isEditable){
-            if (sanitator.settings.submitted.indexOf(elementObj) !== -1){
-              showThisElement = sanitator.settings.doSanitation(sanitator, elementObj);
-              sanitator.settings.showSanatioErrors(showThisElement);
+            if (sanitator.specs.submitted.indexOf(elementObj) !== -1){
+              showThisElement = sanitator.specs.doSanity(sanitator, elementObj);
+              sanitator.specs.showMsgs(showThisElement);
             }
-            if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
-              sanitator.settings.submitted.push(elementObj);
+            if (sanitator.specs.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
+              sanitator.specs.submitted.push(elementObj);
             }
           }
         },
@@ -540,29 +546,29 @@
           if ( event.which === 9 && sanatioTrimmedValue( elementObj.element.val() ) === '' || $.inArray( event.keyCode, excludedKeys ) !== -1 ) {
             return;
           } else {
-            if (sanitator.settings.submitted.indexOf(elementObj) !== -1 && !elementObj.applyCaps){
-              showThisElement = sanitator.settings.doSanitation(sanitator, elementObj);
-              sanitator.settings.showSanatioErrors(showThisElement);
+            if (sanitator.specs.submitted.indexOf(elementObj) !== -1 && !elementObj.applyCaps){
+              showThisElement = sanitator.specs.doSanity(sanitator, elementObj);
+              sanitator.specs.showMsgs(showThisElement);
             }
           }
         },
         keydown: function (sanitator, elementObj, event) {
           // TODO: Caps lock Implementation
-          if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable) && elementObj.applyCaps){
-            sanitator.settings.submitted.push(elementObj);
+          if (sanitator.specs.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable) && elementObj.applyCaps){
+            sanitator.specs.submitted.push(elementObj);
           }
-          if (sanitator.settings.submitted.indexOf(elementObj) !== -1 && elementObj.applyCaps){
-            showThisElement = sanitator.settings.doSanitation(sanitator, elementObj);
-            sanitator.settings.showSanatioErrors(showThisElement);
+          if (sanitator.specs.submitted.indexOf(elementObj) !== -1 && elementObj.applyCaps){
+            showThisElement = sanitator.specs.doSanity(sanitator, elementObj);
+            sanitator.specs.showMsgs(showThisElement);
           }
         },
         change: function (sanitator, elementObj, event) {
-          if (sanitator.settings.submitted.indexOf(elementObj) !== -1){
-            showThisElement = sanitator.settings.doSanitation(sanitator, elementObj);
-            sanitator.settings.showSanatioErrors(showThisElement);
+          if (sanitator.specs.submitted.indexOf(elementObj) !== -1){
+            showThisElement = sanitator.specs.doSanity(sanitator, elementObj);
+            sanitator.specs.showMsgs(showThisElement);
           }
-          if (sanitator.settings.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
-            sanitator.settings.submitted.push(elementObj);
+          if (sanitator.specs.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
+            sanitator.specs.submitted.push(elementObj);
           }
         },
         keypress: function (sanitator, elementObj, event) {
@@ -585,7 +591,7 @@
         return formElement.find( '[name=' + elementName + ']' );
       },
       
-      crossCheckRule: function (ruleValue, ruleFunction, ruleElement, temp_obj, str, typeStr, countStr, messageStr, returnObj, actualMessage, shouldApplyCaps, capsStatus){
+      verifyRule: function (ruleValue, ruleFunction, ruleElement, temp_obj, str, typeStr, countStr, messageStr, returnObj, actualMessage, shouldApplyCaps, capsStatus){
         try {
           jsonedValue = JSON.parse(ruleValue);
         } catch (e){
@@ -617,62 +623,65 @@
       * @param Respective Sanatio object and form element
       * @return 
       */
-      doSanitation: function (sanitator, elementObj){
+      doSanity: function (sanitator, elementObj){
         
-        localSettings = sanitator.settings;
+        localSettings = sanitator.specs;
         tempObj2 = {};
+        
         $.each(localSettings.rulesConfig, function (index, elementItem){
           if (elementItem.elementObj === elementObj){
             
-            tempObj2.isThisElementValid = [];
-            
-            for (innerCnt in elementItem.rules){
-              isThisElementValid = {};
-              isThisElementValid.errors = false;
-              isThisElementValid.warnings = false;
-              isThisElementValid.errorType = '';
-              isThisElementValid.warningType = '';
-              isThisElementValid.message = '';
-              tempErrorObj = false;
-              tempWarnObj = false;
-              isItemPresent = false;
-              localWarningType = '';
-              localErrorType = '';
-              ifConditionPresent = false;
-              for (rootCnt in localSettings.messagesSetup){
-                if (typeof elementItem.if !== 'undefined'){
-                  ifConditionPresent = true;
-                  if (elementItem.elementObj.ifConditionElement.element.is(elementItem.elementObj.ifConditionElement.condition)){
+            tempObj2.isElemValid = [];
+
+            if (typeof elementItem.rules !== 'undefined'){
+              for (innerCnt in elementItem.rules){
+                isElemValid = {};
+                isElemValid.errors = false;
+                isElemValid.warnings = false;
+                isElemValid.errorType = '';
+                isElemValid.warningType = '';
+                isElemValid.message = '';
+                tempErrorObj = false;
+                tempWarnObj = false;
+                isItemPresent = false;
+                localWarningType = '';
+                localErrorType = '';
+                ifConditionPresent = false;
+                
+                for (rootCnt in localSettings.msgSetup){
+                  if (typeof elementItem.if !== 'undefined'){
+                    ifConditionPresent = true;
+                    if (elementItem.elementObj.ifConditionElement.element.is(elementItem.elementObj.ifConditionElement.condition)){
+                      ifConditionPresent = false;
+                    }
+                  } else {
                     ifConditionPresent = false;
                   }
-                } else {
-                  ifConditionPresent = false;
+                  
+                  if (!ifConditionPresent && typeof elementItem.rules[innerCnt].value !== 'undefined' && sanatioTrimmedValue(elementItem.rules[innerCnt].value).toString() !== 'false'){
+                    if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
+                      
+                      isElemValid = localSettings.verifyRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempErrorObj, 'errors', 'errorType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
+                      
+                    }
+                    if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
+                      
+                      isElemValid = localSettings.verifyRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempWarnObj, 'warnings', 'warningType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
+
+                    }
+                  }
                 }
                 
-                if (!ifConditionPresent && typeof elementItem.rules[innerCnt].value !== 'undefined' && sanatioTrimmedValue(elementItem.rules[innerCnt].value).toString() !== 'false'){
-                  if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
-                    
-                    isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempErrorObj, 'errors', 'errorType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
-                    
-                  }
-                  if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
-                    
-                    isThisElementValid = localSettings.crossCheckRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempWarnObj, 'warnings', 'warningType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
-
-                  }
-                }
+                tempObj2.elementObj = elementItem.elementObj;
+                tempObj2.isElemValid.push(isElemValid);
               }
-              
-              tempObj2.elementObj = elementItem.elementObj;
-              tempObj2.isThisElementValid.push(isThisElementValid);
             }
-            
-            if (localSettings.preparedInvalidElements.length > 0){
+            if (localSettings.invalidElements.length > 0){
 
-              for (innerCnt in localSettings.preparedInvalidElements){
-                if (localSettings.preparedInvalidElements[innerCnt].elementObj.element === tempObj2.elementObj.element){
+              for (innerCnt in localSettings.invalidElements){
+                if (localSettings.invalidElements[innerCnt].elementObj && localSettings.invalidElements[innerCnt].elementObj.element === tempObj2.elementObj.element){
                   
-                  localSettings.preparedInvalidElements[innerCnt] = tempObj2;
+                  localSettings.invalidElements[innerCnt] = tempObj2;
                   isItemPresent = true;
                   break;
                   
@@ -682,10 +691,10 @@
               }
 
               if (!isItemPresent){
-                localSettings.preparedInvalidElements.push(tempObj2);
+                localSettings.invalidElements.push(tempObj2);
               }
             } else {
-              localSettings.preparedInvalidElements.push(tempObj2);
+              localSettings.invalidElements.push(tempObj2);
             }
             
             return false;
@@ -850,11 +859,11 @@
       },
       
       /**
-      * Return preparedMessage back to insertErrorOrWarning function
+      * Return preMsg back to insertMsg function
       * @param elementObj with its properties, element, element error or warning class, error or warn string and its string class, message string
-      * @return preparedMessage
+      * @return preMsg
       */
-      preparedMessage: function (errorTag, selectorClass, type, messageClass, additionalClasses, message, element){
+      preMsg: function (errorTag, selectorClass, type, messageClass, additionalClasses, message, element){
         return $('<' + errorTag + ' for="' + element.attr('name') + '" class="' + selectorClass + type + ' ' + messageClass + ' ' + additionalClasses + '">'+ message +'</' + errorTag + '>');
       },
       
@@ -863,8 +872,8 @@
       * @param elementObj with its properties, element, element error or warning class, error or warn string and its string class, message string
       * @return 
       */
-      insertErrorOrWarning: function (placeholderArr, element, elementClass, type, selectorClass, message, messageClass, additionalClasses){
-        addedMessage = this.preparedMessage(this.errorTag, selectorClass.substr(1), type, messageClass, additionalClasses, message, element);
+      insertMsg: function (placeholderArr, element, elementClass, type, selectorClass, message, messageClass, additionalClasses){
+        addedMessage = this.preMsg(this.errorTag, selectorClass.substr(1), type, messageClass, additionalClasses, message, element);
         placeholderArr[0][placeholderArr[1]](addedMessage);
         
         // addedMessage.show('slow');
@@ -875,18 +884,17 @@
       * @param
       * @return 
       */
-      showSanatioErrors: function (elementToBeSanitized){
-        
+      showMsgs: function (elementToBeSanitized){
+
         errorsCount = typeof this.validationStatus['errors'] === 'undefined' ? 0 : parseInt(this.validationStatus['errors']);
         warningsCount = typeof this.validationStatus['warnings'] === 'undefined' ? 0 : parseInt(this.validationStatus['warnings']);
         
-        outerCnt = this.preparedInvalidElements.indexOf(elementToBeSanitized);
+        outerCnt = this.invalidElements.indexOf(elementToBeSanitized);
 
-        if (outerCnt >= 0){
-        // for (outerCnt in this.preparedInvalidElements){
+        if (outerCnt >= 0 && typeof elementToBeSanitized.elementObj !== 'undefined'){
           
-          elementsLength = this.preparedInvalidElements[outerCnt].elementObj;
-          errorElementProps = this.preparedInvalidElements[outerCnt].isThisElementValid;
+          elementsLength = this.invalidElements[outerCnt].elementObj;
+          errorElementProps = this.invalidElements[outerCnt].isElemValid;
           localError = '';
           localWarning = '';
           localErrorType = '';
@@ -894,7 +902,7 @@
           insertedWarningElement = null;
           insertedErrorElement = null;
           
-          errorElement = this.preparedInvalidElements[outerCnt].elementObj.element;
+          errorElement = this.invalidElements[outerCnt].elementObj.element;
           
           this.cleanErrors(elementsLength, 'all');
           
@@ -918,9 +926,7 @@
                 errorElement.parents(this.highlightParent).removeClass(this.errorClass).removeClass(this.additionalErrorClasses);
               }
             }
-          }
-          
-          for (innerCnt in errorElementProps){
+            
             if (errorElementProps[innerCnt].warnings){
               localWarning = errorElementProps[innerCnt].message;
               localWarningType = errorElementProps[innerCnt].warningType;
@@ -945,20 +951,20 @@
           thisMessagePlaceholder = getErrorPlacement(elementsLength, this.messagePlaceholder);
           
           if (errorElement.hasClass('has-sanatio-warning') && localWarningType.length > 0){
-            this.insertErrorOrWarning(thisMessagePlaceholder, elementsLength.element, 'has-sanatio-warning', localWarningType, '.warning-', localWarning, this.warningClass, this.additionalWarningClasses);
+            this.insertMsg(thisMessagePlaceholder, elementsLength.element, 'has-sanatio-warning', localWarningType, '.warning-', localWarning, this.warningClass, this.additionalWarningClasses);
             ++warningsCount;
           }
 
           if (errorElement.hasClass('has-sanatio-error') && localErrorType.length > 0){
-            this.insertErrorOrWarning(thisMessagePlaceholder, elementsLength.element, 'has-sanatio-error', localErrorType, '.error-', localError, this.errorClass, this.additionalErrorClasses);
+            this.insertMsg(thisMessagePlaceholder, elementsLength.element, 'has-sanatio-error', localErrorType, '.error-', localError, this.errorClass, this.additionalErrorClasses);
             ++errorsCount;
           }
 
-          if (!elementsLength.shouldApplyRequired && sanatioReturnLength(errorElement) === 0){
+          if (!elementsLength.applyRequired && sanatioReturnLength(errorElement) === 0){
             this.cleanErrors(elementsLength, 'all');
           }
           
-          if (elementsLength.shouldApplyRequired && sanatioReturnLength(errorElement) === 0){
+          if (elementsLength.applyRequired && sanatioReturnLength(errorElement) === 0){
             this.cleanErrors(elementsLength, 'warnings');
           }
 
@@ -976,8 +982,8 @@
     */
     addSanatioRule: function (fnName, fn){
       
-      if (typeof this.defaults.messagesSetup[fnName] === 'undefined'){
-        this.defaults.messagesSetup[fnName] = '';
+      if (typeof this.defaults.msgSetup[fnName] === 'undefined'){
+        this.defaults.msgSetup[fnName] = '';
       } else {
         return;
       }
@@ -999,13 +1005,22 @@
     },
     
     prototype: {
-      prepareFormElements: function (){
+      prepareElements: function (){
+        var spec;
         formElement = $(this.currentForm);
-        formSettings = this.settings;
+        formSettings = this.specs;
         formSettings.currentForm = formElement;
-
+        
+        if (sanatioTrimmedValue(formSettings.errorClass).length === 0){
+          formSettings.errorClass = 'sanatio-error';
+        }
+        if (sanatioTrimmedValue(formSettings.warningClass).length === 0){
+          formSettings.warningClass = 'sanatio-warn';
+        }
+        
         for (cnt in formSettings.rulesConfig){
-          thisElement = formSettings.getElement(formElement, formSettings.rulesConfig[cnt].elementName);
+          spec = formSettings.rulesConfig[cnt];
+          thisElement = formSettings.getElement(formElement, spec.elementName);
           
           tempObj = {};
           tempObj.element = thisElement;
@@ -1024,8 +1039,8 @@
             tempObj.isEditable = true;
           }
           
-          if (typeof formSettings.rulesConfig[cnt].if !== 'undefined'){
-            tempObj.if = formSettings.rulesConfig[cnt].if;
+          if (typeof spec.if !== 'undefined'){
+            tempObj.if = spec.if;
             
             ifConditionArr = tempObj.if.split(':');
             ifConditionObj = {};
@@ -1035,64 +1050,66 @@
             tempObj.ifConditionElement = ifConditionObj;
 
           }
-          
-          for (outerCnt in formSettings.rulesConfig[cnt].rules){
-            if (typeof formSettings.rulesConfig[cnt].rules[outerCnt].type === 'undefined'){
-              formSettings.rulesConfig[cnt].rules[outerCnt].type = 'error';
-            }
-          }
-          for (outerCnt in formSettings.rulesConfig[cnt].rules){
-            
-            if (formSettings.rulesConfig[cnt].rules[outerCnt].name === 'required'){
-              tempObj.shouldApplyRequired = true;
-              break;
-            } else {
-              tempObj.shouldApplyRequired = false;
-            }
-            
-          }
-          
-          for (outerCnt in formSettings.rulesConfig[cnt].rules){
-            if (formSettings.rulesConfig[cnt].rules[outerCnt].name === 'creditcard'){
-              tempObj.ccProps = {};
-              tempObj.ccProps.applyCC = true;
 
-              tempObj.ccProps.luhnCheck = typeof formSettings.rulesConfig[cnt].rules[outerCnt].value !== 'undefined' ? formSettings.rulesConfig[cnt].rules[outerCnt].value : 'without-luhn';
-              tempObj.ccProps.format = typeof formSettings.rulesConfig[cnt].rules[outerCnt].formatter !== 'undefined' ? true : false;
-              tempObj.ccProps.formatter = typeof formSettings.rulesConfig[cnt].rules[outerCnt].formatter !== 'undefined' ? formSettings.rulesConfig[cnt].rules[outerCnt].formatter : '';
+          if (typeof spec.rules !== 'undefined'){
+            for (outerCnt in spec.rules){
+              if (typeof spec.rules[outerCnt].type === 'undefined'){
+                spec.rules[outerCnt].type = 'error';
+              }
+            }
+            for (outerCnt in spec.rules){
               
-              if (tempObj.ccProps.formatter !== ' ' && tempObj.ccProps.formatter !== '-' && tempObj.ccProps.formatter !== ''){
-                console.warn('Invalid separator is used; resetting it to blankspace.');
-                tempObj.ccProps.formatter = ' ';
+              if (spec.rules[outerCnt].name === 'required'){
+                tempObj.applyRequired = true;
+                break;
+              } else {
+                tempObj.applyRequired = false;
               }
               
-              break;
-            } else {
-              tempObj.ccProps = null;
             }
             
-          }
-          
-          for (outerCnt in formSettings.rulesConfig[cnt].rules){
-            if (formSettings.rulesConfig[cnt].rules[outerCnt].name === 'capslock'){
-              tempObj.applyCaps = true;
-              break;
-            } else {
-              tempObj.applyCaps = false;
+            for (outerCnt in spec.rules){
+              if (spec.rules[outerCnt].name === 'creditcard'){
+                tempObj.ccProps = {};
+                tempObj.ccProps.applyCC = true;
+
+                tempObj.ccProps.luhnCheck = typeof spec.rules[outerCnt].value !== 'undefined' ? spec.rules[outerCnt].value : 'without-luhn';
+                tempObj.ccProps.format = typeof spec.rules[outerCnt].formatter !== 'undefined' ? true : false;
+                tempObj.ccProps.formatter = typeof spec.rules[outerCnt].formatter !== 'undefined' ? spec.rules[outerCnt].formatter : '';
+                
+                if (tempObj.ccProps.formatter !== ' ' && tempObj.ccProps.formatter !== '-' && tempObj.ccProps.formatter !== ''){
+                  console.warn('Invalid separator is used; resetting it to blankspace.');
+                  tempObj.ccProps.formatter = ' ';
+                }
+                
+                break;
+              } else {
+                tempObj.ccProps = null;
+              }
+              
+            }
+            
+            for (outerCnt in spec.rules){
+              if (spec.rules[outerCnt].name === 'capslock'){
+                tempObj.applyCaps = true;
+                break;
+              } else {
+                tempObj.applyCaps = false;
+              }
             }
           }
           
-          this.settings.rulesConfig[cnt].elementObj = tempObj;
-          this.settings.preparedElements.push(tempObj);
+          this.specs.rulesConfig[cnt].elementObj = tempObj;
+          this.specs.preparedElements.push(tempObj);
         }
       },
       
       init: function (){
         
-        formEventCallMethod = function (event){
+        eventFn = function (event){
           localValidator = $.data( this.form, 'sanatio' );
           localEventType = event.type;
-          localSettings = localValidator.settings;
+          localSettings = localValidator.specs;
           localElementObj;
           
           if ( localSettings.events[ localEventType ] && !$( this ).is(localSettings.ignoreElements) ) {
@@ -1110,20 +1127,20 @@
           }
         };
         
-        $( this.currentForm ).on( 'focusin.sanatio focusout.sanatio keyup.sanatio keypress.sanatio keydown.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]', formEventCallMethod ).on( 'change.sanatio', 'select, option, [type=radio], [type=checkbox]', formEventCallMethod);
+        $( this.currentForm ).on(typeEvents, typeFields, eventFn ).on(changeEvents, changeFields, eventFn);
       },
       
-      checkForSubmittedElements: function (){
+      checkSubmitted: function (){
         
-        for (cnt in this.settings.rulesConfig){
-          if (this.settings.submitted.indexOf(this.settings.rulesConfig[cnt].elementObj) === -1 ){
-            this.settings.submitted.push(this.settings.rulesConfig[cnt].elementObj);
+        for (cnt in this.specs.rulesConfig){
+          if (this.specs.submitted.indexOf(this.specs.rulesConfig[cnt].elementObj) === -1 ){
+            this.specs.submitted.push(this.specs.rulesConfig[cnt].elementObj);
           }
         }
         
-        for (cnt in this.settings.submitted){
-          showThisElement = this.settings.doSanitation(this, this.settings.submitted[cnt]);
-          this.settings.showSanatioErrors(showThisElement);
+        for (cnt in this.specs.submitted){
+          showThisElement = this.specs.doSanity(this, this.specs.submitted[cnt]);
+          this.specs.showMsgs(showThisElement);
         }
         
         return;
@@ -1131,22 +1148,28 @@
     }
   });
   
+  /**
+  * Function to destroy Sanatio instance on a form
+  * @param rules form element
+  * @return 
+  */
   $.fn.destroySanatio = function (options) {
     var sanatio = $.data( this[ 0 ], 'sanatio' );
     if (typeof sanatio !== 'undefined'){
       
-      $(this).find('.' + sanatio.settings.errorClass).remove();
-      $(this).find('.' + sanatio.settings.warningClass).remove();
+      $(this).find('.' + sanatio.specs.errorClass).remove();
+      $(this).find('.' + sanatio.specs.warningClass).remove();
       $(this).find('.has-sanatio-error').removeClass('has-sanatio-error');
       $(this).find('.has-sanatio-warning').removeClass('has-sanatio-warning');
       
-      $(this).off('submit.sanatio').off( 'focusin.sanatio focusout.sanatio keyup.sanatio keypress.sanatio keydown.sanatio', ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]' ).off( 'change.sanatio', 'select, option, [type=radio], [type=checkbox]' );
+      $(this).off('submit.sanatio').off( typeEvents, typeFields ).off( changeEvents, changeFields );
       
       $.removeData(this[0]);
     }
     
     return this;
   };
+  
   /**
   * Default plugin initiation for each form
   * @param rules options
@@ -1166,31 +1189,29 @@
     sanatio = new $.sanatio( options, this[ 0 ] );
     $.data( this[ 0 ], 'sanatio', sanatio );
 
-    sanatio.prepareFormElements();
+    sanatio.prepareElements();
     
     this.on( 'submit.sanatio', function ( event ) {
-      if ( sanatio.settings.debug ) {
+      if ( sanatio.specs.debug ) {
 
         // Prevent form submit to be able to see console output
         event.preventDefault();
       }
-      sanatio.settings.validationStatus['errors'] = 0;
-      sanatio.settings.validationStatus['warnings'] = 0;
+      sanatio.specs.validationStatus['errors'] = 0;
+      sanatio.specs.validationStatus['warnings'] = 0;
       
-      sanatio.checkForSubmittedElements();
+      sanatio.checkSubmitted();
       
-      isThisFormValid = sanatio.settings.validationStatus;
+      isThisFormValid = sanatio.specs.validationStatus;
       
-      if (sanatio.settings.allowWarningsToPassForm){
+      if (sanatio.specs.allowWarningsToPassForm){
         passToSubmitHandler = isThisFormValid.errors === 0 ? true : false;
       } else {
         passToSubmitHandler = (isThisFormValid.errors !== 0 || isThisFormValid.warnings !== 0) ? false : true;
       }
-      if (passToSubmitHandler){
-        return $.sanatio.submitHandler();
-      } else {
-        return false;
-      }
+      
+      return passToSubmitHandler === true ? $.sanatio.submitHandler() : false;
+      
     });
     
     thisSanatioObject = $.data(this[0]);
@@ -1200,13 +1221,8 @@
     };
     
     this.getValidityStatus = function (){
-      return thisSanatioObject.sanatio.settings.validationStatus;
+      return thisSanatioObject.sanatio.specs.validationStatus;
     };
-    
-    $.fn.sanatio.destroy = function () {
-      
-    };
-    
     
     return this;
 

@@ -148,6 +148,7 @@ Available Rules
   * `Other form element name:checked`
 
 ### Coming soon
+* `<input type='file'>`
 * `step`
 * `remote`
 * `group` (validation elements as a group, like [DD] [MM] [YYYY] or [first name] [last name]) 
@@ -214,21 +215,23 @@ __HTML markup should not have any `data-sanatio` attributes.__
 ```
 
 ### Configurations
-* `debug`: If set to `true`, will stop the form submission even if validated; adds `event.preventDefault()` to the form submit event
+* `debug`: If set to `true`, will stop the form submission even if validated; adds `event.preventDefault()` to the form submit event; default is `false`
 
-* `highlightParent`: The parent of the element can be highlighted with the CSS classes mentioned in `errorClass`, `warningClass`, `additionalErrorClasses` and `additionalWarningClasses`
+* `allowWarningsToPassForm`: If set to `false`, will not allow the form to be submitted if it has only warnings; default is `true`
 
-* `errorClass`: CSS Class applied to the displayed error
+* `errorClass`: CSS Class applied to the displayed error; default is `sanatio-error`
 
-* `warningClass`: CSS Class applied to the displayed warning __NOTE__: both `errorClass` and `warningClass` are independent; if only one is mentioned, other will not take it
-
-* `errorTag`: Markup element to place the error or warning message
+* `warningClass`: CSS Class applied to the displayed warning __NOTE__: both `errorClass` and `warningClass` are independent; if only one is mentioned, other will not take it;  default is `sanatio-warn`
 
 * `additionalErrorClasses`: If more CSS classes need to be added to the errors
 
 * `additionalWarningClasses`: If more CSS classes need to be added to the warnings __NOTE__: independent to `additionalErrorClasses`
 
+* `highlightParent`: The parent of the element can be highlighted with the CSS classes mentioned in `errorClass`, `warningClass`, `additionalErrorClasses` and `additionalWarningClasses`
+
 * `messagePlaceholder`: In case you want to place the error or warning in certain placeholder related to individual form element
+
+* `errorTag`: Markup element to place the error or warning message; default is `label`
 
 
 ### Methods

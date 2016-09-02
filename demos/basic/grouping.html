@@ -33,10 +33,15 @@
           <div class="row">
             <div class="col-xs-12">
               <form id="form1" action="/">
-                <label for="text1_form1">Text</label>
-                <input type="text" name="text1_form1" id="text1_form1" placeholder="text">
+                <label for="text1_form1">DD</label>
+                <input type="text" name="text1_form1" id="text1_form1" placeholder="DD">
                 <hr>
-                
+                <label for="text2_form1">MM</label>
+                <input type="text" name="text2_form1" id="text2_form1" placeholder="MM">
+                <hr>
+                <label for="text3_form1">YYYY</label>
+                <input type="text" name="text3_form1" id="text3_form1" placeholder="YYYY">
+                <hr>
                 <input type="submit" value="Submit" title="Submit"/>
               </form>
             </div>
@@ -62,24 +67,35 @@
       alert('submitted');
       return false;
     };
-    $.sanatio.addSanatioRule('customrule', function (element, value){
-      return parseInt(element.val()) !== parseInt(value);
-    });
     var validatorObj = {
       'rulesConfig': [{
         'elementName': 'text1_form1',
-        'rules': [
-          {
-            "name": "required",
-            "value": "true"
-          },
-          {
-            "name": "customrule",
-            "value": "123456",
-            "message": "Value does not match with 123456"
-          }
-        ]
-      }]
+        'group': ['dateGroup']
+      },{
+        'elementName': 'text2_form1',
+        'group': ['dateGroup', 'leapGroup:1']
+      },{
+        'elementName': 'text3_form1',
+        'group': ['dateGroup', 'leapGroup:2']
+      }],
+      'groups': [
+        {
+          'groupName': 'dateGroup',
+          'rules': [{
+            'name': 'required',
+            'value': 'true',
+            'separator': '-'
+          }]
+        },
+        {
+          'groupName': 'leapGroup',
+          'rules': [{
+            'name': 'required',
+            'value': 'true',
+            'separator': ''
+          }]
+        }
+      ]
     };
     var initSanatioForm5 = $('#form1').sanatio(validatorObj);
     </script>
