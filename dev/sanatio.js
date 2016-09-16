@@ -480,7 +480,7 @@
   */
   $.extend( $.sanatio, {
     defaults: {
-      debug: true,
+      debug: false,
       allowWarningsToPassForm: true,
       errorClass: 'sanatio-error',
       warningClass: 'sanatio-warn',
