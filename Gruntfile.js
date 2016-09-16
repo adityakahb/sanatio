@@ -24,6 +24,7 @@ module.exports = function (grunt) {
   grunt.registerTask( 'publish', 'Publishing...', [
     'clean:css',
     'sass:dev',
-    'uglify:sanatio'
+    'uglify:sanatioWithMap',
+    'uglify:sanatioWithoutMap'
   ]);
 };

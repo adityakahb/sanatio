@@ -436,9 +436,7 @@
               tempRuleObj2['luhncheck'] = $(thisRuleElement).attr('data-sanatio-creditcard');
               tempRuleObj2['formatter'] = $(thisRuleElement).attr('data-sanatio-creditcard-formatter');
             }
-            if (tempRuleObj2['name'] === 'capslock'){
-              tempRuleObj2['type'] = 'warning';
-            }
+            
             tempRuleObj.rules.push(tempRuleObj2);
             break;
           }
@@ -657,8 +655,14 @@
                   } else {
                     ifConditionPresent = false;
                   }
-                  
+
                   if (!ifConditionPresent && typeof elementItem.rules[innerCnt].value !== 'undefined' && sanatioTrimmedValue(elementItem.rules[innerCnt].value).toString() !== 'false'){
+                    if (elementItem.rules[innerCnt].name === 'equalthisto'){
+                        elementItem.rules[innerCnt].type = 'error';
+                    }
+                    if (elementItem.rules[innerCnt].name === 'capslock'){
+                        elementItem.rules[innerCnt].type = 'warning';
+                    }
                     if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
                       
                       isElemValid = localSettings.verifyRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempErrorObj, 'errors', 'errorType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);

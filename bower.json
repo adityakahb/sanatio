@@ -4,7 +4,7 @@
   "main": [
     "dist/sanatio.min.js"
   ],
-  "devDependencies": {
+  "dependencies": {
     "jquery": "^3.1.0",
     "moment": "^2.14.1"
   },

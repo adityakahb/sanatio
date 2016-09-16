@@ -50,6 +50,7 @@
                 <input type="password" name="password2_form1" id="password2_form1" placeholder="retype password"
                   data-sanatio-required="true"
                   data-sanatio-equalthisto="password1_form1"
+                  data-sanatio-equalthisto-type="warning"
                 >
                 <hr>
                 <label for="email1_form1">Email</label>
@@ -185,8 +186,8 @@
         </div>
       </div>
     </footer>
-    <script src="../../bower_components/jquery/dist/jquery.js"></script>
-    <script src="../../bower_components/moment/min/moment-with-locales.js"></script>
+    <script src="../library/js/jquery.min.js"></script>
+    <script src="../library/js/moment-with-locales.min.js"></script>
     <script src="../../dev/sanatio.js"></script>
     <script>
       $.sanatio.submitHandler = function (){
