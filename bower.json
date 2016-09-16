@@ -2,11 +2,11 @@
   "name": "sanatio",
   "description": "A validator plugin to handle Warnings and Errors separately",
   "main": [
-    "dist/sanatio.min.js"
+    "dev/sanatio.js"
   ],
   "dependencies": {
     "jquery": "^3.1.0",
-    "moment": "^2.14.1"
+    "moment": "^2.15.0"
   },
   "keywords": [
     "sanatio",

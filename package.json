@@ -1,8 +1,12 @@
 {
   "name": "sanatio",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "A validator plugin to handle Warnings and Errors separately",
   "author": "Aditya Bhakay <http://www.adityabhakay.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adityakahb/sanatio.git"
+  },
   "license": "MIT",
   "keywords": [
     "sanatio",
@@ -14,6 +18,10 @@
     "javascript"
   ],
   "dependencies": {
+    "jquery": "^3.1.0",
+    "momentjs": "^1.1.15"
+  },
+  "devDependencies": {
     "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "^1.0.0",
