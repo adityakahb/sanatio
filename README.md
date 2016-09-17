@@ -148,7 +148,6 @@ Available Rules
   * `Other form element name:checked`
 
 ### Coming soon
-* `<input type='file'>`
 * `step`
 * `remote`
 * `group` (validation elements as a group, like [DD] [MM] [YYYY] or [first name] [last name]) 
@@ -181,6 +180,11 @@ For sample creditcard:
   data-sanatio-creditcard-type="error"
   data-sanatio-creditcard-formatter="-"
 >
+```
+
+If the form contains only warnings and no errors, it is considered as valid. You can reverse this behaviour with `data-sanatio-spec-allowwarningstopassform`. Default value is `true`.
+```html
+<form id="form-id" data-sanatio data-sanatio-spec-allowwarningstopassform='false'>
 ```
 
 That's it. No need to specify anything else. `Sanatio` will handle the validation itself.

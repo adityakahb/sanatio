@@ -1,3 +1,6 @@
+/*!
+ * Sanatio Validator v1.1.6
+ */
 (function ( $ ) {
   
   'use strict';
@@ -26,7 +29,7 @@
     // Shift       => 16
     // Ctrl        => 17
     // Alt         => 18
-    // Caps lock   => 20
+    // Caps lock   => 20 ==> NOT USED
     // End         => 35
     // Home        => 36
     // Left arrow  => 37
@@ -36,7 +39,7 @@
     // Insert      => 45
     // Num lock    => 144
     // AltGr key   => 225
-  var excludedKeys = [16, 17, 18, 20, 35, 36, 37, 38, 39, 40, 45, 144, 225],
+  var excludedKeys = [16, 17, 18, 35, 36, 37, 38, 39, 40, 45, 144, 225],
     emailRegex = new RegExp('^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$', 'i'),
     urlRegex = new RegExp( '^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})).?)(?::\d{2,5})?(?:[/?#]\S*)?$', 'i'),
     digitsRegex = new RegExp('^\\d+$'),
@@ -45,9 +48,9 @@
     patternRegex;
     
   var typeEvents = 'focusin.sanatio focusout.sanatio keyup.sanatio keypress.sanatio keydown.sanatio',
-    typeFields = ':text, [type=password], [type=file], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]',
+    typeFields = ':text, [type=password], select, textarea, [type=number], [type=search], [type=tel], [type=url], [type=email], [type=datetime], [type=date], [type=month], [type=week], [type=time], [type=datetime-local], [type=range], [type=color], [type=radio], [type=checkbox], [contenteditable]',
     changeEvents = 'change.sanatio',
-    changeFields = 'select, option, [type=radio], [type=checkbox]';
+    changeFields = 'select, option, [type=file], [type=radio], [type=checkbox]';
     
   var eventFn,
     localValidator,
@@ -120,6 +123,12 @@
   var passToSubmitHandler;
   
   var momentJSWarning = 'Sanatio uses MomentJS to validate the date values. Please check if the MomentJS plugin file is included and referred correctly.\nVisit http://momentjs.com/ for more information.';
+
+  var putOnConsole = function (str, type){
+    if( window.console ) {
+        console[type]( str );
+    }
+  };
   /**
   * Function to check for Luhn Algorithm for Credit Card
   * @param credit card number inserted by user
@@ -455,11 +464,22 @@
   * @param defaultRulesObj
   * @return
   */
+  var formElementFromData,
+    warningsPassForm;
   var defaultSanatioValidate = function (defaultRulesObj){
     if (defaultRulesObj.length > 0){
       for (rulesElementCount = 0; rulesElementCount < defaultRulesObj.length; rulesElementCount++){
-        $('#'+$(defaultRulesObj[rulesElementCount].formElement).attr('id')).sanatio({
-          rulesConfig: defaultRulesObj[rulesElementCount].rulesConfig
+        formElementFromData = defaultRulesObj[rulesElementCount];
+        
+        if (typeof $(formElementFromData.formElement).attr('data-sanatio-spec-allowwarningstopassform') !== 'undefined'){
+          warningsPassForm = $(formElementFromData.formElement).attr('data-sanatio-spec-allowwarningstopassform') === 'false' ? false : true;
+        } else {
+          warningsPassForm = true;
+        }
+        
+        $('#'+$(formElementFromData.formElement).attr('id')).sanatio({
+          rulesConfig: formElementFromData.rulesConfig,
+          allowWarningsToPassForm: warningsPassForm
         });
       }
     }
@@ -500,7 +520,7 @@
       invalidElements: [],
       submitted: [],
       msgSetup: {
-        capslock: 'Capslock is on.',
+        capslock: 'Capslock is / was on. Please check.',
         required: 'This field is required.',
         pattern: 'This does not follow expected pattern.',
         email: 'Please enter a valid email address.',
@@ -520,23 +540,20 @@
       },
       events: {
         focusin: function (sanitator, elementObj, event) {
-          // TODO: Caps lock Implementation
-          if (sanitator.specs.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable) && elementObj.applyCaps){
-            sanitator.specs.submitted.push(elementObj);
-          }
-          if (sanitator.specs.submitted.indexOf(elementObj) !== -1 && elementObj.applyCaps){
-            showThisElement = sanitator.specs.doSanity(sanitator, elementObj);
-            sanitator.specs.showMsgs(showThisElement);
-          }
+          // TODO: FocusIn implementation
         },
         focusout: function (sanitator, elementObj, event) {
           if (elementObj.isEditable){
             if (sanitator.specs.submitted.indexOf(elementObj) !== -1){
+
               showThisElement = sanitator.specs.doSanity(sanitator, elementObj);
-              sanitator.specs.showMsgs(showThisElement);
+              sanitator.specs.showMsgs(showThisElement, true);
+
             }
             if (sanitator.specs.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
+
               sanitator.specs.submitted.push(elementObj);
+
             }
           }
         },
@@ -545,36 +562,48 @@
             return;
           } else {
             if (sanitator.specs.submitted.indexOf(elementObj) !== -1 && !elementObj.applyCaps){
+              
+              showThisElement = sanitator.specs.doSanity(sanitator, elementObj);
+              sanitator.specs.showMsgs(showThisElement);
+
+            }
+            if (elementObj.applyCaps){
+              
+              if (sanitator.specs.submitted.indexOf(elementObj) !== -1){
+                sanitator.specs.submitted.push(elementObj);
+              }
+              
               showThisElement = sanitator.specs.doSanity(sanitator, elementObj);
               sanitator.specs.showMsgs(showThisElement);
             }
           }
         },
         keydown: function (sanitator, elementObj, event) {
-          // TODO: Caps lock Implementation
-          if (sanitator.specs.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable) && elementObj.applyCaps){
-            sanitator.specs.submitted.push(elementObj);
-          }
-          if (sanitator.specs.submitted.indexOf(elementObj) !== -1 && elementObj.applyCaps){
-            showThisElement = sanitator.specs.doSanity(sanitator, elementObj);
-            sanitator.specs.showMsgs(showThisElement);
-          }
+          // TODO: Keydown implementation
         },
         change: function (sanitator, elementObj, event) {
+
           if (sanitator.specs.submitted.indexOf(elementObj) !== -1){
+
             showThisElement = sanitator.specs.doSanity(sanitator, elementObj);
             sanitator.specs.showMsgs(showThisElement);
+
           }
           if (sanitator.specs.submitted.indexOf(elementObj) === -1 && (elementObj.isEditable && sanatioTrimmedValue(elementObj.element.val()).length > 0)){
+
             sanitator.specs.submitted.push(elementObj);
+
           }
         },
         keypress: function (sanitator, elementObj, event) {
           if (elementObj.ccProps !== null && elementObj.ccProps.applyCC && elementObj.ccProps.format){
+
             creditCardValue = elementObj.element.val().split(elementObj.ccProps.formatter).join(''); // remove hyphens
+
             if (creditCardValue.length > 0) {
               creditCardValue = creditCardValue.match(creditcardFormatRegex).join(elementObj.ccProps.formatter);
             }
+
             elementObj.element.val(creditCardValue);
           }
         }
@@ -586,7 +615,13 @@
       * @return element selected from the form element
       */
       getElement: function (formElement, elementName){
-        return formElement.find( '[name=' + elementName + ']' );
+        try {
+            if (typeof formElement.find( '[name=' + elementName + ']' ) !== 'undefined'){
+                return formElement.find( '[name=' + elementName + ']' );
+            }
+        } catch (e){
+            putOnConsole('No element with name \'' + elementName + '\' was found.', 'error');
+        }
       },
       
       verifyRule: function (ruleValue, ruleFunction, ruleElement, temp_obj, str, typeStr, countStr, messageStr, returnObj, actualMessage, shouldApplyCaps, capsStatus){
@@ -597,13 +632,17 @@
         }
         
         if (shouldApplyCaps && countStr === 'capslock'){
+
           temp_obj = ruleFunction(capsStatus);
+
         } else {
+
           if (countStr === 'equalthisto'){
             temp_obj = ruleFunction(ruleElement, this.getElement(this.currentForm, jsonedValue));
           } else {
             temp_obj = ruleFunction(ruleElement, jsonedValue);
           }
+
         }
         
         returnObj[str] = typeof temp_obj !== 'undefined' ? temp_obj : false;
@@ -621,18 +660,20 @@
       * @param Respective Sanatio object and form element
       * @return 
       */
-      doSanity: function (sanitator, elementObj){
+      doSanity: function (sanitator, elementObj, capsrule){
         
         localSettings = sanitator.specs;
         tempObj2 = {};
-        
+  
         $.each(localSettings.rulesConfig, function (index, elementItem){
           if (elementItem.elementObj === elementObj){
-            
+
             tempObj2.isElemValid = [];
 
             if (typeof elementItem.rules !== 'undefined'){
+
               for (innerCnt in elementItem.rules){
+
                 isElemValid = {};
                 isElemValid.errors = false;
                 isElemValid.warnings = false;
@@ -645,18 +686,22 @@
                 localWarningType = '';
                 localErrorType = '';
                 ifConditionPresent = false;
-                
+
                 for (rootCnt in localSettings.msgSetup){
                   if (typeof elementItem.if !== 'undefined'){
+
                     ifConditionPresent = true;
+
                     if (elementItem.elementObj.ifConditionElement.element.is(elementItem.elementObj.ifConditionElement.condition)){
                       ifConditionPresent = false;
                     }
+
                   } else {
                     ifConditionPresent = false;
                   }
 
                   if (!ifConditionPresent && typeof elementItem.rules[innerCnt].value !== 'undefined' && sanatioTrimmedValue(elementItem.rules[innerCnt].value).toString() !== 'false'){
+
                     if (elementItem.rules[innerCnt].name === 'equalthisto'){
                         elementItem.rules[innerCnt].type = 'error';
                     }
@@ -664,31 +709,33 @@
                         elementItem.rules[innerCnt].type = 'warning';
                     }
                     if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'error'){
-                      
+
                       isElemValid = localSettings.verifyRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempErrorObj, 'errors', 'errorType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
-                      
+
                     }
                     if (elementItem.rules[innerCnt].name === rootCnt && elementItem.rules[innerCnt].type === 'warning'){
-                      
+
                       isElemValid = localSettings.verifyRule(elementItem.rules[innerCnt].value, localSettings.checkFor[rootCnt], elementObj.element, tempWarnObj, 'warnings', 'warningType', rootCnt, 'message', {}, elementItem.rules[innerCnt].message, elementObj.applyCaps, elementObj.capslockStatus);
 
                     }
                   }
                 }
-                
+
                 tempObj2.elementObj = elementItem.elementObj;
                 tempObj2.isElemValid.push(isElemValid);
               }
+              
             }
+              
             if (localSettings.invalidElements.length > 0){
 
               for (innerCnt in localSettings.invalidElements){
                 if (localSettings.invalidElements[innerCnt].elementObj && localSettings.invalidElements[innerCnt].elementObj.element === tempObj2.elementObj.element){
-                  
+
                   localSettings.invalidElements[innerCnt] = tempObj2;
                   isItemPresent = true;
                   break;
-                  
+
                 } else {
                   isItemPresent = false;
                 }
@@ -700,11 +747,11 @@
             } else {
               localSettings.invalidElements.push(tempObj2);
             }
-            
+
             return false;
           }
         });
-        
+          
         return tempObj2;
       },
       
@@ -816,8 +863,7 @@
           try {
             return !moment(sanatioReturnValue(element)).isValid();
           } catch (e){
-            console.warn(momentJSWarning);
-            
+            putOnConsole(momentJSWarning, 'warn');
             return true;
           }
           
@@ -827,7 +873,7 @@
           try {
             return !moment(sanatioReturnValue(element), mustBe, true).isValid();
           } catch (e){
-            console.warn(momentJSWarning);
+            putOnConsole(momentJSWarning, 'warn');
             
             return true;
           }
@@ -888,7 +934,7 @@
       * @param
       * @return 
       */
-      showMsgs: function (elementToBeSanitized){
+      showMsgs: function (elementToBeSanitized, removeCapsError){
 
         errorsCount = typeof this.validationStatus['errors'] === 'undefined' ? 0 : parseInt(this.validationStatus['errors']);
         warningsCount = typeof this.validationStatus['warnings'] === 'undefined' ? 0 : parseInt(this.validationStatus['warnings']);
@@ -931,12 +977,16 @@
               }
             }
             
+          }
+          for (innerCnt in errorElementProps){
+
             if (errorElementProps[innerCnt].warnings){
               localWarning = errorElementProps[innerCnt].message;
               localWarningType = errorElementProps[innerCnt].warningType;
             }
-
+              
             if (localWarning.length > 0 && localWarningType.length > 0 && typeof errorElementProps[innerCnt].warnings !== 'undefined'){
+
               errorElement.addClass('has-sanatio-warning');
               
               if (sanatioTrimmedValue(this.highlightParent).length > 0 && typeof errorElement.closest(this.highlightParent) !== 'undefined'){
@@ -968,7 +1018,7 @@
             this.cleanErrors(elementsLength, 'all');
           }
           
-          if (elementsLength.applyRequired && sanatioReturnLength(errorElement) === 0){
+          if ((elementsLength.applyRequired && sanatioReturnLength(errorElement) === 0) || (typeof removeCapsError !== 'undefined' && removeCapsError === true)){
             this.cleanErrors(elementsLength, 'warnings');
           }
 
@@ -1029,7 +1079,7 @@
           tempObj = {};
           tempObj.element = thisElement;
           
-          if (thisElement.prop('tagName').toLowerCase() === 'select' || thisElement.prop('tagName').toLowerCase() === 'option'){
+          if (thisElement.prop('tagName').toLowerCase() === 'select' || thisElement.prop('tagName').toLowerCase() === 'option' || (thisElement.prop('tagName').toLowerCase() === 'input' && thisElement.attr('type').toLowerCase() === 'file')){
             tempObj.isClickable = true;
             tempObj.isCheckable = false;
             tempObj.isEditable = false;
@@ -1080,12 +1130,13 @@
                 tempObj.ccProps.luhnCheck = typeof spec.rules[outerCnt].value !== 'undefined' ? spec.rules[outerCnt].value : 'without-luhn';
                 tempObj.ccProps.format = typeof spec.rules[outerCnt].formatter !== 'undefined' ? true : false;
                 tempObj.ccProps.formatter = typeof spec.rules[outerCnt].formatter !== 'undefined' ? spec.rules[outerCnt].formatter : '';
-                
+
                 if (tempObj.ccProps.formatter !== ' ' && tempObj.ccProps.formatter !== '-' && tempObj.ccProps.formatter !== ''){
-                  console.warn('Invalid separator is used; resetting it to blankspace.');
+                    
+                  putOnConsole('Invalid separator is used; resetting it to blankspace.', 'warn');
                   tempObj.ccProps.formatter = ' ';
                 }
-                
+
                 break;
               } else {
                 tempObj.ccProps = null;
@@ -1214,7 +1265,7 @@
         passToSubmitHandler = (isThisFormValid.errors !== 0 || isThisFormValid.warnings !== 0) ? false : true;
       }
       
-      return passToSubmitHandler === true ? $.sanatio.submitHandler() : false;
+      return passToSubmitHandler === true ? $.sanatio.submitHandler(this) : false;
       
     });
     
