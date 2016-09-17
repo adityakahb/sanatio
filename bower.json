@@ -1,6 +1,6 @@
 {
   "name": "sanatio",
-  "version": "1.1.6.1",
+  "version": "1.1.7",
   "description": "A validator plugin to handle Warnings and Errors separately",
   "main": [
     "dev/sanatio.js"

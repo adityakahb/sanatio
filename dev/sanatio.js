@@ -1,5 +1,5 @@
 /*!
- * Sanatio Validator v1.1.6.1
+ * Sanatio Validator v1.1.7
  */
 (function ( $ ) {
   
