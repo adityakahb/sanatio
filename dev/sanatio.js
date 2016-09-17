@@ -1,5 +1,5 @@
 /*!
- * Sanatio Validator v1.1.6
+ * Sanatio Validator v1.1.6.1
  */
 (function ( $ ) {
   
@@ -1015,6 +1015,7 @@
           }
 
           if (!elementsLength.applyRequired && sanatioReturnLength(errorElement) === 0){
+            errorsCount = 0;
             this.cleanErrors(elementsLength, 'all');
           }
           
