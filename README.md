@@ -189,9 +189,9 @@ If the form contains only warnings and no errors, it is considered as valid. You
 
 That's it. No need to specify anything else. `Sanatio` will handle the validation itself.
 
-User does not have any more custom options available from the plugin. But if initiated explicitly via jQuery, `Sanatio` provides some configurable options.
+User does not have any more custom options available from the plugin. But if initiated via jQuery, `Sanatio` provides some configurable options.
 
-### Details of explicit `jquery` implementation
+### Details of `via jquery` implementation
 
 __HTML markup should not have any `data-sanatio` attributes.__ 
 
@@ -240,13 +240,13 @@ __HTML markup should not have any `data-sanatio` attributes.__
 
 ### Methods
 
-`addSanatioRule`: Can be used to add custom rule to `Sanatio`; must return Boolean
+`addSanatioRule`: Can be used to add custom rule to `Sanatio`; must return Boolean __NOTE__ rulename must be in all small letters
 ```js
 $.sanatio.addSanatioRule('customrule', function (element, value){
   return parseInt(element.val()) !== parseInt(value);
 });
 ```
-`submitHandler`: Can be used to add custom logic while submitting the __validated__ form __NOTE__ this will apply to all forms on the page globally
+`submitHandler`: Can be used to add custom logic while submitting the __validated__ form __NOTE__ this will apply to all forms on the page globally, and will fire only if the form is completely valid
 ```js
 $.sanatio.submitHandler = function (){
   alert('form validated');
@@ -256,13 +256,13 @@ $.sanatio.submitHandler = function (){
 ```
 `getSanatioObject`: For debugging purpose. Nothing to describe as such.
 ```js
-var sanatioInit = $('#form1').sanatio(validatorObj);
-console.log(sanatioInit.getSanatioObject());
+var sanatioObj = $.sanatio.getSanatioObject($('#form1'));
+console.log(sanatioObj);
 ```
 `getValidityStatus`: Returns an object with counts of errors and warnings on the form.
 ```js
-var sanatioInit = $('#form1').sanatio(validatorObj);
-console.log(sanatioInit.getValidityStatus()); /* Returns Object {errors: 0, warnings: 0} */
+var form1Status = $.sanatio.getValidationStatus($('#form1'));
+console.log(form1Status); /* Returns Object {errors: 0, warnings: 0} */
 ```
 `destroySanatio`: Destroys the `Sanatio` implementation on a form.
 ```js

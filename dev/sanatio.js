@@ -1,5 +1,5 @@
 /*!
- * Sanatio Validator v1.1.7
+ * Sanatio Validator v1.1.8
  */
 (function ( $ ) {
   
@@ -723,6 +723,7 @@
 
                 tempObj2.elementObj = elementItem.elementObj;
                 tempObj2.isElemValid.push(isElemValid);
+
               }
               
             }
@@ -935,9 +936,6 @@
       * @return 
       */
       showMsgs: function (elementToBeSanitized, removeCapsError){
-
-        errorsCount = typeof this.validationStatus['errors'] === 'undefined' ? 0 : parseInt(this.validationStatus['errors']);
-        warningsCount = typeof this.validationStatus['warnings'] === 'undefined' ? 0 : parseInt(this.validationStatus['warnings']);
         
         outerCnt = this.invalidElements.indexOf(elementToBeSanitized);
 
@@ -1006,16 +1004,13 @@
           
           if (errorElement.hasClass('has-sanatio-warning') && localWarningType.length > 0){
             this.insertMsg(thisMessagePlaceholder, elementsLength.element, 'has-sanatio-warning', localWarningType, '.warning-', localWarning, this.warningClass, this.additionalWarningClasses);
-            ++warningsCount;
           }
 
           if (errorElement.hasClass('has-sanatio-error') && localErrorType.length > 0){
             this.insertMsg(thisMessagePlaceholder, elementsLength.element, 'has-sanatio-error', localErrorType, '.error-', localError, this.errorClass, this.additionalErrorClasses);
-            ++errorsCount;
           }
 
           if (!elementsLength.applyRequired && sanatioReturnLength(errorElement) === 0){
-            errorsCount = 0;
             this.cleanErrors(elementsLength, 'all');
           }
           
@@ -1025,11 +1020,58 @@
 
         }
 
-        this.validationStatus['errors'] = errorsCount;
-        this.validationStatus['warnings'] = warningsCount;
+        this.calculateCounts();
+      },
+      
+      /**
+      * Function to calculate number of errors and warnings
+      * @param
+      * @return 
+      */
+      calculateCounts: function (){
+          errorsCount = 0;
+          warningsCount = 0;
+          
+          for (outerCnt in this.invalidElements){
+              
+              tempObj2 = this.invalidElements[outerCnt];
+              for (innerCnt in this.invalidElements[outerCnt].isElemValid){
+                 
+                  tempObj = this.invalidElements[outerCnt].isElemValid[innerCnt];
+                  
+                  if (tempObj2.elementObj.applyRequired){
+                      if (sanatioReturnLength(tempObj2.elementObj.element) === 0){
+                          if (tempObj.errors){
+                              errorsCount++;  
+                          }
+                      } else {
+                          if (tempObj.errors){
+                              errorsCount++;  
+                          }
+                          if (tempObj.warnings){
+                              warningsCount++;  
+                          }
+                      }
+                  } else {
+                      if (sanatioReturnLength(tempObj2.elementObj.element) === 0){
+                          
+                      } else {
+                          if (tempObj.errors){
+                              errorsCount++;  
+                          }
+                          if (tempObj.warnings){
+                              warningsCount++;  
+                          }
+                      }
+                  }
+              }
+          }
+          
+          this.validationStatus['errors'] = errorsCount;
+          this.validationStatus['warnings'] = warningsCount;
       }
     },
-    
+      
     /**
     * Function to add custom method and rule
     * @param rule name and function defination
@@ -1056,9 +1098,27 @@
     * @return 
     */
     submitHandler: function (){
-      return true;
+        return true;
     },
     
+    /**
+    * Function to return the Sanatio object
+    * @param form element
+    * @return Sanatio Object
+    */
+    getSanatioObject: function (formElement){
+        return $.data($(formElement)[0]);
+    },
+
+    /**
+    * Function to return the Validation Status Object
+    * @param form element
+    * @return Validation Status Object
+    */
+    getValidationStatus: function (formElement){
+        return $.data(formElement[0]).sanatio.specs.validationStatus;
+    },
+
     prototype: {
       prepareElements: function (){
         var spec;
@@ -1179,7 +1239,7 @@
             if (localElementObj){
               localSettings.events[ localEventType ]( localValidator, localElementObj, event );
             }
-  					// settings[ eventType ].call( sanatio, this, event );
+  			// settings[ eventType ].call( sanatio, this, event );
           }
         };
         
@@ -1271,14 +1331,6 @@
     });
     
     thisSanatioObject = $.data(this[0]);
-    
-    this.getSanatioObject = function (){
-      return thisSanatioObject.sanatio;
-    };
-    
-    this.getValidityStatus = function (){
-      return thisSanatioObject.sanatio.specs.validationStatus;
-    };
     
     return this;
 
