@@ -1,0 +1,629 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Bootstrap with icons</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="../styles/css/demo.css" rel="stylesheet">
+        <link href="../styles/css/bootstrap.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="main-container">
+            <!--[if lte IE 9]>
+                <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+            <![endif]-->
+
+            <!-- Add your site or application content here -->
+            <h2>Textboxes</h2>
+            <form id="form1" data-sanatio data-sanatiocustom='{
+                    "formValidationClass": "",
+                    "formPostValidationClass": "",
+                    "parentErrorClass": "has-error has-feedback",
+                    "parentWarningClass": "has-warning has-feedback",
+                    "elementSuccessClass": "",
+                    "elementErrorClass": "",
+                    "elementWarningClass": "",
+                    "elementSuccessClass": "",
+                    "iconErrorClass": "glyphicon glyphicon-remove form-control-feedback",
+                    "iconWarningClass": "glyphicon glyphicon-warning-sign form-control-feedback",
+                    "iconSuccessClass": "",
+                    "messageErrorClass": "help-block",
+                    "messageWarningClass": "help-block",
+                    "messageSuccessClass": "",
+                    "alertElement": "div"
+                }'>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox1_form1">Required</label>
+                    <input class="form-control" data-sanatioelement name="textbox1_form1" type="text" id="textbox1_form1" required
+                        data-sanatiorules='[
+                            {
+                                "rule": "minlength",
+                                "value": 4,
+                                "message": "Custom message for minlength",
+                                "alertType": "error"
+                            },
+                            {
+                                "rule": "maxlength",
+                                "value": 10,
+                                "message": "Custom message for maxlength",
+                                "alertType": "warning"
+                            },
+                            {
+                                "rule": "min",
+                                "value": 12345,
+                                "message": "Custom message for min",
+                                "alertType": "warning"
+                            },
+                            {
+                                "rule": "required",
+                                "value": true,
+                                "message": "Custom message for required",
+                                "alertType": "error"
+                            },
+                            {
+                                "rule": "somerule",
+                                "value": true,
+                                "message": "Custom message for somerule",
+                                "alertType": "error"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox2_form1">Email</label>
+                    <input class="form-control" data-sanatioelement name="textbox2_form1" type="text" id="textbox2_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "email",
+                                "value": true,
+                                "message": "Custom message for email",
+                                "alertType": "warning"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox3_form1">URL</label>
+                    <input class="form-control" data-sanatioelement name="textbox3_form1" type="text" id="textbox3_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "url",
+                                "value": true,
+                                "message": "Custom message for url"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox4_form1">Date</label>
+                    <input class="form-control" data-sanatioelement name="textbox4_form1" type="text" id="textbox4_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "date",
+                                "value": true,
+                                "message": "Custom message for date"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox5_form1">Date ISO</label>
+                    <input class="form-control" data-sanatioelement name="textbox5_form1" type="text" id="textbox5_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "dateISO",
+                                "value": true,
+                                "message": "Custom message for dateISO"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox6_form1">Regex</label>
+                    <input class="form-control" data-sanatioelement name="textbox6_form1" type="text" id="textbox6_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "pattern",
+                                "value": "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$",
+                                "message": "Custom message for regexp"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox7_form1">Minlength</label>
+                    <input class="form-control" data-sanatioelement name="textbox7_form1" type="text" id="textbox7_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "minlength",
+                                "value": 5,
+                                "message": "Custom message for minlength"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox8_form1">Maxlength</label>
+                    <input class="form-control" data-sanatioelement name="textbox8_form1" type="text" id="textbox8_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "maxlength",
+                                "value": 10,
+                                "message": "Custom message for maxlength"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox9_form1">Rangelength</label>
+                    <input class="form-control" data-sanatioelement name="textbox9_form1" type="text" id="textbox9_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "rangelength",
+                                "value": [5, 10],
+                                "message": "Custom message for rangelength"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox10_form1">Min</label>
+                    <input class="form-control" data-sanatioelement name="textbox10_form1" type="text" id="textbox10_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "min",
+                                "value": 5,
+                                "message": "Custom message for min"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox11_form1">Max</label>
+                    <input class="form-control" data-sanatioelement name="textbox11_form1" type="text" id="textbox11_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "max",
+                                "value": 10,
+                                "message": "Custom message for max"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox12_form1">Range</label>
+                    <input class="form-control" data-sanatioelement name="textbox12_form1" type="text" id="textbox12_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "range",
+                                "value": [5, 10],
+                                "message": "Custom message for range"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox13_form1">Equals with previous textbox value</label>
+                    <input class="form-control" data-sanatioelement name="textbox13_form1" type="text" id="textbox13_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "equalsto",
+                                "value": "textbox12_form1",
+                                "message": "Custom message for equals"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textbox14_form1">Bank Card(credit/debit)</label>
+                    <input class="form-control" data-sanatioelement name="textbox14_form1" type="text" id="textbox14_form1"
+                        data-sanatiorules='[
+                            {
+                                "rule": "bankcard",
+                                "value": true,
+                                "message": "Custom message for bankcard"
+                            }
+                        ]'
+                    >
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <input class="btn btn-primary" type="submit" value="Submit form 1">
+                    <input id="destroy" value="destroy" type="button"/>
+                </div>
+            </form>
+            <hr>
+            <h2>Selects</h2>
+            <form id="form2" data-sanatio data-sanatio-custom='{
+                "formValidationClass": "",
+                "formPostValidationClass": "",
+                "parentErrorClass": "has-error",
+                "parentWarningClass": "has-warning",
+                "elementSuccessClass": "",
+                "elementErrorClass": "",
+                "elementWarningClass": "",
+                "elementSuccessClass": "",
+                "messageErrorClass": "help-block",
+                "messageWarningClass": "help-block",
+                "messageSuccessClass": "",
+                "alertElement": "div"
+            }'>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="select1_form2">Select required</label>
+                    <select class="form-control" data-sanatioelement name="select1_form2" id="select1_form2"
+                        data-sanatiorules='[
+                            {
+                                "rule": "required",
+                                "value": true,
+                                "message": "Custom message for select required"
+                            }
+                        ]'
+                    >
+                        <option value="">Select one</option>
+                        <option value="1">OOJS</option>
+                        <option value="2">AngularJS</option>
+                        <option value="3">ReactJS</option>
+                        <option value="4">VueJS</option>
+                        <option value="5">Not applicable</option>
+                    </select>
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="select2_form2">Multiple Select required</label>
+                    <select class="form-control" data-sanatioelement name="select2_form2" id="select2_form2" multiple
+                        data-sanatiorules='[
+                            {
+                                "rule": "required",
+                                "value": true,
+                                "message": "Custom message for multiple select required"
+                            }
+                        ]'
+                    >
+                        <option value="">Select one</option>
+                        <option value="1">OOJS</option>
+                        <option value="2">AngularJS</option>
+                        <option value="3">ReactJS</option>
+                        <option value="4">VueJS</option>
+                        <option value="5">Not applicable</option>
+                    </select>
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="select3_form2">Multiple Select minlength</label>
+                    <select class="form-control" data-sanatioelement name="select3_form2" id="select3_form2" multiple
+                        data-sanatiorules='[
+                            {
+                                "rule": "minlength",
+                                "value": 2,
+                                "message": "Custom message for multiple select minlength",
+                                "alertType": "warning"
+                            }
+                        ]'
+                    >
+                        <option value="">Select one</option>
+                        <option value="1">OOJS</option>
+                        <option value="2">AngularJS</option>
+                        <option value="3">ReactJS</option>
+                        <option value="4">VueJS</option>
+                        <option value="5">Not applicable</option>
+                    </select>
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="select4_form2">Multiple Select maxlength</label>
+                    <select class="form-control" data-sanatioelement name="select4_form2" id="select4_form2" multiple
+                        data-sanatiorules='[
+                            {
+                                "rule": "maxlength",
+                                "value": 4,
+                                "message": "Custom message for multiple select maxlength"
+                            }
+                        ]'
+                    >
+                        <option value="">Select one</option>
+                        <option value="1">OOJS</option>
+                        <option value="2">AngularJS</option>
+                        <option value="3">ReactJS</option>
+                        <option value="4">VueJS</option>
+                        <option value="5">Not applicable</option>
+                    </select>
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="select5_form2">Multiple Select rangelength</label>
+                    <select class="form-control" data-sanatioelement name="select5_form2" id="select5_form2" multiple
+                        data-sanatiorules='[
+                            {
+                                "rule": "rangelength",
+                                "value": [2, 4],
+                                "message": "Custom message for multiple select rangelength",
+                                "alertType": "warning"
+                            }
+                        ]'
+                    >
+                        <option value="">Select one</option>
+                        <option value="1">OOJS</option>
+                        <option value="2">AngularJS</option>
+                        <option value="3">ReactJS</option>
+                        <option value="4">VueJS</option>
+                        <option value="5">Not applicable</option>
+                    </select>
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <input class="btn btn-primary" type="submit" value="Submit form 2">
+                </div>
+            </form>
+            <hr>
+            <h2>Checkboxes</h2>
+            <form id="form3" data-sanatio data-sanatio-custom='{
+                "formValidationClass": "",
+                "formPostValidationClass": "",
+                "parentErrorClass": "has-error",
+                "parentWarningClass": "has-warning",
+                "elementSuccessClass": "",
+                "elementErrorClass": "",
+                "elementWarningClass": "",
+                "elementSuccessClass": "",
+                "messageErrorClass": "help-block",
+                "messageWarningClass": "help-block",
+                "messageSuccessClass": "",
+                "alertElement": "div"
+            }'>
+                <div data-sanatioparent class="form-group">
+                    <div class="checkbox">
+                        <label for="check1_1_form3"><input type="checkbox" id="check1_1_form3" name="check1_form3" data-sanatioelement
+                            data-sanatiorules='[
+                                {
+                                    "rule": "required",
+                                    "value": true
+                                }
+                            ]'
+                        >Checkbox required 1</label>
+                    </div>
+                    <div class="checkbox">
+                        <label for="check1_2_form3"><input type="checkbox" id="check1_2_form3" name="check1_form3" data-sanatioelement
+                            data-sanatiorules='[
+                                {
+                                    "rule": "required",
+                                    "value": true
+                                }
+                            ]'
+                        >Checkbox required 2</label>
+                    </div>
+                </div>
+                <hr style="border-bottom: 1px dashed #000">
+                <div data-sanatioparent class="form-group">
+                    <div class="checkbox">
+                        <label for="check2_1_form3"><input type="checkbox" id="check2_1_form3" name="check2_form3" data-sanatioelement
+                            data-sanatiorules='[
+                                {
+                                    "rule": "minoptions",
+                                    "value": 2
+                                }
+                            ]'
+                        >Checkbox minoptions</label>
+                    </div>
+                    <div class="checkbox">
+                        <label for="check2_2_form3"><input type="checkbox" id="check2_2_form3" name="check2_form3" data-sanatioelement
+                            data-sanatiorules='[
+                                {
+                                    "rule": "minoptions",
+                                    "value": 2
+                                }
+                            ]'
+                        >Checkbox minoptions</label>
+                    </div>
+                    <div class="checkbox">
+                        <label for="check2_3_form3"><input type="checkbox" id="check2_3_form3" name="check2_form3" data-sanatioelement
+                            data-sanatiorules='[
+                                {
+                                    "rule": "minoptions",
+                                    "value": 2
+                                }
+                            ]'
+                        >Checkbox minoptions</label>
+                    </div>
+                </div>
+                <hr style="border-bottom: 1px dashed #000">
+                <div data-sanatioparent class="form-group">
+                    <div class="checkbox">
+                        <label for="check3_1_form3"><input type="checkbox" id="check3_1_form3" name="check3_form3" data-sanatioelement
+                            data-sanatiorules='[
+                            {
+                                "rule": "maxoptions",
+                                "value": 2,
+                                "alertType": "warning"
+                            }
+                        ]'
+                        >Checkbox maxoptions</label>
+                    </div>
+                    <div class="checkbox">
+                        <label for="check3_2_form3"><input type="checkbox" id="check3_2_form3" name="check3_form3" data-sanatioelement
+                            data-sanatiorules='[
+                            {
+                                "rule": "maxoptions",
+                                "value": 2,
+                                "alertType": "warning"
+                            }
+                        ]'
+                        >Checkbox maxoptions</label>
+                    </div>
+                    <div class="checkbox">
+                        <label for="check3_3_form3"><input type="checkbox" id="check3_3_form3" name="check3_form3" data-sanatioelement
+                            data-sanatiorules='[
+                            {
+                                "rule": "maxoptions",
+                                "value": 2,
+                                "alertType": "warning"
+                            }
+                        ]'
+                        >Checkbox maxoptions</label>
+                    </div>
+                </div>
+                <hr style="border-bottom: 1px dashed #000">
+                <div data-sanatioparent class="form-group">
+                    <div class="checkbox">
+                        <label for="check4_1_form3"><input type="checkbox" id="check4_1_form3" name="check4_form3" data-sanatioelement
+                            data-sanatiorules='[
+                            {
+                                "rule": "rangeoptions",
+                                "value": [2, 5]
+                            }
+                        ]'
+                        >Checkbox rangeoptions</label>
+                    </div>
+                    <div class="checkbox">
+                        <label for="check4_2_form3"><input type="checkbox" id="check4_2_form3" name="check4_form3" data-sanatioelement
+                            data-sanatiorules='[
+                            {
+                                "rule": "rangeoptions",
+                                "value": [2, 5]
+                            }
+                        ]'
+                        >Checkbox rangeoptions</label>
+                    </div>
+                    <div class="checkbox">
+                        <label for="check4_3_form3"><input type="checkbox" id="check4_3_form3" name="check4_form3" data-sanatioelement
+                            data-sanatiorules='[
+                            {
+                                "rule": "rangeoptions",
+                                "value": [2, 5]
+                            }
+                        ]'
+                        >Checkbox rangeoptions</label>
+                    </div>
+                    <div class="checkbox">
+                        <label for="check4_4_form3"><input type="checkbox" id="check4_4_form3" name="check4_form3" data-sanatioelement
+                            data-sanatiorules='[
+                            {
+                                "rule": "rangeoptions",
+                                "value": [2, 5]
+                            }
+                        ]'
+                        >Checkbox rangeoptions</label>
+                    </div>
+                    <div class="checkbox">
+                        <label for="check4_5_form3"><input type="checkbox" id="check4_5_form3" name="check4_form3" data-sanatioelement
+                            data-sanatiorules='[
+                            {
+                                "rule": "rangeoptions",
+                                "value": [2, 5]
+                            }
+                        ]'
+                        >Checkbox rangeoptions</label>
+                    </div>
+                    <div class="checkbox">
+                        <label for="check4_6_form3"><input type="checkbox" id="check4_6_form3" name="check4_form3" data-sanatioelement
+                            data-sanatiorules='[
+                            {
+                                "rule": "rangeoptions",
+                                "value": [2, 5]
+                            }
+                        ]'
+                        >Checkbox rangeoptions</label>
+                    </div>
+                    <div class="checkbox">
+                        <label for="check4_7_form3"><input type="checkbox" id="check4_7_form3" name="check4_form3" data-sanatioelement
+                            data-sanatiorules='[
+                            {
+                                "rule": "rangeoptions",
+                                "value": [2, 5]
+                            }
+                        ]'
+                        >Checkbox rangeoptions</label>
+                    </div>
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <input class="btn btn-primary" type="submit" value="Submit form 3">
+                </div>
+            </form>
+            <hr>
+            <h2>Textarea</h2>
+            <form id="form4" data-sanatio data-sanatio-custom='{
+                "formValidationClass": "",
+                "formPostValidationClass": "",
+                "parentErrorClass": "has-error",
+                "parentWarningClass": "has-warning",
+                "elementSuccessClass": "",
+                "elementErrorClass": "",
+                "elementWarningClass": "",
+                "elementSuccessClass": "",
+                "messageErrorClass": "help-block",
+                "messageWarningClass": "help-block",
+                "messageSuccessClass": "",
+                "alertElement": "div"
+            }'>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="textarea1_form4">Textarea required</label>
+                    <textarea class="form-control" id="textarea1_form4" name="textarea1_form4" data-sanatioelement data-sanatiorules='[
+                        {
+                            "rule": "required",
+                            "value": true,
+                            "message": "Custom message for textarea required"
+                        }
+                    ]'></textarea>
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <input class="btn btn-primary" type="submit" value="Submit form 4">
+                </div>
+            </form>
+            <hr>
+            <h2>File inputs</h2>
+            <form id="form5" data-sanatio>
+                <div data-sanatioparent class="form-group">
+                    <label class="control-label" for="file1_form5">File 1 Required</label>
+                    <input class="form-control-file" type="file" id="file1_form5" name="file1_form5" data-sanatioelement data-sanatiorules='[
+                        {
+                            "rule": "required",
+                            "value": true,
+                            "message": "Custom message for file required"
+                        }
+                    ]'>
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <input class="btn btn-primary" type="submit" value="Submit form 5">
+                </div>
+            </form>
+            <hr>
+            <h2>Radios</h2>
+            <form id="form6" data-sanatio data-sanatio-custom='{
+                "formValidationClass": "",
+                "formPostValidationClass": "",
+                "parentErrorClass": "has-error",
+                "parentWarningClass": "has-warning",
+                "elementSuccessClass": "",
+                "elementErrorClass": "",
+                "elementWarningClass": "",
+                "elementSuccessClass": "",
+                "messageErrorClass": "help-block",
+                "messageWarningClass": "help-block",
+                "messageSuccessClass": "",
+                "alertElement": "div"
+            }'>
+                <div data-sanatioparent class="form-group">
+                    <div class="radio">
+                        <label for="radio1_1_form6"><input type="radio" id="radio1_1_form6" name="radio1_form6" data-sanatioelement
+                            data-sanatiorules='[
+                                {
+                                    "rule": "required",
+                                    "value": true
+                                }
+                            ]'
+                        >Radio required 1</label>
+                    </div>
+                    <div class="radio">
+                        <label for="radio1_2_form6"><input type="radio" id="radio1_2_form6" name="radio1_form6" data-sanatioelement
+                            data-sanatiorules='[
+                                {
+                                    "rule": "required",
+                                    "value": true
+                                }
+                            ]'
+                        >Radio required 2</label>
+                    </div>
+                </div>
+                <div data-sanatioparent class="form-group">
+                    <input class="btn btn-primary" type="submit" value="Submit form 6">
+                </div>
+            </form>
+        </div>
+        <script src="../webpack/sanatio.js"></script>
+    </body>
+</html>

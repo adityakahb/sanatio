@@ -1,0 +1,119 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Simple Form</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="../../styles/css/demo.css" rel="stylesheet">
+        <link href="../../styles/css/simple.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="main-container simple-signup">
+            <!--[if lte IE 9]>
+                <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+            <![endif]-->
+
+            <!-- Add your site or application content here -->
+            <h1>Sign Up</h1>
+            <p>Please fill in this form to create an account.</p>
+            <form id="simple_signup" data-sanatio>
+                <div data-sanatioparent>
+                    <label for="username">Username</label>
+                    <input name="username" type="text" id="username" data-sanatiocapslock="Custom message for capslock"
+                        data-sanatioelement='[
+                            {
+                                "rule": "required",
+                                "value": true
+                            },
+                            {
+                                "rule": "minlength",
+                                "value": 8
+                            },
+                            {
+                                "rule": "maxlength",
+                                "value": 16,
+                                "alertType": "warning"
+                            }
+                        ]'
+                    >
+                    <div data-sanatioalert="username"></div>
+                </div>
+                <div data-sanatioparent>
+                    <label for="email">Email</label>
+                    <input name="email" type="text" id="email"
+                        data-sanatioelement='[
+                            {
+                                "rule": "required",
+                                "value": true
+                            },
+                            {
+                                "rule": "email",
+                                "value": true
+                            }
+                        ]'
+                    >
+                    <div data-sanatioalert="email"></div>
+                </div>
+                <div data-sanatioparent>
+                    <label for="psw"><b>Password</b></label>
+                    <input type="password" placeholder="Enter Password" id="psw" name="psw" data-sanatioelement='[
+                        {
+                            "rule": "required",
+                            "value": true
+                        },
+                        {
+                            "rule": "minlength",
+                            "value": 8,
+                            "alertType": "warning"
+                        },
+                        {
+                            "rule": "pattern",
+                            "value": "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
+                        }
+                    ]'>
+                    <div data-sanatioalert="psw"></div>
+                </div>
+                <div data-sanatioparent>
+                    <label for="psw_repeat"><b>Repeat Password</b></label>
+                    <input type="password" placeholder="Repeat Password" id="psw_repeat" name="psw_repeat" data-sanatioelement='[
+                        {
+                            "rule": "required",
+                            "value": true
+                        },
+                        {
+                            "rule": "minlength",
+                            "value": 8,
+                            "alertType": "warning"
+                        },
+                        {
+                            "rule": "equalsto",
+                            "value": "psw"
+                        },
+                        {
+                            "rule": "pattern",
+                            "value": "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
+                        }
+                    ]'>
+                    <div data-sanatioalert="psw_repeat"></div>
+                </div>
+                <div data-sanatioparent>
+                    <label for="agree"><input type="checkbox" id="agree" name="agree"
+                        data-sanatioelement='[
+                            {
+                                "rule": "required",
+                                "value": true
+                            }
+                        ]'
+                    >By creating an account you agree to our <a href="#" style="color:dodgerblue">Terms &amp; Privacy</a>.</label>
+                    <div data-sanatioalert="agree"></div>
+                </div>
+                <div data-sanatioparent>
+                    <input type="submit" value="Sign up">
+                </div>
+            </form>
+        </div>
+        <script src="../examples-init.js"></script>
+    </body>
+</html>

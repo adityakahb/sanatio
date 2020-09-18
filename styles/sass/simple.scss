@@ -1,0 +1,39 @@
+@import "bootstrap/stylesheets/bootstrap/normalize";
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,300i,600,600i');
+.main-container{
+    font-family: 'Open Sans', sans-serif;
+    button[type=submit], input[type=submit] {
+        margin: 40px 0;
+    }
+    #form1, #form2, #form4 {
+        label {
+            display: block;
+        }
+    }
+}
+.sanatio-alert{
+    display: block;
+}
+.sanatio-alert.error{
+    color: #f00;
+    font-weight: 600;
+}
+.sanatio-alert.warning{
+    color: #f70;
+    font-weight: 300;
+    font-style: italic;
+}
+.sanatio-alert.info{
+    color: #0053a5;
+    font-weight: 300;
+    font-style: italic;
+}
+.simple-signup {
+    label {
+        display: block;
+        font-weight: 600;
+    }
+    input {
+        font-weight: 300;
+    }
+}

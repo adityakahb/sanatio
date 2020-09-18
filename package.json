@@ -1,0 +1,34 @@
+{
+  "name": "sanatio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sanatio.js",
+  "scripts": {
+    "compileTSDev": "webpack --config ./webpack.dev.js",
+    "compileTSWatch": "webpack --watch --config ./webpack.examples.js",
+    "compileTSProd": "webpack --config ./webpack.prod.js",
+    "deleteJSDoc": "del ./outJSDoc",
+    "deleteTSDoc": "del ./outTSDoc",
+    "generateJSDoc": "jsdoc --destination ./outJSDoc/ ./dist/sanatio.js",
+    "generateTSDoc": "typedoc --out ./outTSDoc/ ./src/Sanatio.ts",
+    "sassNormal": "node-sass --source-map true styles/sass/ -o styles/css/",
+    "lint": "tslint --project tsconfig.json --config tslint.json",
+    "build": "tsc && npm run compileTSDev",
+    "buildAll": "npm run lint && tsc && npm run compileTSDev && npm run compileTSProd && npm run sassNormal"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "bootstrap-sass": "^3.3.7",
+    "jsdoc": "^3.5.5",
+    "node-sass": "^4.9.3",
+    "progress-bar-webpack-plugin": "^1.11.0",
+    "ts-loader": "^5.2.1",
+    "tslint": "^5.11.0",
+    "typedoc": "^0.12.0",
+    "typescript": "^3.1.1",
+    "uglifyjs-webpack-plugin": "^2.0.1",
+    "webpack": "^4.20.2"
+  }
+}

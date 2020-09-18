@@ -1,0 +1,389 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Bootstrap</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="../../styles/css/demo.css" rel="stylesheet">
+        <link href="../../styles/css/bootstrap.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="main-container">
+            <!--[if lte IE 9]>
+                <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+            <![endif]-->
+
+            <!-- Add your site or application content here -->
+            <div class="container">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Bootstrap Edit My Profile</div>
+                    <div class="panel-body">
+                        <form id="bootstrap1" data-sanatio data-sanatiocustom='{
+                            "formValidationClass": "",
+                            "formPostValidationClass": "",
+                            "parentErrorClass": "has-error",
+                            "parentWarningClass": "has-warning",
+                            "elementSuccessClass": "",
+                            "elementErrorClass": "",
+                            "elementWarningClass": "",
+                            "elementSuccessClass": "",
+                            "messageErrorClass": "help-block",
+                            "messageWarningClass": "help-block",
+                            "messageSuccessClass": "",
+                            "alertElement": "div"
+                        }'>
+                            <div data-sanatioparent class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-4">
+                                        <label class="control-label" for="firstname">First Name</label>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-8">
+                                        <input class="form-control" name="firstname" type="text" id="firstname" required
+                                            data-sanatioelement='[
+                                                {
+                                                    "rule": "required",
+                                                    "value": true,
+                                                    "message": "First Name is required"
+                                                }
+                                            ]'
+                                        >
+                                        <div data-sanatioalert="firstname"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-sanatioparent class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-4">
+                                        <label class="control-label" for="lastname">Last Name</label>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-8">
+                                        <input class="form-control" name="lastname" type="text" id="lastname" required
+                                            data-sanatioelement='[
+                                                {
+                                                    "rule": "required",
+                                                    "value": true,
+                                                    "message": "Last Name is required"
+                                                }
+                                            ]'
+                                        >
+                                        <div data-sanatioalert="lastname"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div data-sanatioparent class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-4">
+                                        <label class="control-label" for="email">Email</label>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-8">
+                                        <input class="form-control" name="email" type="text" id="email" required
+                                            data-sanatioelement='[
+                                                {
+                                                    "rule": "required",
+                                                    "value": true,
+                                                    "message": "Email is required",
+                                                    "alertType": "error"
+                                                },
+                                                {
+                                                    "rule": "email",
+                                                    "value": true,
+                                                    "message": "This is an invalid email"
+                                                }
+                                            ]'
+                                        >
+                                        <div data-sanatioalert="email"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-sanatioparent class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-4">
+                                        <label class="control-label" for="phone">Phone</label>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-8">
+                                        <input class="form-control" name="phone" type="text" id="phone" required
+                                            data-sanatioelement='[
+                                                {
+                                                    "rule": "required",
+                                                    "value": true,
+                                                    "message": "Phone number is required"
+                                                },
+                                                {
+                                                    "rule": "pattern",
+                                                    "value": "^\d{10}$",
+                                                    "message": "Phone number should be 10 digits",
+                                                    "alertType": "warning"
+                                                }
+                                            ]'
+                                        >
+                                        <div data-sanatioalert="phone"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div data-sanatioparent class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-4">
+                                        <label class="control-label" for="dob">Date of Birth</label>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-8">
+                                        <input class="form-control" name="dob" type="text" id="dob" required
+                                            data-sanatioelement='[
+                                                {
+                                                    "rule": "required",
+                                                    "value": true,
+                                                    "message": "Date of Birth is required"
+                                                },
+                                                {
+                                                    "rule": "datepattern",
+                                                    "value": "^(\d{1,2})-(\d{1,2})-(\d{4})$"
+                                                }
+                                            ]'
+                                        >
+                                        <div data-sanatioalert="dob"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-sanatioparent class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-4">
+                                        <label class="control-label" for="dob">Gender</label>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-8">
+                                        <div class="radio">
+                                            <label for="gender_male"><input type="radio" id="gender_male" name="gender"
+                                                data-sanatioelement='[
+                                                    {
+                                                        "rule": "required",
+                                                        "value": true
+                                                    }
+                                                ]'
+                                            >Male</label>
+                                        </div>
+                                        <div class="radio">
+                                            <label for="gender_female"><input type="radio" id="gender_female" name="gender"
+                                                data-sanatioelement='[
+                                                    {
+                                                        "rule": "required",
+                                                        "value": true
+                                                    }
+                                                ]'
+                                            >Female</label>
+                                        </div>
+                                        <div class="radio">
+                                            <label for="gender_nospecify"><input type="radio" id="gender_nospecify" name="gender"
+                                                data-sanatioelement='[
+                                                    {
+                                                        "rule": "required",
+                                                        "value": true
+                                                    }
+                                                ]'
+                                            >Don't want to specify</label>
+                                        </div>
+                                        <div data-sanatioalert="gender"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div data-sanatioparent class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-4">
+                                        <label class="control-label" for="photo">Profile pic</label>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-8">
+                                        <input class="form-control-file" type="file" id="photo" name="photo" data-sanatioelement='[
+                                            {
+                                                "rule": "required",
+                                                "value": true,
+                                                "message": "Please select a photo"
+                                            }
+                                        ]'>
+                                        <div data-sanatioalert="photo"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div data-sanatioparent class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-4">
+                                        <label class="control-label" for="address">Address</label>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-8">
+                                        <textarea class="form-control" name="address" type="text" id="address"
+                                            data-sanatioelement='[
+                                                {
+                                                    "rule": "required",
+                                                    "value": true,
+                                                    "message": "Your address will be helpful for communication",
+                                                    "alertType": "warning"
+                                                }
+                                            ]'
+                                        ></textarea>
+                                        <div data-sanatioalert="address"></div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-4">
+                                    </div>
+                                    <div class="col-xs-12 col-sm-4">
+                                        <br>
+                                        <select id="country" name="country" class="form-control" data-sanatioelement='[
+                                            {
+                                                "rule": "required",
+                                                "value": true,
+                                                "message": "Select a Country"
+                                            }
+                                        ]'>
+                                            <option value="">Select Country</option>
+                                            <option value="IN">India</option>
+                                            <option value="OT">Other</option>
+                                        </select>
+                                        <div data-sanatioalert="country"></div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-4">
+                                        <br>
+                                        <select id="state" name="state" class="form-control" multiple data-sanatioelement='[
+                                            {
+                                                "rule": "required",
+                                                "value": true,
+                                                "message": "Atleast 3 States must be selected"
+                                            },
+                                            {
+                                                "rule": "rangeoptions",
+                                                "value": [3, 5],
+                                                "message": "Select 3 to 5 States",
+                                                "alertType": "warning"
+                                            }
+                                        ]'>
+                                            <option value="">Select 3 to 5 States</option>
+                                            <option value="AN">Andaman and Nicobar Islands</option>
+                                            <option value="LD">Lakshadweep</option>
+                                            <option value="AP">Andhra Pradesh</option>
+                                            <option value="MH">Maharashtra</option>
+                                            <option value="AR">Arunachal Pradesh</option>
+                                            <option value="ML">Meghalaya</option>
+                                            <option value="AS">Assam</option>
+                                            <option value="MN">Manipur</option>
+                                            <option value="BR">Bihar</option>
+                                            <option value="MP">Madhya Pradesh</option>
+                                            <option value="CG">Chhattisgarh</option>
+                                            <option value="MZ">Mizoram</option>
+                                            <option value="CH">Chandigarh</option>
+                                            <option value="NL">Nagaland</option>
+                                            <option value="DD">Daman and Diu</option>
+                                            <option value="OD">Odisha</option>
+                                            <option value="DL">Delhi</option>
+                                            <option value="PB">Punjab</option>
+                                            <option value="DN">Dadra and Nagar Haveli</option>
+                                            <option value="PY">Puducherry</option>
+                                            <option value="GA">Goa</option>
+                                            <option value="RJ">Rajasthan</option>
+                                            <option value="GJ">Gujarat</option>
+                                            <option value="SK">Sikkim</option>
+                                            <option value="HR">Haryana</option>
+                                            <option value="TN">Tamil Nadu</option>
+                                            <option value="HP">Himachal Pradesh</option>
+                                            <option value="TR">Tripura</option>
+                                            <option value="JH">Jharkhand</option>
+                                            <option value="TS">Telangana</option>
+                                            <option value="JK">Jammu and Kashmir</option>
+                                            <option value="UK">Uttarakhand</option>
+                                            <option value="KA">Karnataka</option>
+                                            <option value="UP">Uttar Pradesh</option>
+                                            <option value="KL">Kerala</option>
+                                            <option value="WB">West Bengal</option>
+                                        </select>
+                                        <div data-sanatioalert="state"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div data-sanatioparent class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-4">
+                                        <label class="control-label" for="dob">Subscriptions</label>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-8">
+                                        <div class="checkbox">
+                                            <label for="allow_subscriptions"><input type="checkbox" id="allow_subscriptions" name="allow_subscriptions"
+                                            >Subscribtions allowed?</label>
+                                        </div>
+                                        <hr>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-4">
+                                    </div>
+                                    <div class="col-xs-12 col-sm-8">
+                                        <div class="checkbox">
+                                            <label for="sub_email"><input type="checkbox" id="sub_email" name="subscription"
+                                                data-sanatioelement='[
+                                                {
+                                                    "rule": "required",
+                                                    "value": true,
+                                                    "message": "Atleast 2 modes must be selected",
+                                                    "if": "allow_subscriptions"
+                                                },
+                                                {
+                                                    "rule": "minoptions",
+                                                    "value": 2,
+                                                    "message": "Select 2"
+                                                }
+                                            ]'
+                                            >Email</label>
+                                        </div>
+                                        <div class="checkbox">
+                                            <label for="sub_msg"><input type="checkbox" id="sub_msg" name="subscription"
+                                                data-sanatioelement='[
+                                                {
+                                                    "rule": "required",
+                                                    "value": true,
+                                                    "message": "Atleast 2 modes must be selected",
+                                                    "if": "allow_subscriptions"
+                                                },
+                                                {
+                                                    "rule": "minoptions",
+                                                    "value": 2,
+                                                    "message": "Select 2"
+                                                }
+                                            ]'
+                                            >Text Message</label>
+                                        </div>
+                                        <div class="checkbox">
+                                            <label for="sub_call"><input type="checkbox" id="sub_call" name="subscription"
+                                                data-sanatioelement='[
+                                                {
+                                                    "rule": "required",
+                                                    "value": true,
+                                                    "message": "Atleast 2 modes must be selected",
+                                                    "if": "allow_subscriptions"
+                                                },
+                                                {
+                                                    "rule": "minoptions",
+                                                    "value": 2,
+                                                    "message": "Select 2"
+                                                }
+                                            ]'
+                                            >Phone calls</label>
+                                        </div>
+                                        <div data-sanatioalert="subscription"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div data-sanatioparent class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-4">
+                                    </div>
+                                    <div class="col-xs-12 col-sm-8">
+                                        <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="../examples-init.js"></script>
+    </body>
+</html>

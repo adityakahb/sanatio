@@ -1,0 +1,15 @@
+@import "bootstrap/stylesheets/bootstrap";
+@import "bootstrap/stylesheets/bootstrap/_variables";
+.has-error{
+    .help-block{
+        &.error{
+            color: $state-danger-text;
+        }
+        &.warning{
+            color: $state-warning-text;
+        }
+        &.info{
+            color: $state-info-text;
+        }
+    }
+}
